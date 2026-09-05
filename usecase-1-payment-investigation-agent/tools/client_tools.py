@@ -13,6 +13,25 @@ the CSV. This creates a clean separation between:
     - final answer generation.
 """
 
+import os
+
+import pandas as pd
+
+_CLIENTS_CSV = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "data",
+    "clients.csv",
+)
+
+_clients_df = None
+
+
+def _get_clients_df() -> pd.DataFrame:
+    global _clients_df
+    if _clients_df is None:
+        _clients_df = pd.read_csv(_CLIENTS_CSV)
+    return _clients_df
+
 
 def get_client_profile(client_id: str) -> dict:
     """
@@ -34,7 +53,11 @@ def get_client_profile(client_id: str) -> dict:
     Return a structured result for known clients and handle unknown IDs
     gracefully.
     """
-    pass
+    df = _get_clients_df()
+    matches = df[df["client_id"] == client_id]
+    if matches.empty:
+        return {}
+    return matches.iloc[0].to_dict()
 
 
 def get_clients_by_country(country: str) -> list[dict]:
@@ -51,4 +74,6 @@ def get_clients_by_country(country: str) -> list[dict]:
     list[dict]
         Matching client records.
     """
-    pass
+    df = _get_clients_df()
+    matches = df[df["country"].str.lower() == country.lower()]
+    return matches.to_dict(orient="records")

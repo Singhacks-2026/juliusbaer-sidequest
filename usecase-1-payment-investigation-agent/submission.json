@@ -1,0 +1,747 @@
+[
+  {
+    "answer": "Deterministic policy check: the beneficiary jurisdiction is not on the high-risk list; this payment does not trigger any RM/enhanced review threshold. No enhanced/RM review threshold or high-risk destination flag is triggered; standard monitoring applies.",
+    "citations": [
+      "global_payment_policy.md",
+      "regional_singapore.md"
+    ],
+    "facts": {
+      "amount_equivalent_threshold": 100000,
+      "payment_id": "P50000",
+      "client_id": "C2000",
+      "amount": 12000.0,
+      "currency": "USD",
+      "beneficiary_name": "Redwood Services",
+      "beneficiary_country": "UK",
+      "beneficiary_country_code": "SG",
+      "channel": "Branch",
+      "payment_date": "2026-01-23",
+      "country": "UAE",
+      "risk_rating": "Medium",
+      "client_type": "Individual",
+      "relationship_years": 13.0,
+      "threshold_evaluation": {
+        "high_risk_destination": false,
+        "high_risk_source": null,
+        "regional_policy": null,
+        "triggered_global_reviews": [],
+        "triggered_regional_reviews": [],
+        "any_currency_assumption_applied": false
+      }
+    },
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "evaluate_review_requirements",
+      "search_policy"
+    ],
+    "question_id": "Q01",
+    "payment_id": "P50000",
+    "question": "Should P50000 require enhanced review? Explain using policy."
+  },
+  {
+    "answer": "Deterministic policy check: the beneficiary jurisdiction is high-risk per high_risk_jurisdictions.md; this payment triggers enhanced review (global_payment_policy.md), enhanced review (regional_singapore.md), rm review (regional_singapore.md). The review requirement that applies to payment P50001 is an enhanced review, as it exceeds USD 100,000 equivalent, according to the Global Payment Monitoring Policy 2026 and regional_singapore.md.",
+    "citations": [
+      "global_payment_policy.md",
+      "regional_singapore.md"
+    ],
+    "facts": {
+      "amount": 125000.0,
+      "currency": "USD",
+      "payment_id": "P50001",
+      "client_id": "C2001",
+      "beneficiary_name": "Desert Star LLC",
+      "beneficiary_country": "UAE",
+      "beneficiary_country_code": "AE",
+      "channel": "Branch",
+      "payment_date": "2026-05-11",
+      "country": "Singapore",
+      "risk_rating": "Low",
+      "client_type": "Individual",
+      "relationship_years": 3.1,
+      "threshold_evaluation": {
+        "high_risk_destination": true,
+        "high_risk_source": "high_risk_jurisdictions.md",
+        "regional_policy": "regional_singapore.md",
+        "triggered_global_reviews": [
+          {
+            "source": "global_payment_policy.md",
+            "currency": "USD",
+            "amount": 100000.0,
+            "review_type": "enhanced review",
+            "currency_assumption_applied": false
+          }
+        ],
+        "triggered_regional_reviews": [
+          {
+            "source": "regional_singapore.md",
+            "currency": "USD",
+            "amount": 75000.0,
+            "review_type": "rm review",
+            "currency_assumption_applied": false
+          },
+          {
+            "source": "regional_singapore.md",
+            "currency": "USD",
+            "amount": 100000.0,
+            "review_type": "enhanced review",
+            "currency_assumption_applied": false
+          }
+        ],
+        "any_currency_assumption_applied": false
+      }
+    },
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "evaluate_review_requirements",
+      "search_policy"
+    ],
+    "question_id": "Q02",
+    "payment_id": "P50001",
+    "question": "What review requirement applies to P50001 and why?"
+  },
+  {
+    "answer": "Deterministic policy check: the beneficiary jurisdiction is high-risk per high_risk_jurisdictions.md; this payment triggers rm review (regional_singapore.md). The payment P50002 has a high risk destination indicator due to the beneficiary country being AE. The applicable policy is regional_singapore.md, which requires payments above USD 75,000 equivalent to be reviewed. Additional review is required for this payment. The structuring threshold is not exceeded in this single payment, but it should be checked if multiple payments are made by the same client within 24 hours.",
+    "citations": [
+      "regional_singapore.md"
+    ],
+    "facts": {
+      "high_risk_destination": true,
+      "beneficiary_country_code": "AE",
+      "amount": 85000.0,
+      "currency": "USD",
+      "payment_id": "P50002",
+      "client_id": "C2002",
+      "beneficiary_name": "Pacific Holdings",
+      "beneficiary_country": "Hong Kong",
+      "channel": "Branch",
+      "payment_date": "2026-04-27",
+      "country": "Singapore",
+      "risk_rating": "Medium",
+      "client_type": "Individual",
+      "relationship_years": 11.5,
+      "threshold_evaluation": {
+        "high_risk_destination": true,
+        "high_risk_source": "high_risk_jurisdictions.md",
+        "regional_policy": "regional_singapore.md",
+        "triggered_global_reviews": [],
+        "triggered_regional_reviews": [
+          {
+            "source": "regional_singapore.md",
+            "currency": "USD",
+            "amount": 75000.0,
+            "review_type": "rm review",
+            "currency_assumption_applied": false
+          }
+        ],
+        "any_currency_assumption_applied": false
+      },
+      "beneficiary_24h_aggregates": [
+        {
+          "beneficiary_name": "Pacific Holdings",
+          "payment_date": "2026-04-27",
+          "count": 1,
+          "total_amount": 85000.0,
+          "currency": "USD",
+          "payments": [
+            {
+              "payment_id": "P50002",
+              "client_id": "C2002",
+              "beneficiary_name": "Pacific Holdings",
+              "beneficiary_country": "Hong Kong",
+              "beneficiary_country_code": "AE",
+              "amount": 85000.0,
+              "currency": "USD",
+              "channel": "Branch",
+              "payment_date": "2026-04-27"
+            }
+          ]
+        }
+      ]
+    },
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "evaluate_review_requirements",
+      "search_policy",
+      "aggregate_beneficiary_24h"
+    ],
+    "question_id": "Q03",
+    "payment_id": "P50002",
+    "question": "Identify the risk indicators for P50002 and state the additional review required."
+  },
+  {
+    "answer": "Deterministic policy check: the beneficiary jurisdiction is not on the high-risk list; this payment does not trigger any RM/enhanced review threshold. The data shows a possible transaction-splitting pattern for Northstar Trading as the total amount of CHF 110000.0 across three payments exceeds the USD 100,000 equivalent threshold.",
+    "citations": [
+      "global_payment_policy.md"
+    ],
+    "facts": {
+      "total_amount_Northstar_Trading": 110000.0,
+      "count_Northstar_Trading": 3,
+      "threshold_USD_100k_equivalent": 100000.0,
+      "payment_id": "P50003",
+      "client_id": "C2003",
+      "amount": 45000.0,
+      "currency": "CHF",
+      "beneficiary_name": "Northstar Trading",
+      "beneficiary_country": "Singapore",
+      "beneficiary_country_code": "CH",
+      "channel": "Branch",
+      "payment_date": "2026-04-11",
+      "country": "Switzerland",
+      "risk_rating": "Low",
+      "client_type": "Corporate",
+      "relationship_years": 12.1,
+      "threshold_evaluation": {
+        "high_risk_destination": false,
+        "high_risk_source": null,
+        "regional_policy": "regional_switzerland.md",
+        "triggered_global_reviews": [],
+        "triggered_regional_reviews": [],
+        "any_currency_assumption_applied": false
+      },
+      "beneficiary_24h_aggregates": [
+        {
+          "beneficiary_name": "Desert Star LLC",
+          "payment_date": "2026-04-18",
+          "count": 1,
+          "total_amount": 72794.74,
+          "currency": "HKD",
+          "payments": [
+            {
+              "payment_id": "P50042",
+              "client_id": "C2003",
+              "beneficiary_name": "Desert Star LLC",
+              "beneficiary_country": "UAE",
+              "beneficiary_country_code": "AE",
+              "amount": 72794.74,
+              "currency": "HKD",
+              "channel": "Branch",
+              "payment_date": "2026-04-18"
+            }
+          ]
+        },
+        {
+          "beneficiary_name": "Northstar Trading",
+          "payment_date": "2026-04-11",
+          "count": 3,
+          "total_amount": 110000.0,
+          "currency": "CHF",
+          "payments": [
+            {
+              "payment_id": "P50003",
+              "client_id": "C2003",
+              "beneficiary_name": "Northstar Trading",
+              "beneficiary_country": "Singapore",
+              "beneficiary_country_code": "CH",
+              "amount": 45000.0,
+              "currency": "CHF",
+              "channel": "Branch",
+              "payment_date": "2026-04-11"
+            },
+            {
+              "payment_id": "P50180",
+              "client_id": "C2003",
+              "beneficiary_name": "Northstar Trading",
+              "beneficiary_country": "Singapore",
+              "beneficiary_country_code": "CH",
+              "amount": 35000.0,
+              "currency": "CHF",
+              "channel": "Online",
+              "payment_date": "2026-04-11"
+            },
+            {
+              "payment_id": "P50181",
+              "client_id": "C2003",
+              "beneficiary_name": "Northstar Trading",
+              "beneficiary_country": "Singapore",
+              "beneficiary_country_code": "CH",
+              "amount": 30000.0,
+              "currency": "CHF",
+              "channel": "RM-assisted",
+              "payment_date": "2026-04-11"
+            }
+          ]
+        },
+        {
+          "beneficiary_name": "Pacific Holdings",
+          "payment_date": "2026-02-18",
+          "count": 1,
+          "total_amount": 47000.0,
+          "currency": "CHF",
+          "payments": [
+            {
+              "payment_id": "P50005",
+              "client_id": "C2003",
+              "beneficiary_name": "Pacific Holdings",
+              "beneficiary_country": "UAE",
+              "beneficiary_country_code": "AE",
+              "amount": 47000.0,
+              "currency": "CHF",
+              "channel": "Online",
+              "payment_date": "2026-02-18"
+            }
+          ]
+        },
+        {
+          "beneficiary_name": "Redwood Services",
+          "payment_date": "2026-01-26",
+          "count": 1,
+          "total_amount": 48000.0,
+          "currency": "CHF",
+          "payments": [
+            {
+              "payment_id": "P50004",
+              "client_id": "C2003",
+              "beneficiary_name": "Redwood Services",
+              "beneficiary_country": "UK",
+              "beneficiary_country_code": "CH",
+              "amount": 48000.0,
+              "currency": "CHF",
+              "channel": "RM-assisted",
+              "payment_date": "2026-01-26"
+            }
+          ]
+        },
+        {
+          "beneficiary_name": "Northstar Trading",
+          "payment_date": "2026-04-11",
+          "count": 3,
+          "total_amount": 110000.0,
+          "currency": "CHF",
+          "payments": [
+            {
+              "payment_id": "P50003",
+              "client_id": "C2003",
+              "beneficiary_name": "Northstar Trading",
+              "beneficiary_country": "Singapore",
+              "beneficiary_country_code": "CH",
+              "amount": 45000.0,
+              "currency": "CHF",
+              "channel": "Branch",
+              "payment_date": "2026-04-11"
+            },
+            {
+              "payment_id": "P50180",
+              "client_id": "C2003",
+              "beneficiary_name": "Northstar Trading",
+              "beneficiary_country": "Singapore",
+              "beneficiary_country_code": "CH",
+              "amount": 35000.0,
+              "currency": "CHF",
+              "channel": "Online",
+              "payment_date": "2026-04-11"
+            },
+            {
+              "payment_id": "P50181",
+              "client_id": "C2003",
+              "beneficiary_name": "Northstar Trading",
+              "beneficiary_country": "Singapore",
+              "beneficiary_country_code": "CH",
+              "amount": 30000.0,
+              "currency": "CHF",
+              "channel": "RM-assisted",
+              "payment_date": "2026-04-11"
+            }
+          ]
+        }
+      ]
+    },
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "evaluate_review_requirements",
+      "search_policy",
+      "aggregate_beneficiary_24h"
+    ],
+    "question_id": "Q04",
+    "payment_id": "P50003",
+    "question": "Does the data show a possible transaction-splitting pattern for C2003? Explain."
+  },
+  {
+    "answer": "Deterministic policy check: the beneficiary jurisdiction is high-risk per high_risk_jurisdictions.md; this payment triggers enhanced review (global_payment_policy.md), enhanced review (regional_singapore.md), rm review (regional_singapore.md). The assistant should retrieve the global_payment_policy.md and regional_singapore.md policy documents before recommending release of P50001.",
+    "citations": [
+      "global_payment_policy.md",
+      "regional_singapore.md"
+    ],
+    "facts": {
+      "triggered_global_reviews": "[{\"source\": \"global_payment_policy.md\", \"currency\": \"USD\", \"amount\": 100000.0, \"review_type\": \"enhanced review\", \"currency_assumption_applied\": false}]",
+      "triggered_regional_reviews": "[{\"source\": \"regional_singapore.md\", \"currency\": \"USD\", \"amount\": 75000.0, \"review_type\": \"rm review\", \"currency_assumption_applied\": false}, {\"source\": \"regional_singapore.md\", \"currency\": \"USD\", \"amount\": 100000.0, \"review_type\": \"enhanced review\", \"currency_assumption_applied\": false}]",
+      "payment_id": "P50001",
+      "client_id": "C2001",
+      "amount": 125000.0,
+      "currency": "USD",
+      "beneficiary_name": "Desert Star LLC",
+      "beneficiary_country": "UAE",
+      "beneficiary_country_code": "AE",
+      "channel": "Branch",
+      "payment_date": "2026-05-11",
+      "country": "Singapore",
+      "risk_rating": "Low",
+      "client_type": "Individual",
+      "relationship_years": 3.1,
+      "threshold_evaluation": {
+        "high_risk_destination": true,
+        "high_risk_source": "high_risk_jurisdictions.md",
+        "regional_policy": "regional_singapore.md",
+        "triggered_global_reviews": [
+          {
+            "source": "global_payment_policy.md",
+            "currency": "USD",
+            "amount": 100000.0,
+            "review_type": "enhanced review",
+            "currency_assumption_applied": false
+          }
+        ],
+        "triggered_regional_reviews": [
+          {
+            "source": "regional_singapore.md",
+            "currency": "USD",
+            "amount": 75000.0,
+            "review_type": "rm review",
+            "currency_assumption_applied": false
+          },
+          {
+            "source": "regional_singapore.md",
+            "currency": "USD",
+            "amount": 100000.0,
+            "review_type": "enhanced review",
+            "currency_assumption_applied": false
+          }
+        ],
+        "any_currency_assumption_applied": false
+      }
+    },
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "evaluate_review_requirements",
+      "search_policy"
+    ],
+    "question_id": "Q05",
+    "payment_id": "P50001",
+    "question": "Which policy documents should the assistant retrieve before recommending release of P50001?"
+  },
+  {
+    "answer": "Deterministic policy check: the beneficiary jurisdiction is high-risk per high_risk_jurisdictions.md; this payment triggers rm review (regional_singapore.md). The payment to Pacific Holdings (P50002) has a total amount of $85,000.00 USD, which is below the structuring threshold of $75,000.00 USD as stated in regional_singapore.md. Therefore, no transaction splitting is suspected.",
+    "citations": [
+      "regional_singapore.md"
+    ],
+    "facts": {
+      "total_amount": 85000.0,
+      "currency": "USD",
+      "beneficiary_country_code": "AE",
+      "payment_id": "P50002",
+      "client_id": "C2002",
+      "amount": 85000.0,
+      "beneficiary_name": "Pacific Holdings",
+      "beneficiary_country": "Hong Kong",
+      "channel": "Branch",
+      "payment_date": "2026-04-27",
+      "country": "Singapore",
+      "risk_rating": "Medium",
+      "client_type": "Individual",
+      "relationship_years": 11.5,
+      "threshold_evaluation": {
+        "high_risk_destination": true,
+        "high_risk_source": "high_risk_jurisdictions.md",
+        "regional_policy": "regional_singapore.md",
+        "triggered_global_reviews": [],
+        "triggered_regional_reviews": [
+          {
+            "source": "regional_singapore.md",
+            "currency": "USD",
+            "amount": 75000.0,
+            "review_type": "rm review",
+            "currency_assumption_applied": false
+          }
+        ],
+        "any_currency_assumption_applied": false
+      },
+      "beneficiary_24h_aggregates": [
+        {
+          "beneficiary_name": "",
+          "count": 0,
+          "total_amount": 0,
+          "payments": []
+        }
+      ]
+    },
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "evaluate_review_requirements",
+      "search_policy",
+      "aggregate_beneficiary_24h"
+    ],
+    "question_id": "Q06",
+    "payment_id": "P50002",
+    "question": "Separate factual evidence from assumptions for P50002 and give a grounded recommendation."
+  },
+  {
+    "answer": "Deterministic policy check: the beneficiary jurisdiction is not on the high-risk list; this payment does not trigger any RM/enhanced review threshold. Additional information needed before escalating potential structuring pattern: Beneficiary country code and amount in local currency for Northstar Trading (CHF) and Pacific Holdings (CHF).",
+    "citations": [
+      "regional_switzerland.md",
+      "high_risk_jurisdictions.md"
+    ],
+    "facts": {
+      "beneficiary_country_code": "CH",
+      "amount_in_local_currency": 100000.0,
+      "payment_id": "P50003",
+      "client_id": "C2003",
+      "amount": 45000.0,
+      "currency": "CHF",
+      "beneficiary_name": "Northstar Trading",
+      "beneficiary_country": "Singapore",
+      "channel": "Branch",
+      "payment_date": "2026-04-11",
+      "country": "Switzerland",
+      "risk_rating": "Low",
+      "client_type": "Corporate",
+      "relationship_years": 12.1,
+      "threshold_evaluation": {
+        "high_risk_destination": false,
+        "high_risk_source": null,
+        "regional_policy": "regional_switzerland.md",
+        "triggered_global_reviews": [],
+        "triggered_regional_reviews": [],
+        "any_currency_assumption_applied": false
+      },
+      "beneficiary_24h_aggregates": [
+        {
+          "beneficiary_name": "Desert Star LLC",
+          "payment_date": "2026-04-18",
+          "count": 1,
+          "total_amount": 72794.74,
+          "currency": "HKD",
+          "payments": [
+            {
+              "payment_id": "P50042",
+              "client_id": "C2003",
+              "beneficiary_name": "Desert Star LLC",
+              "beneficiary_country": "UAE",
+              "beneficiary_country_code": "AE",
+              "amount": 72794.74,
+              "currency": "HKD",
+              "channel": "Branch",
+              "payment_date": "2026-04-18"
+            }
+          ]
+        },
+        {
+          "beneficiary_name": "Northstar Trading",
+          "payment_date": "2026-04-11",
+          "count": 3,
+          "total_amount": 110000.0,
+          "currency": "CHF",
+          "payments": [
+            {
+              "payment_id": "P50003",
+              "client_id": "C2003",
+              "beneficiary_name": "Northstar Trading",
+              "beneficiary_country": "Singapore",
+              "beneficiary_country_code": "CH",
+              "amount": 45000.0,
+              "currency": "CHF",
+              "channel": "Branch",
+              "payment_date": "2026-04-11"
+            },
+            {
+              "payment_id": "P50180",
+              "client_id": "C2003",
+              "beneficiary_name": "Northstar Trading",
+              "beneficiary_country": "Singapore",
+              "beneficiary_country_code": "CH",
+              "amount": 35000.0,
+              "currency": "CHF",
+              "channel": "Online",
+              "payment_date": "2026-04-11"
+            },
+            {
+              "payment_id": "P50181",
+              "client_id": "C2003",
+              "beneficiary_name": "Northstar Trading",
+              "beneficiary_country": "Singapore",
+              "beneficiary_country_code": "CH",
+              "amount": 30000.0,
+              "currency": "CHF",
+              "channel": "RM-assisted",
+              "payment_date": "2026-04-11"
+            }
+          ]
+        },
+        {
+          "beneficiary_name": "Pacific Holdings",
+          "payment_date": "2026-02-18",
+          "count": 1,
+          "total_amount": 47000.0,
+          "currency": "CHF",
+          "payments": [
+            {
+              "payment_id": "P50005",
+              "client_id": "C2003",
+              "beneficiary_name": "Pacific Holdings",
+              "beneficiary_country": "UAE",
+              "beneficiary_country_code": "AE",
+              "amount": 47000.0,
+              "currency": "CHF",
+              "channel": "Online",
+              "payment_date": "2026-02-18"
+            }
+          ]
+        },
+        {
+          "beneficiary_name": "Redwood Services",
+          "payment_date": "2026-01-26",
+          "count": 1,
+          "total_amount": 48000.0,
+          "currency": "CHF",
+          "payments": [
+            {
+              "payment_id": "P50004",
+              "client_id": "C2003",
+              "beneficiary_name": "Redwood Services",
+              "beneficiary_country": "UK",
+              "beneficiary_country_code": "CH",
+              "amount": 48000.0,
+              "currency": "CHF",
+              "channel": "RM-assisted",
+              "payment_date": "2026-01-26"
+            }
+          ]
+        }
+      ]
+    },
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "evaluate_review_requirements",
+      "search_policy",
+      "aggregate_beneficiary_24h"
+    ],
+    "question_id": "Q07",
+    "payment_id": "P50003",
+    "question": "What additional information should be requested before escalating the potential structuring pattern?"
+  },
+  {
+    "answer": "Deterministic policy check: the beneficiary jurisdiction is not on the high-risk list; this payment does not trigger any RM/enhanced review threshold. The applicable policy threshold for this payment is not explicitly stated in the provided policies. However, based on the regional policy of Switzerland (regional_switzerland.md), payments above CHF 80,000 equivalent require RM review. Since the payment amount is not specified, we cannot determine the exact threshold applied.",
+    "citations": [
+      "regional_switzerland.md"
+    ],
+    "facts": {
+      "payment_amount": null,
+      "region": "Switzerland",
+      "payment_id": "P50004",
+      "client_id": "C2003",
+      "amount": 48000.0,
+      "currency": "CHF",
+      "beneficiary_name": "Redwood Services",
+      "beneficiary_country": "UK",
+      "beneficiary_country_code": "CH",
+      "channel": "RM-assisted",
+      "payment_date": "2026-01-26",
+      "country": "Switzerland",
+      "risk_rating": "Low",
+      "client_type": "Corporate",
+      "relationship_years": 12.1,
+      "threshold_evaluation": {
+        "high_risk_destination": false,
+        "high_risk_source": null,
+        "regional_policy": "regional_switzerland.md",
+        "triggered_global_reviews": [],
+        "triggered_regional_reviews": [],
+        "any_currency_assumption_applied": false
+      }
+    },
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "evaluate_review_requirements",
+      "search_policy"
+    ],
+    "question_id": "Q08",
+    "payment_id": "P50004",
+    "question": "What payment-review threshold applies based on the client's region?"
+  },
+  {
+    "answer": "Deterministic policy check: the beneficiary jurisdiction is high-risk per high_risk_jurisdictions.md; this payment does not trigger any RM/enhanced review threshold. Recommend additional review due to high-risk destination and below global threshold.",
+    "citations": [
+      "high_risk_jurisdictions.md",
+      "investigation_procedure.md",
+      "global_payment_policy.md"
+    ],
+    "facts": {
+      "destination_high_risk": true,
+      "payment_amount_below_threshold": false,
+      "payment_id": "P50005",
+      "client_id": "C2003",
+      "amount": 47000.0,
+      "currency": "CHF",
+      "beneficiary_name": "Pacific Holdings",
+      "beneficiary_country": "UAE",
+      "beneficiary_country_code": "AE",
+      "channel": "Online",
+      "payment_date": "2026-02-18",
+      "country": "Switzerland",
+      "risk_rating": "Low",
+      "client_type": "Corporate",
+      "relationship_years": 12.1,
+      "threshold_evaluation": {
+        "high_risk_destination": true,
+        "high_risk_source": "high_risk_jurisdictions.md",
+        "regional_policy": "regional_switzerland.md",
+        "triggered_global_reviews": [],
+        "triggered_regional_reviews": [],
+        "any_currency_assumption_applied": false
+      }
+    },
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "evaluate_review_requirements",
+      "search_policy"
+    ],
+    "question_id": "Q09",
+    "payment_id": "P50005",
+    "question": "If a payment is below the global threshold but the destination is high-risk, what should be recommended?"
+  },
+  {
+    "answer": "Deterministic policy check: the beneficiary jurisdiction is not on the high-risk list; this payment does not trigger any RM/enhanced review threshold. Establish client and payment facts. Identify the applicable policy. Check high-risk destination indicators. Check for possible transaction splitting. Separate observed facts from assumptions. Record the evidence supporting the recommendation.",
+    "citations": [
+      "investigation_procedure.md"
+    ],
+    "facts": {
+      "payment_id": "P50006",
+      "client_id": "C2023",
+      "beneficiary_name": "Pacific Holdings",
+      "beneficiary_country": "Hong Kong",
+      "beneficiary_country_code": "HK",
+      "amount": 24110.41,
+      "currency": "SGD",
+      "channel": "RM-assisted",
+      "payment_date": "2026-01-19",
+      "country": "UK",
+      "risk_rating": "Medium",
+      "client_type": "Individual",
+      "relationship_years": 7.7,
+      "threshold_evaluation": {
+        "high_risk_destination": false,
+        "high_risk_source": null,
+        "regional_policy": null,
+        "triggered_global_reviews": [],
+        "triggered_regional_reviews": [],
+        "any_currency_assumption_applied": false
+      }
+    },
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "evaluate_review_requirements",
+      "search_policy"
+    ],
+    "question_id": "Q10",
+    "payment_id": "P50006",
+    "question": "Summarize the investigation workflow that should be followed."
+  }
+]
