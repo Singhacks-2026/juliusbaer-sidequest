@@ -188,11 +188,53 @@ class AgentTests(unittest.TestCase):
         self.assertIn("evaluate_payment", result["tools_used"])
         self.assertNotIn("invented_tool", result["tools_used"])
 
+    def test_retrieval_does_not_make_an_unrelated_regional_policy_applicable(self):
+        investigation = self.prepared()
+        investigation.execute({"name": "search_policy", "arguments": {
+            "query": "Switzerland payment procedure", "top_k": 2}})
+        with self.assertRaisesRegex(ValueError, "CLIENT"):
+            investigation.finalize(json.dumps({"answer": "Review needed", "citations": ["regional_switzerland.md"]}))
+
     def test_pattern_answer_requires_history_and_aggregation(self):
         investigation = self.prepared()
         investigation.question = "Is there a structuring pattern?"
         with self.assertRaisesRegex(ValueError, "history"):
             investigation.finalize(json.dumps({"answer": "Unknown", "citations": ["global_payment_policy.md"]}))
+
+    def test_unchecked_structuring_cannot_be_reported_as_absent(self):
+        investigation = self.prepared()
+        for wording in (
+            "There is no evidence of structuring based on this single payment.",
+            "Structuring does not apply here given the single payment.",
+            "No structuring behavior was indicated, so no checks were necessary.",
+        ):
+            with self.subTest(wording=wording), self.assertRaisesRegex(ValueError, "NOT been checked"):
+                investigation.finalize(json.dumps({"answer": wording, "citations": ["global_payment_policy.md"]}))
+        result = investigation.finalize(json.dumps({"answer": "Check for possible transaction splitting.",
+                                                    "citations": ["global_payment_policy.md"]}))
+        self.assertIn("Check for possible", result["answer"])
+        result = investigation.finalize(json.dumps({
+            "answer": "Structuring has not been checked because history is needed.",
+            "citations": ["global_payment_policy.md"]}))
+        self.assertIn("not been checked", result["answer"])
+
+    def test_followup_check_preserves_policy_and_history_evidence(self):
+        investigation = Investigation("Investigate structuring", "P50003")
+        investigation.execute({"name": "search_policy", "arguments": {
+            "query": "global Switzerland payment high-risk jurisdiction structuring", "top_k": 9}})
+        first = investigation.execute({"name": "evaluate_payment", "arguments": {
+            "payment_id": "P50003", "policy_sources": ["global_payment_policy.md", "regional_switzerland.md"],
+            "check_structuring": True}})
+        self.assertFalse(first["missing_policy_evidence"])
+        followup = investigation.execute({"name": "evaluate_payment", "arguments": {
+            "payment_id": "P50003", "policy_sources": ["high_risk_jurisdictions.md"],
+            "check_structuring": False}})
+        self.assertTrue(followup["structuring_checked"])
+        self.assertTrue(followup["potential_structuring"])
+        self.assertFalse(followup["missing_policy_evidence"])
+        last = investigation.trace[-1]
+        self.assertEqual(last["requested_arguments"]["policy_sources"], ["high_risk_jurisdictions.md"])
+        self.assertIn("global_payment_policy.md", last["arguments"]["policy_sources"])
 
     def test_missing_configuration_is_explanatory(self):
         with patch.dict(os.environ, {}, clear=True), patch("dotenv.load_dotenv"):

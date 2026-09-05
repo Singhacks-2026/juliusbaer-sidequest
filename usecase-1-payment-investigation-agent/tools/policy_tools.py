@@ -15,7 +15,7 @@ def search_policy(query: str, top_k: int = 5) -> list[dict]:
 
 def get_policy_document(source: str) -> dict:
     """Return a known complete policy after discovery, or an empty dict."""
-    if source != Path(source).name:
+    if source != Path(source).name or Path(source).suffix != ".md":
         return {}
-    return next((doc for doc in load_policy_documents(str(_POLICY_DIR))
-                 if doc["source"] == source), {})
+    path = _POLICY_DIR / source
+    return {"source": source, "text": path.read_text(encoding="utf-8-sig")} if path.is_file() else {}

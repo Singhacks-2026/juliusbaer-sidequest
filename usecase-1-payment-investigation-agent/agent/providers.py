@@ -1,6 +1,7 @@
 """Provider adapters; the investigation loop remains provider-independent."""
 
 import os
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -17,6 +18,7 @@ class Settings:
     max_rounds: int = 14
     max_output_tokens: int = 4096
     timeout: float = 45
+    min_request_interval: float = 0
 
 
 def read_settings() -> Settings:
@@ -59,11 +61,12 @@ def read_settings() -> Settings:
         rounds = int(os.getenv("LLM_MAX_ROUNDS", "14"))
         tokens = int(os.getenv("LLM_MAX_OUTPUT_TOKENS", "4096"))
         timeout = float(os.getenv("LLM_TIMEOUT_SECONDS", "45"))
-        if not 2 <= rounds <= 40 or not 256 <= tokens <= 32768 or not 1 <= timeout <= 300:
+        interval = float(os.getenv("LLM_MIN_REQUEST_INTERVAL_SECONDS", "0"))
+        if not 2 <= rounds <= 40 or not 256 <= tokens <= 32768 or not 1 <= timeout <= 300 or not 0 <= interval <= 60:
             raise ValueError
     except ValueError as error:
-        raise ConfigurationError("Use LLM_MAX_ROUNDS 2-40, LLM_MAX_OUTPUT_TOKENS 256-32768, and LLM_TIMEOUT_SECONDS 1-300.") from error
-    return Settings(provider, os.environ[model_key].strip(), api, rounds, tokens, timeout)
+        raise ConfigurationError("Use LLM_MAX_ROUNDS 2-40, LLM_MAX_OUTPUT_TOKENS 256-32768, LLM_TIMEOUT_SECONDS 1-300, and LLM_MIN_REQUEST_INTERVAL_SECONDS 0-60.") from error
+    return Settings(provider, os.environ[model_key].strip(), api, rounds, tokens, timeout, interval)
 
 
 def make_client(settings: Settings):
@@ -71,21 +74,23 @@ def make_client(settings: Settings):
         if settings.provider == "anthropic":
             from anthropic import Anthropic
             return Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"],
-                             timeout=settings.timeout, max_retries=1)
+                             timeout=settings.timeout, max_retries=2)
         from openai import AzureOpenAI, OpenAI
         if settings.provider == "azure":
             return AzureOpenAI(api_key=os.environ["AZURE_OPENAI_API_KEY"],
                                azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
                                api_version=os.environ["AZURE_OPENAI_API_VERSION"],
-                               timeout=settings.timeout, max_retries=1)
+                               timeout=settings.timeout, max_retries=2)
         return OpenAI(api_key=os.environ["OPENAI_API_KEY"],
                       base_url=os.getenv("OPENAI_BASE_URL") or None,
-                      timeout=settings.timeout, max_retries=1)
+                      timeout=settings.timeout, max_retries=2)
     except ImportError as error:
         raise ConfigurationError("Install dependencies: python -m pip install -r requirements.txt") from error
 
 
 class Conversation:
+    _last_request_at = 0.0
+
     def __init__(self, client, settings: Settings, system: str, prompt: str):
         self.client, self.settings, self.system = client, settings, system
         self.messages = [{"role": "user", "content": prompt}]
@@ -93,6 +98,10 @@ class Conversation:
             self.messages.insert(0, {"role": "system", "content": system})
 
     def request(self, schemas: list[dict]) -> tuple[str, list[dict]]:
+        delay = self.settings.min_request_interval - (time.monotonic() - Conversation._last_request_at)
+        if delay > 0:
+            time.sleep(delay)
+        Conversation._last_request_at = time.monotonic()
         common = {"model": self.settings.model}
         if self.settings.api == "responses":
             response = self.client.responses.create(
@@ -160,6 +169,8 @@ def public_api_error(error: Exception) -> str:
         return "The provider rejected access. Check the API key and model permissions in .env."
     if status == 429:
         return "The provider reported a rate or quota limit. Check the account, then retry."
+    if status in {500, 502, 503, 504}:
+        return f"The LLM provider is temporarily unavailable (HTTP {status}). Retry later; your configuration has been preserved."
     if "Connection" in name or "Timeout" in name:
         return "Cannot reach the configured LLM. Check its server, OPENAI_BASE_URL, and network connection."
     return f"LLM request failed ({name}{', HTTP ' + str(status) if status else ''}). Check model name, tool support, and LLM_API."

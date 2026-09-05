@@ -1,6 +1,8 @@
 # RAG Pipeline
 
-The RAG pipeline is deliberately provided as method signatures only.
+The original method-only starter is now implemented with local TF-IDF retrieval.
+Source filenames and complete policy rules are preserved. See
+../IMPLEMENTATION.md for the implementation and verification commands.
 
 ## Minimum viable implementation
 
