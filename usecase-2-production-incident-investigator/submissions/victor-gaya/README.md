@@ -30,6 +30,8 @@ json.dump(answers, open('submissions/victor-gaya/answers.json','w'), indent=2)
 | `llm_review.py` | **supplementary**: an adversarial QA harness I used to attack my own output. Not part of the pipeline; `solution.py` never calls it |
 | `llm_review_findings.json` | the last review it produced, kept as evidence for the claims below |
 
+**Visual walkthrough:** https://claude.ai/code/artifact/0c5ba135-9508-4e11-932b-1700b89d3dd3 — confidence scale, the four-document corroboration matrix, the calibration arithmetic, and the ranked scenario set for incident B.
+
 ## Results
 
 | | Incident A | Incident B |
