@@ -1,54 +1,35 @@
-"""
-Client data-access tool interfaces.
+"""Client data-access tools."""
 
-These methods intentionally contain NO implementations.
-
-The candidate must implement the data lookup using the supplied
-``data/clients.csv`` file.
-
-The AI agent should interact with these methods rather than directly reading
-the CSV. This creates a clean separation between:
-    - AI orchestration;
-    - deterministic data access;
-    - final answer generation.
-"""
+from tools._data import load_clients, row_to_dict
 
 
 def get_client_profile(client_id: str) -> dict:
-    """
-    Retrieve one client's profile.
+    """Retrieve one client's profile from ``data/clients.csv``."""
+    if not client_id:
+        return {"error": "client_id is required"}
 
-    Parameters
-    ----------
-    client_id:
-        Example: ``"C2001"``.
+    clients = load_clients()
+    matches = clients[clients["client_id"] == client_id]
+    if matches.empty:
+        return {"error": f"Unknown client_id: {client_id}"}
 
-    Returns
-    -------
-    dict
-        Client information including country, risk rating, client type and
-        relationship duration.
-
-    Implementation requirement
-    --------------------------
-    Return a structured result for known clients and handle unknown IDs
-    gracefully.
-    """
-    pass
+    profile = row_to_dict(matches.iloc[0])
+    country = profile.get("country")
+    if country == "Singapore":
+        profile["regional_policy"] = "regional_singapore.md"
+    elif country == "Switzerland":
+        profile["regional_policy"] = "regional_switzerland.md"
+    else:
+        profile["regional_policy"] = None
+    profile["global_policy"] = "global_payment_policy.md"
+    return profile
 
 
 def get_clients_by_country(country: str) -> list[dict]:
-    """
-    OPTIONAL: Retrieve clients associated with a given country.
+    """Retrieve clients associated with a given country."""
+    if not country:
+        return []
 
-    Parameters
-    ----------
-    country:
-        Country name.
-
-    Returns
-    -------
-    list[dict]
-        Matching client records.
-    """
-    pass
+    clients = load_clients()
+    matches = clients[clients["country"].str.casefold() == country.casefold()]
+    return [row_to_dict(row) for _, row in matches.iterrows()]
