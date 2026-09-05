@@ -329,8 +329,15 @@ def _ensure_structuring(
     client_id = client["client_id"] if client.get("found") else payment["client_id"]
 
     aggregation = ledger.result_of("aggregate_beneficiary_24h")
-    if not isinstance(aggregation, dict) or not aggregation.get("largest_window"):
-        aggregation = _best_aggregation(client_id, payment, ledger)
+    window = aggregation.get("largest_window") if isinstance(aggregation, dict) else None
+
+    # The model's own aggregation is accepted only when it actually found a
+    # multi-payment window.  A single-payment window says nothing about the
+    # client's other beneficiaries, so absence of a pattern has to be
+    # established by sweeping the whole history rather than inferred from one
+    # arbitrary lookup.
+    if window is None or window["count"] < 2:
+        aggregation = _best_aggregation(client_id, payment, ledger) or aggregation
 
     if aggregation is None:
         return None
