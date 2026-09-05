@@ -14,7 +14,7 @@ import math
 import re
 from collections import Counter
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from statistics import mean
 
@@ -118,7 +118,7 @@ ALIASES = {
     "confirmations": "confirm",
 }
 LOG = re.compile(
-    r"^(?P<time>\d{4}-\d\d-\d\d[ T]\d\d:\d\d:\d\d)\s+"
+    r"^(?P<time>\d{4}-\d\d-\d\d[ T]\d\d:\d\d:\d\d(?:\.\d+)?(?:Z|[+-]\d\d:?\d\d)?)\s+"
     r"(?P<level>TRACE|DEBUG|INFO|WARN|WARNING|ERROR|FATAL)\s+"
     r"(?P<component>[\w.-]+)\s+(?P<message>.+)$",
     re.MULTILINE,
@@ -233,10 +233,10 @@ def ingest(corpus: dict[str, str]) -> tuple[list[Passage], list[Event]]:
                     )
             continue
         matches = list(LOG.finditer(text))
-        if matches:
+        if matches and document_kind(text) == "context":
             for match in matches:
                 try:
-                    timestamp = datetime.fromisoformat(match["time"])
+                    timestamp = utc_time(match["time"])
                 except ValueError:
                     continue
                 passage = Passage(source, match[0], "log")
@@ -258,7 +258,7 @@ def ingest(corpus: dict[str, str]) -> tuple[list[Passage], list[Event]]:
                 cells = [clean(cell) for cell in line.strip().strip("|").split("|")]
                 if len(cells) == 4 and re.match(r"\d{4}-\d\d-\d\d", cells[1]):
                     try:
-                        timestamp = datetime.fromisoformat(cells[1])
+                        timestamp = utc_time(cells[1])
                     except ValueError:
                         continue
                     passages.append(
@@ -305,18 +305,15 @@ def ingest(corpus: dict[str, str]) -> tuple[list[Passage], list[Event]]:
 def field_text(passage: Passage | None, name: str) -> str:
     if passage is None:
         return ""
+    # Keep wrapped lines but stop at the next field, even without a blank line.
     match = re.search(
-        r"\*\*" + re.escape(name) + r"\*\*\s*:\s*(.*?)(?=\n\s*\n|\Z)",
+        r"(?im)^\s*(?:\*\*)?"
+        + re.escape(name)
+        + r"(?:\*\*)?\s*:(?:\*\*)?\s*(.*?)"
+        + r"(?=\n\s*\n|\n\s*(?:\*\*)?[A-Z][A-Za-z ]+?(?:\*\*)?\s*:|\Z)",
         passage.excerpt,
-        re.DOTALL | re.IGNORECASE,
+        re.DOTALL,
     )
-    # The corpus places the colon inside bold markers.
-    if not match:
-        match = re.search(
-            r"\*\*" + re.escape(name) + r":\*\*\s*(.*?)(?=\n\s*\n|\Z)",
-            passage.excerpt,
-            re.DOTALL | re.IGNORECASE,
-        )
     return clean(match[1]) if match else ""
 
 
@@ -332,26 +329,51 @@ def mttr(passage: Passage | None) -> int | None:
 def relevant_components(
     query: str, passages: list[Passage], events: list[Event]
 ) -> set[str]:
-    """Anchor the investigation to the symptom's subject before expanding it."""
     components = {event.component for event in events}
-    # Strong subject terms avoid matching 'order' in every correlation identifier.
-    q = set(tokens(query.split("\n\n")[0]))
-    q -= {"intermittent", "fail", "delay", "arriving", "arrive", "hour", "purchase"}
+    subject = query.strip().split("\n\n")[0]
+    q = set(tokens(subject)) - {
+        "intermittent",
+        "fail",
+        "delay",
+        "arriving",
+        "arrive",
+        "hour",
+        "purchase",
+        "investigate",
+        "why",
+        "do",
+    }
+    explicit = {
+        c
+        for c in components
+        if re.search(r"(?<![\w-])" + re.escape(c) + r"(?![\w-])", subject)
+    }
+    if explicit:
+        return explicit
     scores = {}
     for component in components:
-        subject = set(tokens(component))
-        descriptions = [
-            p
-            for p in passages
-            if p.kind == "architecture" and p.excerpt.startswith(f"- **{component}**:")
-        ]
-        for description in descriptions:
-            subject.update(tokens(description.excerpt))
-        scores[component] = len(q & subject)
+        words = set(tokens(component))
+        for p in passages:
+            if p.kind == "architecture" and p.excerpt.startswith(f"- **{component}**:"):
+                # An 'independent of' clause is not evidence of ownership.
+                description = re.split(
+                    r"independent of|unrelated to|does not call",
+                    p.excerpt,
+                    flags=re.IGNORECASE,
+                )[0]
+                words.update(tokens(description))
+        lexical = len(q & words)
+        event_overlap = max(
+            (
+                len(q & set(tokens(e.message)))
+                for e in events
+                if e.component == component
+            ),
+            default=0,
+        )
+        scores[component] = max(lexical, event_overlap)
     best = max(scores.values(), default=0)
-    return {
-        component for component, score in scores.items() if score == best and score > 0
-    }
+    return {c for c, score in scores.items() if score == best and score > 0}
 
 
 @dataclass
@@ -365,6 +387,8 @@ class Hypothesis:
     history: Passage | None = None
     context: list[Passage] = field(default_factory=list)
     contradictions: list[Passage] = field(default_factory=list)
+    followup_changes: list[Passage] = field(default_factory=list)
+    query: str = ""
 
 
 def correlate(
@@ -372,110 +396,96 @@ def correlate(
 ) -> list[Hypothesis]:
     focus = relevant_components(query, passages, events)
     initial = {id(p): score for p, score in index.rank(query)}
-    candidates = []
-    observed: dict[tuple[str, str], list[Event]] = {}
-    for event in events:
-        if event.level not in {"ERROR", "FATAL", "WARN", "WARNING"}:
-            continue
-        for match in EXCEPTION.finditer(event.message):
-            negated = re.search(
-                r"\b(?:no|without)\s+$", event.message[: match.start()], re.IGNORECASE
-            )
-            absent = re.match(
-                r"\s+(?:not observed|absent|resolved|count=0)\b",
-                event.message[match.end() :],
-                re.IGNORECASE,
-            )
-            if not (negated or absent):
-                observed.setdefault((event.component, match[0]), []).append(event)
-    seen_anchors = set()
+    candidates, seen = [], set()
     for issue in (p for p in passages if p.kind == "issue"):
         component = issue.meta["affected_component"].strip()
         if component not in focus:
             continue
-        # Exact runtime identifiers are strong anchors; component overlap alone is not.
-        signatures = EXCEPTION.findall(
-            issue.meta["signature"] + " " + issue.meta.get("title", "")
-        )
-        for signature in sorted(set(signatures)):
-            anchor = (component, signature, clean(issue.meta["signature"]))
-            if anchor in seen_anchors:
+        for signature in signature_anchors(issue):
+            identity = (component, signature, clean(issue.meta["signature"]))
+            if identity in seen:
                 continue
-            seen_anchors.add(anchor)
-            observations = observed.get((component, signature), [])
-            if not observations:
+            seen.add(identity)
+            observed = [
+                e
+                for e in events
+                if e.component == component
+                and affirmative(e, signature)
+                and anchor_matches(signature, e.message, component)
+            ]
+            if not observed or not operation_matches(query, issue, observed):
                 continue
-            hypothesis = Hypothesis(issue, component, signature, observations)
-            onset = observations[0].time
-            expanded = (
-                query
-                + " "
-                + component
-                + " "
-                + signature
-                + " "
-                + issue.meta["signature"]
-            )
-            ranked = index.rank(expanded)
-            mechanism = set(tokens(issue.meta["signature"])) - set(tokens(component))
-            mechanism -= {
-                "exception",
-                "error",
-                "known",
-                "signature",
-                "logs",
-                "change",
-                "recent",
-            }
-            for passage, _ in ranked:
+            h = Hypothesis(issue, component, signature, observed, query=query)
+            onset = observed[0].time
+            for passage, _ in index.rank(
+                query + " " + component + " " + issue.meta["signature"]
+            ):
                 body = clean(passage.excerpt)
-                if passage.kind in {"runbook", "history"}:
+                if passage.kind in {"architecture", "api"} and component in body:
+                    h.context.append(passage)
+                if passage.kind not in {"runbook", "history"} or component not in body:
+                    continue
+                if not anchor_matches(signature, body, component) or UNCERTAIN.search(
+                    body
+                ):
+                    continue
+                if re.search(
+                    r"not (?:the|a) (?:cause|match)|unrelated|ruled out",
+                    body,
+                    re.IGNORECASE,
+                ):
+                    continue
+                date = re.search(r"\b\d{4}-\d\d-\d\d\b", body)
+                if date:
+                    try:
+                        if utc_time(date[0]) > onset:
+                            continue
+                    except ValueError:
+                        continue
+                if not reference_matches(h, passage):
+                    continue
+                if passage.kind == "history":
+                    cause = field_text(passage, "Root cause")
                     if (
-                        component not in body
-                        or signature not in body
-                        or UNCERTAIN.search(body)
+                        cause
+                        and capacity_deficit(issue.meta["signature"])
+                        and not capacity_deficit(cause)
                     ):
                         continue
-                    date = re.search(r"\b\d{4}-\d\d-\d\d\b", body)
-                    if date and datetime.fromisoformat(date[0]) > onset:
-                        continue
-                    if passage.kind == "runbook" and hypothesis.runbook is None:
-                        hypothesis.runbook = passage
-                    if passage.kind == "history" and hypothesis.history is None:
-                        hypothesis.history = passage
-                if passage.kind in {"architecture", "api"} and component in body:
-                    hypothesis.context.append(passage)
-            deployments = [
-                p
-                for p in passages
-                if p.kind == "deployment"
-                and p.meta.get("component") == component
-                and p.meta["time"] <= onset
-            ]
-            # Only the last component deployment can explain its current config.
-            if deployments:
-                latest = max(deployments, key=lambda p: p.meta["time"])
-                change = latest.meta["change"]
-                if len(mechanism & set(tokens(change))) >= 2:
-                    if re.search(
-                        r"undersized|too (?:small|low)",
-                        issue.meta["signature"],
-                        re.IGNORECASE,
-                    ) and re.search(r"increas|restor|revert", change, re.IGNORECASE):
-                        hypothesis.contradictions.append(latest)
-                    else:
-                        hypothesis.deployment = latest
-            # A matching failure before a supposed triggering deployment contradicts it.
-            future = [
-                p
-                for p in passages
-                if p.kind == "deployment"
-                and p.meta.get("component") == component
-                and p.meta["time"] > onset
-                and len(mechanism & set(tokens(p.meta["change"]))) >= 2
-            ]
-            hypothesis.contradictions.extend(future)
-            candidates.append(hypothesis)
+                    if h.history is None:
+                        h.history = passage
+                elif h.runbook is None:
+                    h.runbook = passage
+            changes = sorted(
+                (
+                    p
+                    for p in passages
+                    if p.kind == "deployment"
+                    and p.meta.get("component") == component
+                    and reference_scope(query, p.meta["change"], component)
+                ),
+                key=lambda p: (p.meta["time"], p.excerpt),
+            )
+            relevant = [(p, change_status(p, issue)) for p in changes]
+            relevant = [(p, status) for p, status in relevant if status != "unrelated"]
+            past = [(p, status) for p, status in relevant if p.meta["time"] <= onset]
+            if past:
+                latest, status = past[-1]
+                if status == "support":
+                    h.deployment = latest
+                else:
+                    h.contradictions.append(latest)
+            elif relevant:
+                # A future change cannot explain already observed failures.
+                h.contradictions.extend(p for p, _ in relevant)
+            # Once there is an earlier trigger, later changes are mitigation context,
+            # not evidence refuting the historical cause. They cannot establish recovery.
+            h.followup_changes = (
+                [p for p, _ in relevant if p.meta["time"] > onset]
+                if h.deployment
+                else []
+            )
+            candidates.append(h)
     return sorted(
         candidates,
         key=lambda h: (
@@ -507,7 +517,7 @@ def confidence(hypothesis: Hypothesis) -> float:
     score = sum(source_votes.values())
     if any(p.kind == "architecture" for p in h.context):
         score += 3
-    if len(source_votes) < 3 or not (h.deployment or h.history):
+    if len(source_votes) < 3 or not h.deployment:
         score = min(score, 49)
     if h.contradictions:
         score = min(score, 40)
@@ -524,57 +534,43 @@ def citations(passages: list[Passage]) -> list[dict]:
     return result
 
 
-def build_known_report(h: Hypothesis, events: list[Event]) -> dict:
+def build_known_report(
+    h: Hypothesis, events: list[Event], competing: bool = False
+) -> dict:
     first, last = h.observations[0], h.observations[-1]
+    score = min(confidence(h), 40.0) if competing else confidence(h)
+    decisive = score >= 50
     components = {h.component}
-    evidence = [event.passage for event in h.observations] + [h.issue]
+    evidence = [e.passage for e in h.observations] + [h.issue]
     mechanism = h.issue.meta["signature"].split(";")[0].rstrip(".")
     mechanism = re.sub(r"^.*?known signature of\s+", "", mechanism, flags=re.IGNORECASE)
-    root = f"The matching catalog mechanism is {mechanism} in {h.component}."
+    root = (
+        "Probable mechanism" if decisive else "Unconfirmed hypothesis"
+    ) + f" in {h.component}: {mechanism}."
     if h.deployment:
-        deployment = h.deployment.meta
-        elapsed = int((first.time - deployment["time"]).total_seconds())
-        root = (
-            f"Probable root cause: {deployment['version']} changed {h.component}: "
-            f"{deployment['change']}. " + root
+        d = h.deployment.meta
+        elapsed = int((first.time - d["time"]).total_seconds())
+        qualifier = (
+            "Probable contributing trigger"
+            if decisive
+            else "A candidate trigger requiring validation"
         )
+        root += f" {qualifier}: {d['version']} changed {h.component}: {d['change']}."
         root += (
-            f" The first matching error at {first.time.isoformat(sep=' ')} follows "
-            f"the {deployment['time'].isoformat(sep=' ')} deployment by "
-            f"{elapsed // 60}m {elapsed % 60:02d}s."
+            f" The first matching error at {first.time.isoformat(sep=' ')} follows the "
+            f"{d['time'].isoformat(sep=' ')} deployment by {elapsed // 60}m {elapsed % 60:02d}s."
         )
         evidence.append(h.deployment)
-    root += f" There are {len(h.observations)} matching runtime events in the supplied window."
-    # Same-time errors need documented dependency support, not just shared timestamps.
-    context = " ".join(clean(p.excerpt) for p in h.context)
-    times = {e.time for e in h.observations}
-    cited_components = {h.component}
-    for event in events:
-        if (
-            event.time in times
-            and event.level in {"ERROR", "FATAL"}
-            and event.component != h.component
-        ):
-            linked = any(
-                event.component in p.excerpt
-                and h.component in p.excerpt
-                and re.search(r"calls|delegates|direct path|->", p.excerpt)
-                and not re.search(
-                    r"independent|does not call|unrelated", p.excerpt, re.IGNORECASE
-                )
-                and not p.excerpt.lstrip().startswith("```")
-                for p in h.context
-            )
-            if linked:
-                components.add(event.component)
-                if event.component not in cited_components:
-                    evidence.append(event.passage)
-                    cited_components.add(event.component)
+    root += f" There are {len(h.observations)} affirmative matching runtime events in the supplied window."
+    cited = set()
+    for e in events:
+        if linked_failure(h, e):
+            components.add(e.component)
+            if e.component not in cited:
+                evidence.append(e.passage)
+                cited.add(e.component)
     successes = [
-        e
-        for e in events
-        if e.component == h.component
-        and re.search(r"succeed|success", e.message, re.IGNORECASE)
+        e for e in events if e.component == h.component and successful(e, h.query)
     ]
     before = [e for e in successes if e.time < first.time]
     during = [e for e in successes if first.time < e.time < last.time]
@@ -587,103 +583,124 @@ def build_known_report(h: Hypothesis, events: list[Event]) -> dict:
     if wait:
         root += f" The observed acquisition timeout is {wait[1]}."
     if h.contradictions:
-        root += " Deployment evidence conflicts with this trigger hypothesis; the cause needs human validation."
+        root += " Conflicting or inapplicable change evidence prevents a reliable trigger attribution."
         evidence.extend(h.contradictions)
-    for passage in (h.history, h.runbook):
-        if passage:
-            evidence.append(passage)
-    # Source diversity is selected explicitly; an architecture hit cannot crowd out logs.
+    if competing:
+        root += " Another mechanism has comparable support; human review is needed to resolve the competing hypotheses."
+    if not decisive:
+        root += " The available evidence is insufficient to establish this as the root cause."
+    for p in (h.history, h.runbook):
+        if p:
+            evidence.append(p)
     for role in ("architecture", "api"):
-        selected = [p for p in h.context if p.kind == role]
-        selected.sort(
+        matches = [p for p in h.context if p.kind == role]
+        matches.sort(
             key=lambda p: (
                 not p.excerpt.startswith(f"- **{h.component}**:"),
                 p.excerpt.lstrip().startswith("```"),
             )
         )
-        evidence.extend(selected[:2])
-    remediation = field_text(h.runbook, "Remediation") or field_text(
-        h.history, "Resolution"
-    )
+        evidence.extend(matches[:2])
+    estimate = (mttr(h.runbook) or mttr(h.history)) if decisive else None
     diagnostics = field_text(h.runbook, "Diagnostic steps")
-    if diagnostics:
-        remediation = "Validate the mechanism: " + diagnostics + " Then " + remediation
-    reduction = (
-        re.search(
-            r"(?:size|capacity) from (\d+) to (\d+)",
-            h.deployment.meta["change"],
-            re.IGNORECASE,
-        )
-        if h.deployment
-        else None
-    )
-    if reduction:
-        remediation += f" Restore the prior documented baseline of {reduction[1]} (currently {reduction[2]})."
-    if not remediation:
-        remediation = "Have the owning on-call engineer validate the runtime signature and choose a reversible mitigation."
-    estimate = mttr(h.runbook) or mttr(h.history)
-    if confidence(h) < 50:
-        estimate = None
+    remedy = field_text(h.runbook, "Remediation") or field_text(h.history, "Resolution")
+    if decisive:
         remediation = (
-            "Human review required before applying a candidate fix. " + remediation
+            ("Validate the mechanism: " + diagnostics + " ") if diagnostics else ""
         )
-    remediation += (
-        " Verify sustained disappearance of the matching errors and recovery of the affected "
-        "operation rate/latency after mitigation; retain telemetry and regression-test configuration changes."
-    )
-    if "pool" in tokens(context):
-        remediation += " Monitor pool utilization, acquisition wait time, and traffic before adjusting capacity."
+        remediation += (
+            ("After validation, apply the matching documented mitigation: " + remedy)
+            if remedy
+            else "Have the owning on-call engineer validate a reversible mitigation."
+        )
+        if h.deployment:
+            delta = configuration_delta(h.deployment.meta["change"])
+            if delta and capacity_deficit(h.issue.meta["signature"]):
+                remediation += f" The suspected trigger changed the baseline from {delta[0]} to {delta[1]}; confirm current configuration before restoring capacity."
+    else:
+        remediation = (
+            "Human review required. Gather current configuration and utilization metrics and test competing mechanisms. "
+            "Do not apply a rollback or the candidate procedure until the operation, resource, and cause are validated."
+        )
+        if diagnostics:
+            remediation += " Relevant diagnostic checks: " + diagnostics
+    remediation += " Verify sustained recovery of error rate and latency after any mitigation; retain evidence and regression-test configuration changes."
+    if h.followup_changes:
+        evidence.extend(h.followup_changes[-2:])
+        root += " Later related changes are recorded; they cannot explain onset and do not alone prove recovery."
     if estimate is not None:
         basis = (
             "runbook estimate"
             if mttr(h.runbook) is not None
             else "matching historical recovery time"
         )
-        remediation += (
-            f" MTTR {estimate} minutes is a {basis}, not measured recovery for this incident. "
-            "No incident resolution is documented in the supplied evidence."
-        )
-        previous = mttr(h.history)
-        if previous is not None:
+        remediation += f" MTTR {estimate} minutes is a {basis}, not measured recovery for this incident."
+        prior = mttr(h.history)
+        if prior is not None:
             remediation += (
-                f" The matching previous incident recovered in {previous} minutes."
+                f" The matching previous incident recovered in {prior} minutes."
             )
+        remediation += " The supplied evidence does not establish a complete incident recovery interval."
     return {
         "root_cause": root,
         "supporting_evidence": citations(evidence),
         "impacted_systems": sorted(components),
         "mttr_minutes": estimate,
         "remediation": remediation,
-        "confidence_score": confidence(h),
-        "needs_human_review": confidence(h) < 50,
+        "confidence_score": score,
+        "needs_human_review": score < 50,
     }
 
 
 def queue_delays(
     events: list[Event], focus: set[str]
 ) -> list[tuple[Event, Event, int]]:
-    """Pair actual queue/send events by component and correlation identifier."""
-    pending: dict[tuple[str, str, str], Event] = {}
-    pairs = []
+    """Pair successful terminal events by the strongest shared identifier.
+
+    Reused ambiguous keys are discarded instead of silently choosing a FIFO match.
+    Duplicate events have already been removed during ingestion.
+    """
+    grouped: dict[tuple[str, str, str], dict[str, list[Event]]] = {}
     for event in events:
-        if event.component not in focus:
+        if event.component not in focus or event.level != "INFO":
             continue
-        identifier = re.search(
-            r"\b(order_id|message_id|request_id|trace_id)=([\w.-]+)", event.message
-        )
-        if not identifier:
-            continue
-        key = (event.component, identifier[1], identifier[2])
-        if re.search(r"\b(?:email|message) queued\b", event.message, re.IGNORECASE):
-            pending.setdefault(key, event)
-        elif (
-            re.search(r"\b(?:email|message) sent\b", event.message, re.IGNORECASE)
-            and key in pending
+        if re.search(
+            r"(?:sent|queued)\s*[:=]\s*(?:false|0)|\b(?:failed|failure|not sent|not queued|attempt|retry)\b|\b(?:no|never|not)\s+(?:email|message)\s+(?:sent|queued)\b",
+            event.message,
+            re.IGNORECASE,
         ):
-            start = pending.pop(key)
-            seconds = int((event.time - start.time).total_seconds())
-            pairs.append((start, event, seconds))
-    return pairs
+            continue
+        stage = (
+            "start"
+            if re.search(r"\b(?:email|message) queued\b", event.message, re.IGNORECASE)
+            else "end"
+            if re.search(r"\b(?:email|message) sent\b", event.message, re.IGNORECASE)
+            else None
+        )
+        if stage is None:
+            continue
+        ids = correlation_ids(event.message)
+        for name in ("message_id", "request_id", "trace_id", "order_id"):
+            if name in ids:
+                key = (event.component, name, ids[name])
+                grouped.setdefault(key, {"start": [], "end": []})[stage].append(event)
+                break
+    pairs = []
+    for group in grouped.values():
+        if len(group["start"]) != 1 or len(group["end"]) != 1:
+            continue
+        start, end = group["start"][0], group["end"][0]
+        start_ids, end_ids = (
+            correlation_ids(start.message),
+            correlation_ids(end.message),
+        )
+        if any(
+            start_ids[key] != end_ids[key] for key in start_ids.keys() & end_ids.keys()
+        ):
+            continue
+        if end.time >= start.time:
+            pairs.append((start, end, int((end.time - start.time).total_seconds())))
+    return sorted(pairs, key=lambda p: (p[0].time, p[0].message))
 
 
 def build_uncertain_report(
@@ -704,7 +721,8 @@ def build_uncertain_report(
         anomalies = [
             e
             for e in events
-            if e.component in focus and e.level in {"ERROR", "FATAL", "WARN", "WARNING"}
+            if e.component in focus
+            and affirmative(e, next(iter(EXCEPTION.findall(e.message)), ""))
         ]
         if anomalies:
             evidence.extend(e.passage for e in (anomalies[0], anomalies[-1]))
@@ -724,10 +742,10 @@ def build_uncertain_report(
             details.append(f"{identifier[1]}: {delay // 60}m {delay % 60:02d}s")
             evidence.extend([start.passage, end.passage])
         root += (
-            f" The logs confirm delayed processing in {', '.join(impacted)}: "
+            f" The logs measure queue-to-send processing times in {', '.join(impacted)}: "
             + "; ".join(details)
             + f" (mean queue-to-send latency {mean(seconds) / 60:.2f} minutes). "
-            "These are delivery waiting times, not time to recover the incident. "
+            "These are delivery waiting times, not time to recover the incident. Without a documented latency target or baseline, the samples alone do not establish an SLA breach. "
             "Each of these matched messages eventually has a send event; this does not establish inbox delivery."
         )
         scoped = [e for e in events if e.component in impacted]
@@ -827,6 +845,360 @@ def build_uncertain_report(
     }
 
 
+def utc_time(value: str) -> datetime:
+    """Compare every timestamp in UTC; unzoned challenge timestamps mean UTC."""
+    parsed = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def affirmative(event: Event, anchor: str = "") -> bool:
+    """Reject explicit absent/zero/failed observations without negating 'no capacity'."""
+    if event.level not in {"ERROR", "FATAL", "WARN", "WARNING"}:
+        return False
+    message = event.message
+    if re.search(
+        r"\b(?:count|occurrences|errors)\s*[:=]\s*0\b|\b(?:zero|0) (?:occurrences|errors)\b|"
+        r"\b(?:not observed|not detected|not thrown|did not occur|never occurred|"
+        r"false alarm|absent|resolved|cleared|suppressed|simulation|dry.run)\b",
+        message,
+        re.IGNORECASE,
+    ):
+        return False
+    if anchor:
+        match = re.search(re.escape(anchor), message, re.IGNORECASE)
+        if match and re.search(
+            r"\b(?:no|without|never|not)\s+(?:any\s+)?$",
+            message[: match.start()],
+            re.IGNORECASE,
+        ):
+            return False
+    return True
+
+
+def correlation_ids(message: str) -> dict[str, str]:
+    return dict(
+        re.findall(r"\b(message_id|request_id|trace_id|order_id)=([\w.-]+)", message)
+    )
+
+
+def signature_anchors(issue: Passage) -> list[str]:
+    text = issue.meta["signature"] + " " + (issue.meta.get("title") or "")
+    identifiers = EXCEPTION.findall(text) + re.findall(
+        r"\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b", text
+    )
+    if identifiers:
+        return sorted(set(identifiers))
+    phrase = re.search(
+        r"^(?:A|An|The)\s+(.+?)\s+in\s+"
+        + re.escape(issue.meta["affected_component"])
+        + r"\b",
+        issue.meta["signature"],
+        re.IGNORECASE,
+    )
+    return [phrase[1] if phrase else issue.meta["signature"].split(";")[0]]
+
+
+def anchor_matches(anchor: str, text: str, component: str) -> bool:
+    if re.search(r"(?<!\w)" + re.escape(anchor) + r"(?!\w)", text, re.IGNORECASE):
+        return True
+    if EXCEPTION.fullmatch(anchor) or re.fullmatch(
+        r"[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+", anchor
+    ):
+        return False
+    words = (
+        set(tokens(anchor))
+        - set(tokens(component))
+        - {"log", "logs", "known", "signature"}
+    )
+    shared = words & set(tokens(text))
+    return len(words) >= 3 and len(shared) >= 3 and len(shared) / len(words) >= 0.7
+
+
+def operation_terms(text: str) -> set[str]:
+    """Extract operation subjects as well as common domain synonyms.
+
+    Grammar-derived subjects allow unseen operations such as invoice/report to be
+    distinguished without adding a service-specific branch for each new case.
+    """
+    normalized = clean(text)
+    terms = set(tokens(normalized)) & {
+        "payment",
+        "refund",
+        "webhook",
+        "email",
+        "search",
+        "checkout",
+        "login",
+        "order",
+    }
+    patterns = (
+        r"\b([A-Za-z][\w-]*)\s+(?:requests?|processing|fail(?:ed|ing|ures?|s)?|succeeded|queued|sent)\b",
+        r"\b(?:while|when)\s+processing\s+([A-Za-z][\w-]*)\b",
+        r"\b([A-Za-z][\w-]*)\s+(?:are|is)\s+(?:intermittently\s+)?(?:failing|delayed|late)\b",
+    )
+    excluded = STOP | {
+        "request",
+        "intermittent",
+        "intermittently",
+        "total",
+        "any",
+        "pool",
+        "connection",
+        "gateway",
+        "http",
+        "api",
+    }
+    for pattern in patterns:
+        for match in re.finditer(pattern, normalized, re.IGNORECASE):
+            terms.update(w for w in tokens(match[1]) if w not in excluded)
+    return terms
+
+
+def operation_matches(query: str, issue: Passage, observations: list[Event]) -> bool:
+    wanted = operation_terms(query.split("\n\n")[0]) - {"order"}
+    if not wanted:
+        return True
+    # Runtime operation takes precedence over a possibly misleading catalog title.
+    actual = operation_terms(" ".join(e.message for e in observations)) - {"order"}
+    if actual and not (wanted & actual):
+        return False
+    body = issue.meta["signature"] + "; " + (issue.meta.get("notes") or "")
+    return reference_scope(query, body, issue.meta["affected_component"])
+
+
+def mechanism_terms(issue: Passage) -> set[str]:
+    words = set(tokens(issue.meta["signature"])) - set(
+        tokens(issue.meta["affected_component"])
+    )
+    return words - {
+        "exception",
+        "error",
+        "known",
+        "signature",
+        "logs",
+        "change",
+        "recent",
+        "reference",
+        "cross",
+        "current",
+    }
+
+
+def capacity_deficit(text: str) -> bool:
+    return bool(
+        re.search(
+            r"undersized|too (?:small|low)|insufficient|under.provision|capacity.*(?:reduc|low)|pool size.*(?:reduc|low)",
+            text,
+            re.IGNORECASE,
+        )
+    )
+
+
+def configuration_delta(text: str) -> tuple[int, int] | None:
+    """Read numbers attached to capacity, excluding unrelated retries/timeouts.
+
+    Multiple distinct capacity changes are ambiguous without a structured
+    resource identifier, so omit a numeric baseline rather than choose one.
+    """
+    matches = re.findall(
+        r"\b(?:pool(?:\s+(?:size|capacity))?|"
+        r"(?:worker|thread|consumer|process)\s+(?:count|capacity))"
+        r"\s+from\s+(\d+)\s+to\s+(\d+)\b",
+        text,
+        re.IGNORECASE,
+    )
+    deltas = {(int(before), int(after)) for before, after in matches}
+    return next(iter(deltas)) if len(deltas) == 1 else None
+
+
+def change_status(passage: Passage, issue: Passage) -> str:
+    change = passage.meta["change"]
+    expected, actual = resource_terms(issue.meta["signature"]), resource_terms(change)
+    if expected and actual and not expected & actual:
+        return "unrelated"
+    if len(mechanism_terms(issue) & set(tokens(change))) < 2:
+        return "unrelated"
+    if re.search(
+        r"not (?:applied|deployed|implemented|changed)|did not|unchanged|remains|"
+        r"proposed|planned|scheduled|documentation only|dry.run|no (?:change|reduction)",
+        change,
+        re.IGNORECASE,
+    ):
+        return "unapplied"
+    delta = configuration_delta(change)
+    if delta and delta[0] == delta[1]:
+        return "unapplied"
+    if capacity_deficit(issue.meta["signature"]):
+        if delta:
+            return "support" if delta[1] < delta[0] else "opposite"
+        if re.search(r"increas|restor|revert|rollback", change, re.IGNORECASE):
+            return "opposite"
+    return "support"
+
+
+def resource_terms(text: str) -> set[str]:
+    """Use explicit resource qualifiers; 'pool' alone cannot join unlike pools."""
+    ignored = {
+        "connection",
+        "the",
+        "a",
+        "an",
+        "bounded",
+        "undersized",
+        "exhausted",
+        "current",
+        "new",
+        "prior",
+        "old",
+        "static",
+        "insufficient",
+        "reduced",
+        "increased",
+        "configured",
+        "available",
+        "normal",
+        "same",
+        "small",
+        "large",
+    }
+    aliases = {
+        "https": "http",
+        "db": "database",
+        "sql": "database",
+        "postgres": "database",
+        "postgresql": "database",
+    }
+    qualifiers = re.findall(
+        r"\b([A-Za-z][\w-]*)\s+connection\s+pool\b", clean(text), re.IGNORECASE
+    )
+    qualifiers += re.findall(
+        r"\b(worker|thread|consumer|process)\s+pool\b", clean(text), re.IGNORECASE
+    )
+    words = {word.lower() for word in qualifiers if word.lower() not in ignored}
+    return {aliases.get(word, word) for word in words}
+
+
+def reference_scope(query: str, text: str, component: str) -> bool:
+    wanted = operation_terms(query.split("\n\n")[0]) - {"order"}
+    body = clean(text).replace(component, "")
+    if not wanted:
+        return True
+    for clause in re.split(r"[.;\n]", body):
+        mentioned = operation_terms(clause) - {"order"}
+        if wanted & mentioned and re.search(
+            r"unrelated|independent|does not affect|not related|remains? healthy|not part of",
+            clause,
+            re.IGNORECASE,
+        ):
+            return False
+        if (
+            re.search(
+                r"scope\s*:|applies? only to|while processing|for .*processing",
+                clause,
+                re.IGNORECASE,
+            )
+            and mentioned
+            and not (wanted & mentioned)
+        ):
+            return False
+    return True
+
+
+def reference_matches(h: Hypothesis, passage: Passage) -> bool:
+    if not reference_scope(h.query, passage.excerpt, h.component):
+        return False
+    for name in ("Summary", "Symptoms"):
+        value = field_text(passage, name).replace(h.component, "")
+        operations = operation_terms(value) - {"order"}
+        wanted = operation_terms(h.query) - {"order"}
+        if operations and wanted and not (operations & wanted):
+            return False
+    cause = field_text(passage, "Root cause")
+    if cause:
+        known_resources, resources = (
+            resource_terms(h.issue.meta["signature"]),
+            resource_terms(cause),
+        )
+        if known_resources and resources and not (known_resources & resources):
+            return False
+        if capacity_deficit(h.issue.meta["signature"]) and not capacity_deficit(cause):
+            return False
+    return True
+
+
+def direct_dependency(caller: str, target: str, context: list[Passage]) -> bool:
+    for passage in context:
+        if passage.kind not in {
+            "architecture",
+            "api",
+        } or passage.excerpt.lstrip().startswith("```"):
+            continue
+        for sentence in re.split(r"[.!?]\s+", clean(passage.excerpt)):
+            if re.search(
+                r"independent|does not call|unrelated", sentence, re.IGNORECASE
+            ):
+                continue
+            if re.search(
+                re.escape(caller)
+                + r"\b[^.;]*?\b(?:calls|delegates to|depends on)\s+"
+                + re.escape(target)
+                + r"\b",
+                sentence,
+                re.IGNORECASE,
+            ):
+                return True
+    return False
+
+
+def linked_failure(h: Hypothesis, event: Event) -> bool:
+    if event.component == h.component or not affirmative(event):
+        return False
+    if not direct_dependency(event.component, h.component, h.context):
+        return False
+    wanted = operation_terms(h.query) - {"order"}
+    operation = operation_terms(event.message) - {"order"}
+    if wanted and operation and not wanted & operation:
+        return False
+    ids = correlation_ids(event.message)
+    for observation in h.observations:
+        other = correlation_ids(observation.message)
+        common = ids.keys() & other.keys()
+        if any(ids[key] != other[key] for key in common):
+            continue
+        delta = (event.time - observation.time).total_seconds()
+        if common and 0 <= delta <= 30:
+            return True
+        # Legacy records lack shared IDs: require exact timing and the same
+        # documented symptom family, in addition to a direct dependency.
+        if (
+            not common
+            and delta == 0
+            and set(tokens(event.message)) & set(tokens(h.signature))
+        ):
+            return True
+    return False
+
+
+def successful(event: Event, query: str) -> bool:
+    if event.level != "INFO" or not re.search(
+        r"\b(?:succeeded|successful|success)\b", event.message, re.IGNORECASE
+    ):
+        return False
+    if re.search(
+        r"\b(?:no|not|never|failed|failure|unsuccessful)\b|success\s*[:=]\s*(?:false|0)",
+        event.message,
+        re.IGNORECASE,
+    ):
+        return False
+    wanted, actual = (
+        operation_terms(query) - {"order"},
+        operation_terms(event.message) - {"order"},
+    )
+    return not wanted or not actual or bool(wanted & actual)
+
+
 def investigate(query: str, corpus: dict) -> dict:
     """Return exactly the seven required fields, grounded only in this corpus."""
     if not isinstance(query, str) or not isinstance(corpus, dict):
@@ -837,16 +1209,11 @@ def investigate(query: str, corpus: dict) -> dict:
     index = BM25(passages)
     candidates = correlate(query, passages, events, index)
     if candidates:
-        report = build_known_report(candidates[0], events)
-        if (
+        competing = (
             len(candidates) > 1
             and confidence(candidates[0]) - confidence(candidates[1]) < 10
-        ):
-            report["root_cause"] += (
-                " A competing runtime-signature hypothesis has similar support; review both mechanisms."
-            )
-            report["confidence_score"] = min(report["confidence_score"], 40.0)
-            report["mttr_minutes"] = None
+        )
+        report = build_known_report(candidates[0], events, competing)
     else:
         report = build_uncertain_report(query, passages, events, index)
     report["needs_human_review"] = report["confidence_score"] < 50
@@ -1114,6 +1481,44 @@ def self_test(data_dir: Path) -> None:
         and parsed[0].meta["signature"] == "A multiline\nsignature"
         and parsed[0].excerpt in csv_sample,
     )
+    # Reproduced final-review defects: numeric and operation scope in deployments.
+    pool_change = "Reduced connection pool size from 50 to 10"
+    for retry_change in (
+        "Reduced retry count from 5 to 2",
+        "Increased retry count from 2 to 5",
+    ):
+        mixed_changes = {
+            source: text.replace(
+                pool_change,
+                retry_change + " and reduced connection pool size from 50 to 10",
+            )
+            if document_kind(text) == "deployment"
+            else text
+            for source, text in ca.items()
+        }
+        report = contract(qa, mixed_changes)
+        check(
+            "capacity numbers belong to the pool, not retry count",
+            report["confidence_score"] >= 80
+            and "baseline from 50 to 10" in report["remediation"]
+            and "baseline from 5 to 2" not in report["remediation"]
+            and "baseline from 2 to 5" not in report["remediation"],
+        )
+    for operation, applies in (("refund", False), ("charge", True)):
+        scoped_change = {
+            source: text.replace(
+                pool_change,
+                pool_change + f" for {operation} processing only",
+            )
+            if document_kind(text) == "deployment"
+            else text
+            for source, text in ca.items()
+        }
+        report = contract(qa, scoped_change)
+        check(
+            "deployment must apply to the investigated operation",
+            ("contributing trigger: v2.4.1" in report["root_cause"]) == applies,
+        )
     start = time.perf_counter()
     for _ in range(50):
         investigate(qa, ca)
@@ -1122,6 +1527,922 @@ def self_test(data_dir: Path) -> None:
     print(
         f"PASS: {count} checks; 100 investigations in {elapsed:.3f}s ({elapsed * 10:.2f}ms/report)."
     )
+
+
+def run_evaluation(investigator, data_dir, split="all"):
+    """Run the frozen 36-case independent challenge evaluation.
+
+    This function owns all test fixtures and labels; production investigation
+    never consumes them. ``data_dir`` contains the two public incident folders.
+    Counts represent distinct end-to-end cases, not repeated schema asserts.
+    Development has 26 cases, held-out has 10. Once inspected, held-out cases
+    are regression cases and must not be described as a fresh blind test.
+    Labels are public-task and synthetic facts, not private answer-key labels.
+    Lexical checks do not establish general accuracy or probabilistic calibration.
+    """
+    import copy
+    import csv
+    import hashlib
+    import inspect
+    import io
+    import json
+    import math
+    import re
+    import time
+    from pathlib import Path
+    from types import SimpleNamespace
+
+    if split not in {"dev", "holdout", "all"}:
+        raise ValueError("split must be dev, holdout, or all")
+
+    ROOT = Path(data_dir).resolve().parent
+    KEYS = {
+        "root_cause",
+        "supporting_evidence",
+        "impacted_systems",
+        "mttr_minutes",
+        "remediation",
+        "confidence_score",
+        "needs_human_review",
+    }
+    UNKNOWN = re.compile(
+        r"not establish|unknown|undetermined|uncertain|insufficient|cannot.{0,30}(?:determin|confirm|establish)|unconfirmed|not confirmed|inconclusive|missing|needs human",
+        re.IGNORECASE,
+    )
+
+    def official(name):
+        directory = ROOT / "data" / name
+        return (directory / "query.txt").read_text().strip(), {
+            p.name: p.read_text()
+            for p in directory.iterdir()
+            if p.is_file() and p.name != "query.txt"
+        }
+
+    def csv_rows(rows):
+        out = io.StringIO()
+        writer = csv.writer(out)
+        writer.writerow(
+            ["issue_id", "title", "signature", "affected_component", "notes"]
+        )
+        writer.writerows(rows)
+        return out.getvalue()
+
+    def fixture(
+        service="ledger-adapter",
+        caller="billing-service",
+        operation="Charge",
+        signature="ConnectionPoolTimeoutException",
+        version="v9.1.0",
+        resource="HTTP connection pool",
+        baseline=80,
+        current=8,
+        recovery=18,
+    ):
+        """Explicit causal fixture: normal service, config decrease, repeated errors,
+        exact catalog mechanism, matching prior incident, and matching runbook."""
+        mechanism = f"undersized {resource} relative to current traffic"
+        query = f"{operation} requests are intermittently failing in {service} after deployment. What caused this and how should we recover?"
+        corpus = {
+            "events.log": "# Application logs\n```\n"
+            + "\n".join(
+                [
+                    f"2026-07-18 09:00:00 INFO  {service}  {operation} succeeded request_id=R0",
+                    f"2026-07-18 10:00:00 INFO  deploy-agent  Deployment {version} completed on {service}",
+                    f"2026-07-18 10:12:00 ERROR {service}  {operation} failed {signature}: no available {resource} connection after 5000ms request_id=R1",
+                    f"2026-07-18 10:12:00 ERROR {caller}  {operation} failed reason=GATEWAY_TIMEOUT request_id=R1",
+                    f"2026-07-18 10:15:00 INFO  {service}  {operation} succeeded request_id=R2",
+                    f"2026-07-18 10:18:00 ERROR {service}  {operation} failed {signature}: no available {resource} connection after 5000ms request_id=R3",
+                    f"2026-07-18 10:18:00 ERROR {caller}  {operation} failed reason=GATEWAY_TIMEOUT request_id=R3",
+                ]
+            )
+            + "\n```\n",
+            "changes.md": f"# Deployment history\n\n| Version | Timestamp (UTC) | Component | Change |\n|---|---|---|---|\n| {version} | 2026-07-18 10:00 | {service} | Reduced {resource} size from {baseline} to {current} for {operation.lower()} processing |\n",
+            "catalog.csv": csv_rows(
+                [
+                    [
+                        "KI-701",
+                        f"{operation} {resource} exhausted",
+                        f"A {signature} in {service} logs while processing {operation.lower()} is a known signature of an {mechanism}; check recent pool size changes",
+                        service,
+                        "Verified in matching previous incident",
+                    ]
+                ]
+            ),
+            "history.md": f"# Previous incidents\n\n## INC-71 (2026-05-01)\n\n**Summary**: {service} {operation.lower()} failures with {signature}.\n\n**Root cause**: {resource} size was too low for traffic following a pool size reduction.\n\n**Resolution**: restored the {resource} size to {baseline} and redeployed {service}.\n\n**MTTR**: {recovery + 2} minutes.\n",
+            "operations.md": f"# Runbooks\n\n## RB-71: {operation} {resource} timeout\n\n**Symptoms**: {service} logs {signature} while processing {operation.lower()} requests.\n\n**Diagnostic steps**: Check {resource} utilization and {operation.lower()} failures.\n\n**Remediation**: Restore the {resource} size to {baseline} and redeploy {service}.\n\n**Typical MTTR: {recovery} minutes.**\n",
+            "topology.md": f"# Architecture overview\n\n## Components\n\n- **{caller}**: calls {service} synchronously for every {operation.lower()} request.\n- **{service}**: owns the bounded {resource} used for {operation.lower()} processing.\n- **search-service**: independent search indexing.\n",
+            "api.md": f"# API specification\n\n## POST /api/{operation.lower()}\n\nOwned by {caller}, delegates to {service}.\n\n**Timeout**: 5000ms to acquire an {resource} connection for {operation.lower()} processing.\n",
+        }
+        return query, corpus
+
+    def queue_fixture(service="mail-worker", lines=None):
+        query = f"Order confirmation email delivery from {service} is delayed. Investigate the delay."
+        lines = lines or [
+            f"2026-07-18 10:00:00 INFO  {service}  Email queued message_id=M1",
+            f"2026-07-18 10:30:00 INFO  {service}  Email sent message_id=M1",
+        ]
+        return query, {
+            "events.log": "# Application logs\n```\n" + "\n".join(lines) + "\n```\n",
+            "topology.md": f"# Architecture overview\n\n## Components\n\n- **{service}**: sends order confirmation emails from a queue to an external email provider.\n- **order-service**: independent of the email delivery path.\n",
+            "changes.md": f"# Deployment history\n\nNo deployment touched {service} before this incident.\n",
+            "catalog.csv": csv_rows(
+                [
+                    [
+                        "KI-99",
+                        "Email rendering issue",
+                        "Broken HTML in older mail clients",
+                        service,
+                        "Cosmetic only; does not affect email delivery timing",
+                    ]
+                ]
+            ),
+            "history.md": "# Previous incidents\n\nNo previous incident explains this email delay.\n",
+            "operations.md": f"# Runbooks\n\n## RB-9: Email queue warning\n\n**Symptoms**: elevated queue depth in {service}.\n\n**Remediation**: Investigate provider latency and consumer throughput. Scaling consumers is unverified.\n\n**Typical MTTR**: 15 minutes, unconfirmed and may not apply.\n",
+        }
+
+    def case(
+        name,
+        split,
+        query,
+        corpus,
+        *,
+        answerable=False,
+        root_groups=(),
+        low=False,
+        minimum=0,
+        impacts=(),
+        excludes=(),
+        mttr=None,
+        sources=0,
+        forbidden_trigger=None,
+        delay_seconds=(),
+        forbid_latency=False,
+        note="",
+    ):
+        return {
+            "name": name,
+            "split": split,
+            "query": query,
+            "corpus": corpus,
+            "expected": {
+                "answerable": answerable,
+                "root_groups": root_groups,
+                "low": low,
+                "minimum": minimum,
+                "impacts": impacts,
+                "excludes": excludes,
+                "mttr": mttr,
+                "sources": sources,
+                "forbidden_trigger": forbidden_trigger,
+                "delay_seconds": delay_seconds,
+                "forbid_latency": forbid_latency,
+            },
+            "label_note": note,
+        }
+
+    def positives(name, split="dev", **kwargs):
+        q, c = fixture(**kwargs)
+        service = kwargs.get("service", "ledger-adapter")
+        caller = kwargs.get("caller", "billing-service")
+        recovery = kwargs.get("recovery", 18)
+        return case(
+            name,
+            split,
+            q,
+            c,
+            answerable=True,
+            root_groups=[
+                ["pool"],
+                ["undersized", "too low", "too small", "reduced", "reduction"],
+            ],
+            minimum=50,
+            impacts=[service, caller],
+            excludes=["search-service"],
+            mttr=recovery,
+            sources=4,
+            note="Matching observed failure mechanism, prior trigger, precedent and runbook make the mechanism answerable. MTTR is an estimate, not observed recovery.",
+        )
+
+    def build_cases():
+        cases = []
+        q, c = official("incident_a_pool_exhaustion")
+        cases.append(
+            case(
+                "official_a",
+                "dev",
+                q,
+                c,
+                answerable=True,
+                root_groups=[["pool"], ["50"], ["10"], ["payment-gateway-adapter"]],
+                minimum=75,
+                impacts=["payment-gateway-adapter", "payment-service"],
+                excludes=[
+                    "order-service",
+                    "notification-service",
+                    "search-service",
+                    "web-frontend",
+                    "auth-service",
+                ],
+                mttr=20,
+                sources=5,
+                note="Public README specifies high confidence, payment adapter, approximately 20-minute estimate, and cross-document evidence.",
+            )
+        )
+        q, c = official("incident_b_ambiguous_delay")
+        cases.append(
+            case(
+                "official_b",
+                "dev",
+                q,
+                c,
+                low=True,
+                impacts=["notification-service"],
+                excludes=[
+                    "payment-gateway-adapter",
+                    "payment-service",
+                    "order-service",
+                    "search-service",
+                    "web-frontend",
+                    "auth-service",
+                ],
+                mttr=None,
+                sources=3,
+                note="Public README explicitly requires low confidence and a human flag; no defensible recovery estimate is established.",
+            )
+        )
+        cases.append(positives("renamed_pool"))
+        cases.append(
+            positives(
+                "alternate_exception",
+                service="vault-proxy",
+                caller="transfer-service",
+                signature="PoolAcquireTimeoutError",
+                version="v12.7.3",
+                recovery=26,
+            )
+        )
+        cases.append(
+            positives("nonexception_literal", signature="POOL_CAPACITY_EXHAUSTED")
+        )
+        cases.append(
+            positives(
+                "nonexception_phrase",
+                service="invoice-connector",
+                caller="invoice-service",
+                operation="Invoice",
+                signature="pool acquire wait exceeded",
+                recovery=32,
+            )
+        )
+        x = positives("filenames_reordered")
+        x["corpus"] = {
+            f"evidence_{i}.txt": v
+            for i, v in enumerate(reversed(list(x["corpus"].values())))
+        }
+        cases.append(x)
+        x = positives("csv_quoted_multiline")
+        rows = list(csv.reader(io.StringIO(x["corpus"]["catalog.csv"])))
+        rows[1][4] = (
+            "Verified previously, with two data points.\nSee the prior incident for details."
+        )
+        out = io.StringIO()
+        csv.writer(out).writerows(rows)
+        x["corpus"]["catalog.csv"] = out.getvalue()
+        cases.append(x)
+        x = positives("no_runbook_history_estimate")
+        del x["corpus"]["operations.md"]
+        x["expected"]["mttr"] = 20
+        cases.append(x)
+        x = positives("no_recovery_basis")
+        del x["corpus"]["operations.md"]
+        del x["corpus"]["history.md"]
+        x["expected"]["mttr"] = None
+        x["expected"]["sources"] = 3
+        cases.append(x)
+        x = positives("duplicated_sources")
+        x["corpus"].update({f"duplicate_{k}": v for k, v in list(x["corpus"].items())})
+        cases.append(x)
+        q, c = fixture()
+        c = {"events.log": c["events.log"]}
+        cases.append(
+            case(
+                "logs_only",
+                "dev",
+                q,
+                c,
+                low=True,
+                impacts=["ledger-adapter"],
+                mttr=None,
+                note="Runtime symptoms alone do not establish the catalog mechanism or recovery duration.",
+            )
+        )
+        q, c = fixture()
+        c.pop("events.log")
+        cases.append(
+            case(
+                "no_runtime_observation",
+                "dev",
+                q,
+                c,
+                low=True,
+                mttr=None,
+                note="Documents describe a possible issue, but no observation establishes it happened in this incident.",
+            )
+        )
+        cases.append(
+            case(
+                "empty_corpus",
+                "dev",
+                "Requests are failing. Why?",
+                {},
+                low=True,
+                mttr=None,
+                note="No evidence is available.",
+            )
+        )
+        q, c = fixture()
+        c["events.log"] = c["events.log"].replace(
+            "Charge failed ConnectionPoolTimeoutException:",
+            "No ConnectionPoolTimeoutException observed; Charge healthy:",
+        )
+        cases.append(
+            case(
+                "negated_exception",
+                "dev",
+                q,
+                c,
+                low=True,
+                mttr=None,
+                note="Text names the exception while explicitly denying its observation.",
+            )
+        )
+        q, c = fixture()
+        c["changes.md"] = c["changes.md"].replace(
+            "2026-07-18 10:00", "2026-07-18 11:00"
+        )
+        cases.append(
+            case(
+                "deployment_after_errors",
+                "dev",
+                q,
+                c,
+                low=True,
+                impacts=["ledger-adapter"],
+                mttr=None,
+                forbidden_trigger="v9.1.0",
+                note="The proposed configuration trigger postdates all observed errors.",
+            )
+        )
+        q, c = fixture()
+        c["changes.md"] = c["changes.md"].replace(
+            "Reduced HTTP connection pool size from 80 to 8",
+            "Increased HTTP connection pool size from 8 to 80",
+        )
+        cases.append(
+            case(
+                "deployment_opposite_direction",
+                "dev",
+                q,
+                c,
+                low=True,
+                impacts=["ledger-adapter"],
+                mttr=None,
+                forbidden_trigger="v9.1.0",
+                note="The asserted trigger is contradicted by the documented capacity increase.",
+            )
+        )
+        q, c = fixture()
+        c["changes.md"] = c["changes.md"].replace(
+            "HTTP connection pool", "database connection pool"
+        )
+        cases.append(
+            case(
+                "wrong_resource_deployment",
+                "dev",
+                q,
+                c,
+                root_groups=[["HTTP", "pool"]],
+                impacts=["ledger-adapter"],
+                mttr=[None, 18],
+                forbidden_trigger="v9.1.0",
+                note="An HTTP acquisition failure does not establish a database pool change as its trigger; the known symptom mechanism may still be reported.",
+            )
+        )
+        q, c = fixture()
+        c["events.log"] = c["events.log"].replace(
+            "Charge failed ConnectionPoolTimeoutException",
+            "Refund failed ConnectionPoolTimeoutException",
+        )
+        c["events.log"] += (
+            "\n2026-07-18 10:12:00 INFO ledger-adapter Charge succeeded request_id=C1\n"
+        )
+        c["catalog.csv"] = c["catalog.csv"].replace(
+            "processing charge", "processing refund"
+        )
+        c["operations.md"] = c["operations.md"].replace("charge", "refund")
+        c["history.md"] = c["history.md"].replace("charge", "refund")
+        c["changes.md"] = c["changes.md"].replace("charge", "refund")
+        cases.append(
+            case(
+                "same_service_wrong_operation",
+                "dev",
+                q,
+                c,
+                low=True,
+                mttr=None,
+                note="The only matching service exception is on refund processing, while the question is about charge failures.",
+            )
+        )
+        x = positives("unrelated_same_time_errors")
+        x["corpus"]["events.log"] += (
+            "\n2026-07-18 10:12:00 ERROR search-service ReindexException: index unavailable\n"
+        )
+        cases.append(x)
+        x = positives("same_service_decoy_issue")
+        c = x["corpus"]
+        c["catalog.csv"] += (
+            "KI-799,Refund callback slowness,Refund webhook delivery delayed,ledger-adapter,Separate from charge processing and does not affect charge failure\n"
+        )
+        c["events.log"] += (
+            "\n2026-07-18 10:10:00 WARN ledger-adapter Refund webhook delivery delayed 480s merchant_id=MER1\n"
+        )
+        cases.append(x)
+        q, c = queue_fixture()
+        cases.append(
+            case(
+                "queue_message_id",
+                "dev",
+                q,
+                c,
+                low=True,
+                impacts=["mail-worker"],
+                excludes=["order-service"],
+                mttr=None,
+                delay_seconds=[1800],
+                note="A same-message queue/send pair establishes a 30-minute observation, not the bottleneck or MTTR.",
+            )
+        )
+        q, c = queue_fixture(
+            lines=[
+                "2026-07-18 10:00:00 INFO mail-worker Email queued order_id=O1 message_id=M1",
+                "2026-07-18 10:05:00 INFO mail-worker Email queued order_id=O1 message_id=M2",
+                "2026-07-18 10:25:00 INFO mail-worker Email sent order_id=O1 message_id=M2",
+                "2026-07-18 10:30:00 INFO mail-worker Email sent order_id=O1 message_id=M1",
+            ]
+        )
+        cases.append(
+            case(
+                "queue_shared_order_distinct_messages",
+                "dev",
+                q,
+                c,
+                low=True,
+                impacts=["mail-worker"],
+                mttr=None,
+                delay_seconds=[1200, 1800],
+                note="Message IDs disambiguate two notifications of one order; order ID alone would invent a 25-minute pair and lose another.",
+            )
+        )
+        q, c = queue_fixture(
+            lines=[
+                "2026-07-18 10:30:00 INFO mail-worker Email sent message_id=M1",
+                "2026-07-18 10:00:00 INFO mail-worker Email queued message_id=M1",
+                "2026-07-18 10:00:00 INFO mail-worker Email queued message_id=M1",
+                "2026-07-18 10:30:00 INFO mail-worker Email sent message_id=M1",
+            ]
+        )
+        cases.append(
+            case(
+                "queue_shuffled_duplicates",
+                "dev",
+                q,
+                c,
+                low=True,
+                impacts=["mail-worker"],
+                mttr=None,
+                delay_seconds=[1800],
+                note="Chronological sorting and replay deduplication preserve one 30-minute pair.",
+            )
+        )
+        q, c = queue_fixture(
+            lines=[
+                "2026-07-18 10:00:00 INFO mail-worker Email queued message_id=M1",
+                "2026-07-18 10:30:00 INFO mail-worker Email sent message_id=M2",
+            ]
+        )
+        cases.append(
+            case(
+                "queue_mismatched_identifiers",
+                "dev",
+                q,
+                c,
+                low=True,
+                mttr=None,
+                forbid_latency=True,
+                note="Different messages cannot be joined into a measured delay.",
+            )
+        )
+        q, c = queue_fixture(
+            lines=[
+                "2026-07-18 10:00:00 INFO mail-worker Email queued order_id=X1",
+                "2026-07-18 10:30:00 INFO mail-worker Email sent message_id=X1",
+            ]
+        )
+        cases.append(
+            case(
+                "queue_identifier_type_collision",
+                "dev",
+                q,
+                c,
+                low=True,
+                mttr=None,
+                forbid_latency=True,
+                note="Equal identifier values in different namespaces are not the same message.",
+            )
+        )
+        # Held-out variations are generated here but are not disclosed before release.
+        cases.append(
+            positives(
+                "holdout_01",
+                "holdout",
+                service="settlement-bridge",
+                caller="settlement-api",
+                operation="Settlement",
+                signature="ConnectionLeaseExpiredError",
+                version="v44.2.8",
+                resource="outbound connection pool",
+                baseline=120,
+                current=12,
+                recovery=24,
+            )
+        )
+        cases.append(
+            positives(
+                "holdout_02",
+                "holdout",
+                service="receipt-adapter",
+                caller="receipt-service",
+                operation="Receipt",
+                signature="NO_FREE_CONNECTIONS",
+                version="v8.6.1",
+                resource="provider connection pool",
+                recovery=12,
+            )
+        )
+        x = positives(
+            "holdout_03",
+            "holdout",
+            service="refund-bridge",
+            caller="refund-api",
+            operation="Refund",
+            signature="acquisition capacity exhausted",
+            resource="refund connection pool",
+            recovery=16,
+        )
+        x["corpus"] = {f"proof-{i}.txt": v for i, v in enumerate(x["corpus"].values())}
+        cases.append(x)
+        q, c = fixture(
+            service="invoice-adapter", caller="invoice-api", operation="Invoice"
+        )
+        c["changes.md"] = c["changes.md"].replace(
+            "2026-07-18 10:00", "2026-07-19 09:00"
+        )
+        cases.append(
+            case(
+                "holdout_04",
+                "holdout",
+                q,
+                c,
+                low=True,
+                mttr=None,
+                forbidden_trigger="v9.1.0",
+                note="Future deployment cannot cause earlier errors.",
+            )
+        )
+        q, c = fixture()
+        c["events.log"] = c["events.log"].replace(
+            "ConnectionPoolTimeoutException:",
+            "ConnectionPoolTimeoutException count=0; status healthy:",
+        )
+        cases.append(
+            case(
+                "holdout_05",
+                "holdout",
+                q,
+                c,
+                low=True,
+                mttr=None,
+                note="A zero counter is not a positive exception observation.",
+            )
+        )
+        q, c = fixture(resource="provider connection pool")
+        c["changes.md"] = c["changes.md"].replace(
+            "provider connection pool", "database connection pool"
+        )
+        cases.append(
+            case(
+                "holdout_06",
+                "holdout",
+                q,
+                c,
+                root_groups=[["pool"]],
+                mttr=[None, 18],
+                forbidden_trigger="v9.1.0",
+                note="Different connection-pool resources cannot be conflated.",
+            )
+        )
+        q, c = queue_fixture(
+            service="receipt-worker",
+            lines=[
+                "2026-07-18 12:42:00 INFO receipt-worker Email sent trace_id=T1 message_id=MB",
+                "2026-07-18 12:05:00 INFO receipt-worker Email queued trace_id=T1 message_id=MB",
+                "2026-07-18 12:53:00 INFO receipt-worker Email sent trace_id=T1 message_id=MA",
+                "2026-07-18 12:00:00 INFO receipt-worker Email queued trace_id=T1 message_id=MA",
+            ],
+        )
+        cases.append(
+            case(
+                "holdout_07",
+                "holdout",
+                q,
+                c,
+                low=True,
+                impacts=["receipt-worker"],
+                mttr=None,
+                delay_seconds=[2220, 3180],
+                note="Message identity outranks shared trace identity, independent of log order.",
+            )
+        )
+        q, c = queue_fixture(
+            service="delivery-worker",
+            lines=[
+                "2026-07-18 10:00:00 INFO delivery-worker Email queued request_id=R7",
+                "2026-07-18 10:11:00 INFO unrelated-worker Email sent request_id=R7",
+            ],
+        )
+        cases.append(
+            case(
+                "holdout_08",
+                "holdout",
+                q,
+                c,
+                low=True,
+                mttr=None,
+                forbid_latency=True,
+                excludes=["unrelated-worker"],
+                note="Events from separate components cannot establish this worker queue latency.",
+            )
+        )
+        x = positives(
+            "holdout_09",
+            "holdout",
+            service="clearing-adapter",
+            caller="clearing-api",
+            operation="Clearing",
+            baseline=150,
+            current=15,
+            recovery=28,
+        )
+        x["corpus"]["operations.md"] = x["corpus"]["operations.md"].replace(
+            "28 minutes.", "28 minutes, unconfirmed and may not apply."
+        )
+        del x["corpus"]["history.md"]
+        x["expected"]["mttr"] = None
+        x["expected"]["sources"] = 3
+        cases.append(x)
+        q, c = fixture(
+            service="merchant-bridge", caller="merchant-api", operation="Charge"
+        )
+        c["events.log"] = c["events.log"].replace(
+            "Charge failed ConnectionPoolTimeoutException",
+            "Report failed ConnectionPoolTimeoutException",
+        )
+        c["catalog.csv"] = c["catalog.csv"].replace(
+            "processing charge", "processing report"
+        )
+        c["operations.md"] = c["operations.md"].replace("charge", "report")
+        c["history.md"] = c["history.md"].replace("charge", "report")
+        c["changes.md"] = c["changes.md"].replace("charge", "report")
+        cases.append(
+            case(
+                "holdout_10",
+                "holdout",
+                q,
+                c,
+                low=True,
+                mttr=None,
+                note="Reporting failure on the same component does not explain charge failures.",
+            )
+        )
+        return cases
+
+    def schema_ok(r):
+        if not isinstance(r, dict) or set(r) != KEYS:
+            return False
+        n = r["confidence_score"]
+        return (
+            isinstance(r["root_cause"], str)
+            and bool(r["root_cause"].strip())
+            and isinstance(r["remediation"], str)
+            and bool(r["remediation"].strip())
+            and isinstance(n, float)
+            and math.isfinite(n)
+            and 0 <= n <= 100
+            and type(r["needs_human_review"]) is bool
+            and r["needs_human_review"] == (n < 50)
+            and (
+                r["mttr_minutes"] is None
+                or type(r["mttr_minutes"]) is int
+                and r["mttr_minutes"] >= 0
+            )
+            and isinstance(r["impacted_systems"], list)
+            and all(isinstance(s, str) for s in r["impacted_systems"])
+            and isinstance(r["supporting_evidence"], list)
+            and all(
+                isinstance(e, dict)
+                and set(e) == {"source", "excerpt"}
+                and all(isinstance(v, str) for v in e.values())
+                for e in r["supporting_evidence"]
+            )
+        )
+
+    def causal_trigger(root, version):
+        # Inspect the sentence segment before/after the version, preserving dots in versions.
+        text = root.replace(version, "VERSIONTOKEN")
+        for segment in re.split(r"(?<=[.!?])\s+", text):
+            if (
+                "VERSIONTOKEN" in segment
+                and re.search(
+                    r"cause|caus|trigger|changed|responsib", segment, re.IGNORECASE
+                )
+                and not re.search(
+                    r"not|contradict|post.?dat|after.*(?:error|onset)|unrelated|reject|unsupported|cannot|no evidence|conflict",
+                    segment,
+                    re.IGNORECASE,
+                )
+            ):
+                return True
+        return False
+
+    def delay_mentioned(root, seconds):
+        minutes, remaining = divmod(seconds, 60)
+        patterns = [
+            rf"\b{minutes}\s*m\s*{remaining:02d}\s*s\b",
+            rf"\b{minutes}\s*min(?:utes)?\s*(?:and\s*)?{remaining}\s*(?:sec|s)",
+            rf"\b{seconds}\s*(?:seconds|s)\b",
+        ]
+        if remaining == 0:
+            patterns.append(rf"\b{minutes}(?:\.0+)?\s*(?:minutes|min)\b")
+        return any(re.search(p, root, re.IGNORECASE) for p in patterns)
+
+    def evaluate_case(module, c):
+        began = time.perf_counter()
+        try:
+            report = module.investigate(c["query"], copy.deepcopy(c["corpus"]))
+            json.dumps(report, allow_nan=False)
+        except Exception as exc:  # noqa: BLE001 - Record arbitrary failures of the implementation under evaluation.
+            return {
+                "name": c["name"],
+                "split": c["split"],
+                "crash": f"{type(exc).__name__}: {exc}",
+                "passed": False,
+                "dimensions": {},
+                "elapsed_ms": round((time.perf_counter() - began) * 1000, 3),
+                "expected": c["expected"],
+                "label_note": c["label_note"],
+            }
+        ex = c["expected"]
+        root = str(report.get("root_cause", ""))
+        score = report.get("confidence_score", 0)
+        score = score if isinstance(score, (int, float)) else 0
+        evidence = report.get("supporting_evidence", [])
+        evidence = evidence if isinstance(evidence, list) else []
+        provenance = all(
+            isinstance(e, dict)
+            and isinstance(e.get("excerpt"), str)
+            and bool(e["excerpt"])
+            and e.get("source") in c["corpus"]
+            and e["excerpt"] in c["corpus"][e["source"]]
+            for e in evidence
+        )
+        source_count = len({e.get("source") for e in evidence if isinstance(e, dict)})
+        cause = all(
+            any(term.lower() in root.lower() for term in group)
+            for group in ex["root_groups"]
+        )
+        if ex["low"]:
+            cause = cause and bool(UNKNOWN.search(root))
+        if ex["forbidden_trigger"]:
+            cause = cause and not causal_trigger(root, ex["forbidden_trigger"])
+        impacts = set(report.get("impacted_systems", []))
+        impact = set(ex["impacts"]) <= impacts and not (set(ex["excludes"]) & impacts)
+        mttr = (
+            report.get("mttr_minutes") in ex["mttr"]
+            if isinstance(ex["mttr"], list)
+            else report.get("mttr_minutes") == ex["mttr"]
+        )
+        calibration = score >= ex["minimum"] and (not ex["low"] or score < 50)
+        delay = all(delay_mentioned(root, seconds) for seconds in ex["delay_seconds"])
+        if ex["forbid_latency"]:
+            delay = delay and not bool(
+                re.search(
+                    r"confirm(?:ed|s)? delayed processing|mean queue.to.send latency|\b\d+m \d+s",
+                    root,
+                    re.IGNORECASE,
+                )
+            )
+        dims = {
+            "schema": schema_ok(report),
+            "citation_provenance": provenance,
+            "cause": cause,
+            "impact": impact,
+            "mttr": mttr,
+            "confidence": calibration,
+            "source_diversity": source_count >= ex["sources"],
+            "queue_observation": delay,
+        }
+        return {
+            "name": c["name"],
+            "split": c["split"],
+            "crash": None,
+            "passed": all(dims.values()),
+            "dimensions": dims,
+            "high_confidence_false_claim": score >= 70
+            and (
+                not cause
+                or not impact
+                or not mttr
+                or not calibration
+                or not provenance
+                or not delay
+            ),
+            "answerable": ex["answerable"],
+            "answered": score >= 50 and cause,
+            "citation_count": len(evidence),
+            "elapsed_ms": round((time.perf_counter() - began) * 1000, 3),
+            "report": report,
+            "expected": ex,
+            "label_note": c["label_note"],
+        }
+
+    def summarize(results):
+        total = len(results)
+        crashes = sum(bool(r["crash"]) for r in results)
+        dimensions = {
+            k: sum(r.get("dimensions", {}).get(k, False) for r in results)
+            for k in [
+                "schema",
+                "citation_provenance",
+                "cause",
+                "impact",
+                "mttr",
+                "confidence",
+                "source_diversity",
+                "queue_observation",
+            ]
+        }
+        answerable = [r for r in results if r.get("answerable")]
+        return {
+            "distinct_cases": total,
+            "passed_cases": sum(r["passed"] for r in results),
+            "crashes": crashes,
+            "crash_rate": round(crashes / total, 4),
+            "dimension_pass_counts": dimensions,
+            "high_confidence_false_claims": sum(
+                r.get("high_confidence_false_claim", False) for r in results
+            ),
+            "answerable_cases": len(answerable),
+            "correct_answers": sum(r["answered"] for r in answerable),
+            "answer_coverage": round(
+                sum(r["answered"] for r in answerable) / len(answerable), 4
+            )
+            if answerable
+            else None,
+            "total_citations": sum(r.get("citation_count", 0) for r in results),
+            "elapsed_ms": round(sum(r["elapsed_ms"] for r in results), 3),
+        }
+
+    all_cases = build_cases()
+    cases = [c for c in all_cases if split == "all" or c["split"] == split]
+    fixture_hash = hashlib.sha256(
+        json.dumps(all_cases, sort_keys=True).encode()
+    ).hexdigest()
+    module = SimpleNamespace(investigate=investigator)
+    results = [evaluate_case(module, c) for c in cases]
+    source_file = inspect.getsourcefile(investigator)
+    solution_hash = (
+        hashlib.sha256(Path(source_file).read_bytes()).hexdigest()
+        if source_file
+        else None
+    )
+    return {
+        "evaluation_version": 1,
+        "fixture_sha256": fixture_hash,
+        "solution_sha256": solution_hash,
+        "split": split,
+        "summary": summarize(results),
+        "results": results,
+    }
 
 
 def main() -> None:
@@ -1137,7 +2458,52 @@ def main() -> None:
         action="store_true",
         help="Run contract and adversarial regression checks",
     )
+    parser.add_argument(
+        "--evaluate",
+        action="store_true",
+        help="Run 36 independently authored semantic scenarios",
+    )
+    parser.add_argument("--split", choices=("dev", "holdout", "all"), default="all")
+    parser.add_argument(
+        "--evaluation-output",
+        type=Path,
+        help="Save per-scenario reports and metrics as JSON",
+    )
+    parser.add_argument(
+        "--evaluate-against",
+        type=Path,
+        help="Evaluate another trusted solution.py for comparison",
+    )
     args = parser.parse_args()
+    if args.evaluate:
+        implementation = investigate
+        if args.evaluate_against:
+            import importlib.util
+            import sys
+
+            spec = importlib.util.spec_from_file_location(
+                "evaluated_submission", args.evaluate_against
+            )
+            if spec is None or spec.loader is None:
+                parser.error("Cannot load comparison implementation")
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[spec.name] = module
+            spec.loader.exec_module(module)
+            implementation = module.investigate
+        evaluation = run_evaluation(implementation, args.data_dir, args.split)
+        if args.evaluation_output:
+            args.evaluation_output.write_text(
+                json.dumps(evaluation, indent=2, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+        print(json.dumps(evaluation["summary"], indent=2))
+        if (
+            evaluation["summary"]["passed_cases"]
+            != evaluation["summary"]["distinct_cases"]
+        ):
+            raise SystemExit(1)
+        return
+
     if args.self_test:
         self_test(args.data_dir)
         return
