@@ -1,7 +1,8 @@
 # Use Case 2: Production Incident Investigator — Submission Report
 
 **Author**: Hitesh Shah  
-**Email**: hitesh.shah@example.com *(or candidate primary contact email)*  
+**Phone**: +65 9424 7574  
+**Email**: hns78@yahoo.com  
 **Track**: Retrieval & Multi-Source Evidence Correlation (RAG-Shaped, Zero-LLM)  
 
 ---
@@ -133,4 +134,5 @@ Through deep analysis of the problem statement and dataset, four core challenges
 ## 5. Candidate Contact Information
 
 - **Name**: Hitesh Shah
-- **Contact**: Available upon request / GitHub profile
+- **Phone**: +65 9424 7574
+- **Email**: hns78@yahoo.com
