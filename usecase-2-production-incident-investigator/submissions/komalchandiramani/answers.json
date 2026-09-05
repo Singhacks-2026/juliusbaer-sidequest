@@ -1,0 +1,51 @@
+{
+  "incident_a_pool_exhaustion": {
+    "root_cause": "`payment-gateway-adapter` is failing with `ConnectionPoolTimeoutException`, triggered by the preceding deployment: Reduced connection pool size from 50 to 10 (memory optimization for the upcoming cost-reduction initiative). Corroborated independently by 5 source types (deployment_history, known_issues, logs, previous_incidents, runbooks).",
+    "supporting_evidence": [
+      {
+        "source": "deployment_history.md",
+        "excerpt": "| **v2.4.1** | **2026-09-02 14:30** | **payment-gateway-adapter** | **Reduced connection pool size from 50 to 10 (memory optimization for the upcoming cost-reduction initiative)** |"
+      },
+      {
+        "source": "known_issues.csv",
+        "excerpt": "KI-101,ConnectionPoolTimeoutException in payment-gateway-adapter,A ConnectionPoolTimeoutException in payment-gateway-adapter logs is a known signature of an undersized connection pool relative to current traffic; cross-reference against deployment history for any recent pool size change,payment-gateway-adapter,Recurred more than once - see previous incidents; both prior occurrences traced back to a pool size reduction"
+      },
+      {
+        "source": "logs.md",
+        "excerpt": "2026-09-02 14:47:12 ERROR payment-gateway-adapter  ConnectionPoolTimeoutException: no available connection after 5000ms"
+      },
+      {
+        "source": "previous_incidents.md",
+        "excerpt": "**Summary**: Intermittent payment failures, `payment-gateway-adapter`\nlogging `ConnectionPoolTimeoutException` under normal (not elevated)\ntraffic.\n\n**Root cause**: connection pool size was set too low for peak traffic\nduring a configuration change made in that day's deploy.\n\n**Resolution**: reverted the pool size to its prior value (50) and\nredeployed.\n\n**MTTR**: 22 minutes (from first error log to resolution deploy landing)."
+      },
+      {
+        "source": "runbooks.md",
+        "excerpt": "**Symptoms**: `ConnectionPoolTimeoutException` appearing in\n`payment-gateway-adapter` logs; intermittent (not total) payment\nfailures; `payment-service` logging `GATEWAY_TIMEOUT`.\n\n**Diagnostic steps**:\n1. Check `payment-gateway-adapter` connection pool utilization metrics\n   for saturation.\n2. Check recent deployments touching `payment-gateway-adapter`\n   (see deployment history) for pool size or timeout configuration changes.\n3. Compare the current pool size configuration against the historical\n   baseline (50 connections).\n\n**Remediation**: revert the pool size to the prior baseline value, or\nscale the pool size upward to match current traffic; redeploy\n`payment-gateway-adapter`.\n\n**Typical MTTR: 20 minutes.**"
+      }
+    ],
+    "impacted_systems": [
+      "payment-gateway-adapter",
+      "payment-service"
+    ],
+    "mttr_minutes": 20,
+    "remediation": "Remediation: revert the pool size to the prior baseline value, or scale the pool size upward to match current traffic; redeploy `payment-gateway-adapter`.",
+    "confidence_score": 87.0,
+    "needs_human_review": false
+  },
+  "incident_b_ambiguous_delay": {
+    "root_cause": "Probable but unconfirmed: delivery latency in `notification-service` (Queue depth elevated). Only 1 independent source corroborates this and 4 contradict or qualify it - no matching known issue, no correlated deployment, and no precedent on file. The evidence is too thin to name a cause with confidence.",
+    "supporting_evidence": [
+      {
+        "source": "logs.md",
+        "excerpt": "2026-08-15 11:10:02 WARN  notification-service     Queue depth elevated: 340 messages"
+      }
+    ],
+    "impacted_systems": [
+      "notification-service"
+    ],
+    "mttr_minutes": null,
+    "remediation": "Do not act on this diagnosis unreviewed. Instrument `notification-service` with per-stage timing to establish where the delay accrues, then re-investigate.",
+    "confidence_score": 10.0,
+    "needs_human_review": true
+  }
+}
