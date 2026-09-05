@@ -1,5 +1,9 @@
 # Julius Baer AI Hackathon — Payment Investigation Assistant
 
+**Local implementation:** The tools, RAG pipeline, and configurable LLM agent
+are implemented in this checkout. See [IMPLEMENTATION.md](IMPLEMENTATION.md)
+for Windows commands, provider configuration, tests, and submission validation.
+
 Build a small AI-powered assistant for a bank's payment operations and
 compliance team.  The assistant answers natural-language
 payment-investigation questions by combining structured data, policy
@@ -35,29 +39,32 @@ usecase-1-payment-investigation-agent/
 │   └── policies/            # 9 policy docs (5 relevant, 4 decoys)
 ├── questions/
 │   └── questions.json       # 10 evaluation questions
-├── tools/                   # Data-access tools (implement these)
+├── tools/                   # Data access and deterministic policy checks
 │   ├── client_tools.py
 │   ├── payment_tools.py
 │   └── policy_tools.py
-├── rag/                     # RAG pipeline (implement this)
+├── rag/                     # Local policy retrieval pipeline
 │   └── pipeline.py
-└── agent/                   # AI agent (implement this)
+└── agent/                   # Configurable LLM agent and provider adapters
     └── agent.py
 ```
 
 ## Quick start
 
-```bash
-python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env  # Add your LLM API key
-python main.py --questions questions.json --output submission.json
+```powershell
+# From the usecase-1-payment-investigation-agent folder:
+if (-not (Test-Path .venv)) { python -m venv .venv }
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+# Edit .env to select your provider, model, and API key.
+.\.venv\Scripts\python.exe check_setup.py
+.\.venv\Scripts\python.exe main.py --questions .\questions\questions.json --output submission.json
 ```
 
 ## What you must implement
 
-The package intentionally contains **method-only interfaces** — function
-signatures and contracts are provided, but no implementations.
+The original starter provided method-only interfaces. Their implementations
+are now present in this checkout:
 
 1. **Tools** — `tools/*.py` — deterministic data access (CSV lookups,
    aggregation, 24h window analysis)

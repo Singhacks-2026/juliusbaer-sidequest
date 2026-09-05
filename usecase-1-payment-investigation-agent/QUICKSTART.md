@@ -1,5 +1,8 @@
 # Quick Start
 
+The implementation is present in this checkout. See
+[IMPLEMENTATION.md](IMPLEMENTATION.md) for provider options and verification.
+
 ## Prerequisites
 
 - Python 3.10 or later
@@ -7,26 +10,18 @@
 
 ## Setup
 
-```bash
-# 1. Create and activate a virtual environment
-python -m venv .venv
-
-# Linux / macOS
-source .venv/bin/activate
-
-# Windows
-.venv\Scripts\activate
-
-# 2. Install dependencies
-pip install -r requirements.txt
-
-# 3. Configure your LLM
-cp .env.example .env
-# Edit .env and add your API key and model name
-
-# 4. If your LLM provider requires a Python SDK, install it
-#    e.g. pip install openai   OR   pip install anthropic
+```powershell
+# Windows: run from the usecase-1-payment-investigation-agent directory.
+if (-not (Test-Path .venv)) { python -m venv .venv }
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+# Edit .env and add your provider, API key, and model name.
+.\.venv\Scripts\python.exe check_setup.py
 ```
+
+On Linux/macOS, activate .venv/bin/activate and use python in place of
+.\.venv\Scripts\python.exe. The required provider SDKs are already listed in
+requirements.txt.
 
 ## Understand the problem
 
@@ -48,7 +43,7 @@ data/data_dictionary.csv  — field descriptions
 questions/questions.json  — 10 evaluation questions
 ```
 
-## Implement
+## Implementation
 
 ```text
 tools/client_tools.py     — client data access
@@ -60,8 +55,8 @@ agent/agent.py            — LLM/tool-calling agent loop
 
 ## Run
 
-```bash
-python main.py --questions questions.json --output submission.json
+```powershell
+.\.venv\Scripts\python.exe main.py --questions .\questions\questions.json --output submission.json
 ```
 
 Your program must run without interactive input and produce one result for each
@@ -73,5 +68,9 @@ question.
 - Each object has all required fields: `question_id`, `payment_id`,
   `answer`, `citations`, `facts`, `tools_used`.
 - No answer is hard-coded to a `question_id`.
-- The program runs in a fresh environment with only `pip install -r
-  requirements.txt` plus your chosen LLM SDK.
+- The program runs in a fresh environment with `pip install -r requirements.txt`
+  and the selected provider configured in .env.
+
+```powershell
+.\.venv\Scripts\python.exe validate_submission.py --submission submission.json --traces
+```
