@@ -1,54 +1,59 @@
 """
-Client data-access tool interfaces.
+Client data-access tools.
 
-These methods intentionally contain NO implementations.
-
-The candidate must implement the data lookup using the supplied
-``data/clients.csv`` file.
-
-The AI agent should interact with these methods rather than directly reading
-the CSV. This creates a clean separation between:
-    - AI orchestration;
-    - deterministic data access;
-    - final answer generation.
+The agent reads client context through these functions rather than touching
+``data/clients.csv`` directly, which keeps AI orchestration separate from
+deterministic data access.
 """
+
+from tools.data_store import clients
+
+# Only these two countries have a regional procedure in the policy corpus.
+# Every other client country is governed by the global policy alone.
+_REGIONAL_POLICIES = {
+    "Singapore": "regional_singapore.md",
+    "Switzerland": "regional_switzerland.md",
+}
 
 
 def get_client_profile(client_id: str) -> dict:
     """
     Retrieve one client's profile.
 
-    Parameters
-    ----------
-    client_id:
-        Example: ``"C2001"``.
-
-    Returns
-    -------
-    dict
-        Client information including country, risk rating, client type and
-        relationship duration.
-
-    Implementation requirement
-    --------------------------
-    Return a structured result for known clients and handle unknown IDs
-    gracefully.
+    Returns the client record augmented with the regional policy that applies
+    to it, or ``{"found": False, ...}`` for an unknown ID.
     """
-    pass
+    client_id = (client_id or "").strip()
+    record = clients().get(client_id)
+
+    if record is None:
+        return {
+            "found": False,
+            "client_id": client_id,
+            "error": f"No client record for {client_id!r} in clients.csv.",
+        }
+
+    country = record["country"]
+
+    return {
+        "found": True,
+        "client_id": record["client_id"],
+        "country": country,
+        "risk_rating": record["risk_rating"],
+        "client_type": record["client_type"],
+        "relationship_years": record["relationship_years"],
+        "regional_policy": _REGIONAL_POLICIES.get(country),
+        "policy_scope": (
+            "global + regional" if country in _REGIONAL_POLICIES else "global only"
+        ),
+    }
 
 
 def get_clients_by_country(country: str) -> list[dict]:
-    """
-    OPTIONAL: Retrieve clients associated with a given country.
-
-    Parameters
-    ----------
-    country:
-        Country name.
-
-    Returns
-    -------
-    list[dict]
-        Matching client records.
-    """
-    pass
+    """Retrieve every client whose relationship country matches ``country``."""
+    country = (country or "").strip().casefold()
+    return [
+        get_client_profile(client_id)
+        for client_id, record in clients().items()
+        if record["country"].casefold() == country
+    ]
