@@ -34,7 +34,7 @@ class DataAndPolicyTests(unittest.TestCase):
         self.assertIn('1:1', window['fx_assumption'])
         assessment = assess_payment_policy('P50003', [GLOBAL, SWISS, RISK], [result])
         self.assertTrue(assessment['potential_structuring'])
-        self.assertTrue(assessment['compliance_escalation_required'])
+        self.assertTrue(assessment['compliance_escalation_recommended'])
         self.assertFalse(assessment['enhanced_review_required'])
 
     def test_dates_decimal_precision_and_mixed_currency(self):
@@ -106,13 +106,13 @@ class DataAndPolicyTests(unittest.TestCase):
             with self.subTest(sources=sources):
                 result = assess_payment_policy('P50003', sources, [analysis])
                 self.assertIsNone(result['potential_structuring'])
-                self.assertIsNone(result['compliance_escalation_required'])
+                self.assertIsNone(result['compliance_escalation_recommended'])
 
     def test_missing_region_does_not_clear_escalation(self):
         analysis = aggregate_beneficiary_24h('C2003', 'Northstar Trading')
         result = assess_payment_policy('P50003', [GLOBAL, RISK], [analysis])
         self.assertTrue(result['potential_structuring'])
-        self.assertIsNone(result['compliance_escalation_required'])
+        self.assertIsNone(result['compliance_escalation_recommended'])
 
     def test_single_large_payment_is_not_structuring(self):
         result = aggregate_beneficiary_24h('C2001', 'Desert Star LLC')

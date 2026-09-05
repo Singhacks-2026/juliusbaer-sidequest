@@ -1,6 +1,6 @@
 [
   {
-    "answer": "No\u2014P50000 does not trigger enhanced review on its individual amount or destination under the applicable policies.\n\n- **Amount:** The payment is USD 12,000 to Redwood Services. The global policy requires enhanced review before release for payments strictly above USD 100,000 equivalent. The policy assessment confirms that this payment does not trigger that requirement; the comparison is directly in USD, without an FX assumption (`global_payment_policy.md`).\n- **Applicable region:** Client C2000 is based in the UAE, so only the global rules apply. Singapore regional requirements do not apply merely because the beneficiary\u2019s country code is SG.\n- **Destination:** The authoritative beneficiary code is **SG (Singapore)**, which is not on this exercise\u2019s high-risk list. Consequently, destination-based additional review is not triggered. The list identifies AE (UAE) as high-risk, but the client\u2019s location does not make this a payment to AE (`high_risk_jurisdictions.md`).\n\n**Recommended action:** Clarify the discrepancy between the displayed beneficiary country, \u201cUK,\u201d and code SG. This conclusion addresses individual-payment triggers only: client history has not been reviewed for potential structuring, so it is not a finding that no splitting exists or an automatic release authorization.",
+    "answer": "No\u2014P50000 does not trigger enhanced review on the supplied individual-payment facts.\n\n- **Amount:** The USD 12,000 payment to Redwood Services is below the global threshold. Enhanced review before release is required only for payments **above USD 100,000 equivalent**; this comparison uses USD directly, without an FX assumption (`global_payment_policy.md`).\n- **Applicable rules:** The client is based in the UAE, so global rules apply; neither Singapore nor Swiss regional requirements apply.\n- **Destination:** The authoritative beneficiary country code is **SG (Singapore)**, which is not high-risk under the exercise\u2019s high-risk list. That list identifies **AE (UAE)** as a high-risk destination, not a high-risk origin (`high_risk_jurisdictions.md`). Additional destination review is therefore not triggered.\n\nThe displayed beneficiary country, \u201cUK,\u201d conflicts with SG. I recommend clarifying this discrepancy and standard monitoring. This individual-payment assessment does not establish whether a separate structuring pattern exists.",
     "citations": [
       "global_payment_policy.md",
       "high_risk_jurisdictions.md"
@@ -56,7 +56,7 @@
         "structuring_checked": false,
         "structuring_checks": [],
         "potential_structuring": null,
-        "compliance_escalation_required": null,
+        "compliance_escalation_recommended": null,
         "assumptions": [],
         "limitations": [
           "A policy trigger does not establish intent or suspicious activity.",
@@ -75,7 +75,7 @@
     "question": "Should P50000 require enhanced review? Explain using policy."
   },
   {
-    "answer": "P50001 requires enhanced review before release, RM review, and additional destination review.\n\nThe payment is USD 125,000 from Singapore client C2001 to Desert Star LLC in the UAE, dated 11 May 2026. Global rules and Singapore requirements both apply:\n\n- Enhanced review before release: USD 125,000 is above the global USD 100,000 threshold; it also triggers Singapore\u2019s enhanced-review requirement (global_payment_policy.md; regional_singapore.md).\n- RM review: the amount is above Singapore\u2019s USD 75,000 threshold (regional_singapore.md).\n- Additional destination review: the authoritative beneficiary country code is AE (UAE), which is designated high-risk in this exercise (high_risk_jurisdictions.md; global_payment_policy.md; regional_singapore.md).\n\nThese comparisons use native USD amounts; no FX assumption is needed. The client\u2019s Low risk rating does not override the requirements. Arrange all three reviews, with enhanced review completed before release. These triggers do not themselves establish suspicious activity.",
+    "answer": "P50001 requires enhanced review before release, RM review, and additional destination review.\n\n- Enhanced review: The USD 125,000 payment to Desert Star LLC exceeds the strict USD 100,000 threshold under both global and Singapore rules. The global policy requires this review before release (global_payment_policy.md; regional_singapore.md).\n- RM review: The initiating client is in Singapore, so Singapore requirements apply in addition to global rules. The payment exceeds Singapore\u2019s USD 75,000 threshold (regional_singapore.md).\n- Additional destination review: The authoritative beneficiary country code is AE (UAE), a high-risk destination under the exercise\u2019s high-risk list (high_risk_jurisdictions.md).\n\nThese are native-USD comparisons; no FX assumption is needed. Arrange all three reviews; the client\u2019s Low risk rating does not override the triggers. These requirements do not establish suspicious activity (global_payment_policy.md).",
     "citations": [
       "global_payment_policy.md",
       "regional_singapore.md",
@@ -157,7 +157,7 @@
         "structuring_checked": false,
         "structuring_checks": [],
         "potential_structuring": null,
-        "compliance_escalation_required": null,
+        "compliance_escalation_recommended": null,
         "assumptions": [],
         "limitations": [
           "A policy trigger does not establish intent or suspicious activity.",
@@ -176,7 +176,7 @@
     "question": "What review requirement applies to P50001 and why?"
   },
   {
-    "answer": "P50002 requires RM review and additional high-risk-destination review.\n\nThe payment is USD 85,000 to Pacific Holdings, initiated through a branch on 27 April 2026 by C2002, a Singapore-based individual with a Medium risk rating.\n\nKey risk indicators and requirements:\n- High-risk destination: the authoritative beneficiary country code is AE (UAE), which is on the exercise\u2019s high-risk list. Additional destination review is required under global and Singapore rules (high_risk_jurisdictions.md; global_payment_policy.md; regional_singapore.md).\n- Conflicting country data: the displayed country is Hong Kong, whereas the code identifies UAE. Investigators should resolve this discrepancy; its cause is not supplied.\n- Amount trigger: USD 85,000 exceeds Singapore\u2019s USD 75,000 RM-review threshold. It does not exceed the USD 100,000 enhanced-review threshold under either applicable policy; amount-based enhanced review is therefore not triggered (regional_singapore.md; global_payment_policy.md).\n\nThe supplied history contains only this payment to Pacific Holdings, so its assessed window does not trigger potential-structuring review. Same-calendar-date payments are the exercise\u2019s 24-hour proxy; precise rolling windows cannot be assessed. Comparisons use native USD without FX conversion.\n\nRecommended next actions: conduct both required reviews, clarify destination details, and request payment purpose, supporting invoices/contracts, source of funds and the beneficiary relationship. These details were not supplied. The indicators are review triggers, not proof of suspicious activity.",
+    "answer": "P50002 requires RM review and additional high-risk-destination review.\n\n- **Amount:** The USD 85,000 payment to Pacific Holdings exceeds Singapore\u2019s strict USD 75,000 RM-review threshold. Singapore rules apply because C2002 is Singapore-based (regional_singapore.md).\n- **Destination risk:** The authoritative beneficiary country code is AE (UAE), which is high-risk under the exercise\u2019s high-risk list. Additional destination review is required under both global and Singapore rules (high_risk_jurisdictions.md; global_payment_policy.md; regional_singapore.md).\n- **Data discrepancy:** The displayed country is Hong Kong, inconsistent with AE. I recommend clarifying this discrepancy while retaining the code-based risk determination.\n\nThe amount does not exceed either applicable USD 100,000 enhanced-review threshold; comparisons use native USD, with no FX assumption. The client\u2019s Medium risk rating is context, not a separate trigger identified by these policies. These indicators do not establish suspicious activity. Proceed with the required reviews; as investigator recommendations, obtain the payment purpose, supporting documents, source of funds and beneficiary relationship.",
     "citations": [
       "global_payment_policy.md",
       "regional_singapore.md",
@@ -196,48 +196,6 @@
       "client_risk_rating": "Medium",
       "client_type": "Individual",
       "relationship_years": 11.5,
-      "beneficiary_analyses": [
-        {
-          "client_id": "C2002",
-          "beneficiary_name": "Pacific Holdings",
-          "date_assumption": "Only calendar dates are supplied: same-date payments are treated as one 24-hour window; true rolling or cross-midnight windows cannot be determined.",
-          "windows": [
-            {
-              "payment_date": "2026-04-27",
-              "count": 1,
-              "payment_ids": [
-                "P50002"
-              ],
-              "individual_amounts": [
-                85000.0
-              ],
-              "channels": [
-                "Branch"
-              ],
-              "totals_by_currency": {
-                "USD": 85000.0
-              },
-              "currency": "USD",
-              "total_amount": 85000.0,
-              "usd_equivalent": 85000.0,
-              "fx_assumption": null,
-              "payments": [
-                {
-                  "payment_id": "P50002",
-                  "client_id": "C2002",
-                  "beneficiary_name": "Pacific Holdings",
-                  "beneficiary_country": "Hong Kong",
-                  "beneficiary_country_code": "AE",
-                  "amount": 85000.0,
-                  "currency": "USD",
-                  "channel": "Branch",
-                  "payment_date": "2026-04-27"
-                }
-              ]
-            }
-          ]
-        }
-      ],
       "policy_assessment": {
         "payment_id": "P50002",
         "client_country": "Singapore",
@@ -297,56 +255,11 @@
         "enhanced_review_required": false,
         "rm_review_required": true,
         "additional_review_required": true,
-        "structuring_checked": true,
-        "structuring_checks": [
-          {
-            "source": "global_payment_policy.md",
-            "rule": "- Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
-            "kind": "structuring",
-            "operator": ">",
-            "currency": "USD",
-            "threshold": 100000.0,
-            "payment_date": "2026-04-27",
-            "count": 1,
-            "payment_ids": [
-              "P50002"
-            ],
-            "individual_amounts": [
-              85000.0
-            ],
-            "channels": [
-              "Branch"
-            ],
-            "totals_by_currency": {
-              "USD": 85000.0
-            },
-            "total_amount": 85000.0,
-            "usd_equivalent": 85000.0,
-            "fx_assumption": null,
-            "payments": [
-              {
-                "payment_id": "P50002",
-                "client_id": "C2002",
-                "beneficiary_name": "Pacific Holdings",
-                "beneficiary_country": "Hong Kong",
-                "beneficiary_country_code": "AE",
-                "amount": 85000.0,
-                "currency": "USD",
-                "channel": "Branch",
-                "payment_date": "2026-04-27"
-              }
-            ],
-            "beneficiary_name": "Pacific Holdings",
-            "threshold_currency": "USD",
-            "triggered": false,
-            "each_payment_below_structuring_threshold": true
-          }
-        ],
-        "potential_structuring": false,
-        "compliance_escalation_required": false,
-        "assumptions": [
-          "Only calendar dates are supplied: same-date payments are treated as one 24-hour window; true rolling or cross-midnight windows cannot be determined."
-        ],
+        "structuring_checked": false,
+        "structuring_checks": [],
+        "potential_structuring": null,
+        "compliance_escalation_recommended": null,
+        "assumptions": [],
         "limitations": [
           "A policy trigger does not establish intent or suspicious activity.",
           "Payment purpose, source of funds, supporting documents, beneficiary relationship and precise timestamps are not supplied."
@@ -357,8 +270,6 @@
       "get_payment",
       "get_client_profile",
       "search_policy",
-      "get_client_payments",
-      "aggregate_beneficiary_24h",
       "assess_payment_policy"
     ],
     "question_id": "Q03",
@@ -366,7 +277,7 @@
     "question": "Identify the risk indicators for P50002 and state the additional review required."
   },
   {
-    "answer": "Yes. C2003\u2019s history shows a possible transaction-splitting pattern involving Northstar Trading on 11 April 2026:\n\n- P50003: CHF 45,000, Branch.\n- P50180: CHF 35,000, Online.\n- P50181: CHF 30,000, RM-assisted.\n\nThe combined total is CHF 110,000. Each payment is below the global USD 100,000-equivalent threshold, but their aggregate exceeds it under the exercise\u2019s permitted 1:1 CHF/USD equivalence. This triggers potential-structuring review under global_payment_policy.md. The different channels warrant explanation but do not prove evasion or suspicious intent.\n\n**Required action:** C2003 is a Swiss client, so regional_switzerland.md applies alongside global policy and requires escalation of potential structuring to Compliance. Its Low risk rating does not override this requirement. P50003 alone does not trigger amount-based RM or enhanced review; those are distinct from the structuring escalation.\n\nAll repeated beneficiaries were checked. Redwood Services, Pacific Holdings and Desert Star LLC show no other same-date multi-payment group. The CHF 25,000 Desert Star payment on 11 April must not be added to Northstar\u2019s total because it has a different beneficiary.\n\n**Qualifications:** Same-calendar-date grouping is the exercise\u2019s 24-hour proxy; precise rolling windows cannot be established. The 1:1 equivalence is an assumption, not an observed FX rate. Northstar\u2019s authoritative country code is CH, inconsistent with displayed \u201cSingapore\u201d; CH is not on this exercise\u2019s high-risk list (high_risk_jurisdictions.md). Reconcile that discrepancy.\n\n**Recommended investigation:** Obtain payment purposes, invoices/contracts, source-of-funds evidence, beneficiary relationship, exact timestamps and reasons for separate payments/channels. These are not supplied, so legitimate commercial explanations remain possible. Collect this evidence alongside\u2014not before\u2014the required Compliance escalation.",
+    "answer": "Yes. C2003 shows a possible transaction-splitting pattern involving Northstar Trading on 11 April 2026:\n- P50003: CHF 45,000, Branch.\n- P50180: CHF 35,000, Online.\n- P50181: CHF 30,000, RM-assisted.\n\nThe combined CHF 110,000 exceeds the global USD 100,000-equivalent structuring threshold, although each payment is individually below it. Same-date payments serve as the exercise\u2019s 24-hour proxy; precise rolling windows cannot be established. The USD comparison uses the permitted 1:1 exercise equivalence, not an observed exchange rate. This supports review for potential structuring (global_payment_policy.md).\n\nC2003 is Swiss, so Swiss requirements apply alongside global rules. Recommend Compliance escalation for potential structuring (regional_switzerland.md). P50003 alone triggers neither global enhanced review nor Swiss RM/enhanced review; the client\u2019s Low risk rating does not override the structuring trigger.\n\nThe authoritative destination code CH is not high-risk under the exercise\u2019s high-risk list, but conflicts with the displayed \u201cSingapore\u201d; clarify this discrepancy (high_risk_jurisdictions.md).\n\nThe grouping and channel variation do not prove intentional evasion; a legitimate explanation remains possible. As investigator recommendations, request payment purpose, invoices/contracts, source of funds, beneficiary relationship, reasons for splitting and channel choices, and precise timestamps, then document the evidence supporting the recommendation.",
     "citations": [
       "global_payment_policy.md",
       "regional_switzerland.md",
@@ -450,258 +361,6 @@
                   "currency": "CHF",
                   "channel": "RM-assisted",
                   "payment_date": "2026-04-11"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "client_id": "C2003",
-          "beneficiary_name": "Redwood Services",
-          "date_assumption": "Only calendar dates are supplied: same-date payments are treated as one 24-hour window; true rolling or cross-midnight windows cannot be determined.",
-          "windows": [
-            {
-              "payment_date": "2026-01-26",
-              "count": 1,
-              "payment_ids": [
-                "P50004"
-              ],
-              "individual_amounts": [
-                48000.0
-              ],
-              "channels": [
-                "RM-assisted"
-              ],
-              "totals_by_currency": {
-                "CHF": 48000.0
-              },
-              "currency": "CHF",
-              "total_amount": 48000.0,
-              "usd_equivalent": 48000.0,
-              "fx_assumption": "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
-              "payments": [
-                {
-                  "payment_id": "P50004",
-                  "client_id": "C2003",
-                  "beneficiary_name": "Redwood Services",
-                  "beneficiary_country": "UK",
-                  "beneficiary_country_code": "CH",
-                  "amount": 48000.0,
-                  "currency": "CHF",
-                  "channel": "RM-assisted",
-                  "payment_date": "2026-01-26"
-                }
-              ]
-            },
-            {
-              "payment_date": "2026-05-01",
-              "count": 1,
-              "payment_ids": [
-                "P50068"
-              ],
-              "individual_amounts": [
-                23714.57
-              ],
-              "channels": [
-                "RM-assisted"
-              ],
-              "totals_by_currency": {
-                "GBP": 23714.57
-              },
-              "currency": "GBP",
-              "total_amount": 23714.57,
-              "usd_equivalent": 23714.57,
-              "fx_assumption": "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
-              "payments": [
-                {
-                  "payment_id": "P50068",
-                  "client_id": "C2003",
-                  "beneficiary_name": "Redwood Services",
-                  "beneficiary_country": "UK",
-                  "beneficiary_country_code": "GB",
-                  "amount": 23714.57,
-                  "currency": "GBP",
-                  "channel": "RM-assisted",
-                  "payment_date": "2026-05-01"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "client_id": "C2003",
-          "beneficiary_name": "Pacific Holdings",
-          "date_assumption": "Only calendar dates are supplied: same-date payments are treated as one 24-hour window; true rolling or cross-midnight windows cannot be determined.",
-          "windows": [
-            {
-              "payment_date": "2026-02-18",
-              "count": 1,
-              "payment_ids": [
-                "P50005"
-              ],
-              "individual_amounts": [
-                47000.0
-              ],
-              "channels": [
-                "Online"
-              ],
-              "totals_by_currency": {
-                "CHF": 47000.0
-              },
-              "currency": "CHF",
-              "total_amount": 47000.0,
-              "usd_equivalent": 47000.0,
-              "fx_assumption": "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
-              "payments": [
-                {
-                  "payment_id": "P50005",
-                  "client_id": "C2003",
-                  "beneficiary_name": "Pacific Holdings",
-                  "beneficiary_country": "UAE",
-                  "beneficiary_country_code": "AE",
-                  "amount": 47000.0,
-                  "currency": "CHF",
-                  "channel": "Online",
-                  "payment_date": "2026-02-18"
-                }
-              ]
-            },
-            {
-              "payment_date": "2026-03-12",
-              "count": 1,
-              "payment_ids": [
-                "P50141"
-              ],
-              "individual_amounts": [
-                9327.26
-              ],
-              "channels": [
-                "RM-assisted"
-              ],
-              "totals_by_currency": {
-                "HKD": 9327.26
-              },
-              "currency": "HKD",
-              "total_amount": 9327.26,
-              "usd_equivalent": 9327.26,
-              "fx_assumption": "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
-              "payments": [
-                {
-                  "payment_id": "P50141",
-                  "client_id": "C2003",
-                  "beneficiary_name": "Pacific Holdings",
-                  "beneficiary_country": "Hong Kong",
-                  "beneficiary_country_code": "HK",
-                  "amount": 9327.26,
-                  "currency": "HKD",
-                  "channel": "RM-assisted",
-                  "payment_date": "2026-03-12"
-                }
-              ]
-            },
-            {
-              "payment_date": "2026-07-15",
-              "count": 1,
-              "payment_ids": [
-                "P50109"
-              ],
-              "individual_amounts": [
-                23666.73
-              ],
-              "channels": [
-                "RM-assisted"
-              ],
-              "totals_by_currency": {
-                "USD": 23666.73
-              },
-              "currency": "USD",
-              "total_amount": 23666.73,
-              "usd_equivalent": 23666.73,
-              "fx_assumption": null,
-              "payments": [
-                {
-                  "payment_id": "P50109",
-                  "client_id": "C2003",
-                  "beneficiary_name": "Pacific Holdings",
-                  "beneficiary_country": "Hong Kong",
-                  "beneficiary_country_code": "HK",
-                  "amount": 23666.73,
-                  "currency": "USD",
-                  "channel": "RM-assisted",
-                  "payment_date": "2026-07-15"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "client_id": "C2003",
-          "beneficiary_name": "Desert Star LLC",
-          "date_assumption": "Only calendar dates are supplied: same-date payments are treated as one 24-hour window; true rolling or cross-midnight windows cannot be determined.",
-          "windows": [
-            {
-              "payment_date": "2026-04-11",
-              "count": 1,
-              "payment_ids": [
-                "P50183"
-              ],
-              "individual_amounts": [
-                25000.0
-              ],
-              "channels": [
-                "Online"
-              ],
-              "totals_by_currency": {
-                "CHF": 25000.0
-              },
-              "currency": "CHF",
-              "total_amount": 25000.0,
-              "usd_equivalent": 25000.0,
-              "fx_assumption": "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
-              "payments": [
-                {
-                  "payment_id": "P50183",
-                  "client_id": "C2003",
-                  "beneficiary_name": "Desert Star LLC",
-                  "beneficiary_country": "UAE",
-                  "beneficiary_country_code": "AE",
-                  "amount": 25000.0,
-                  "currency": "CHF",
-                  "channel": "Online",
-                  "payment_date": "2026-04-11"
-                }
-              ]
-            },
-            {
-              "payment_date": "2026-04-18",
-              "count": 1,
-              "payment_ids": [
-                "P50042"
-              ],
-              "individual_amounts": [
-                72794.74
-              ],
-              "channels": [
-                "Branch"
-              ],
-              "totals_by_currency": {
-                "HKD": 72794.74
-              },
-              "currency": "HKD",
-              "total_amount": 72794.74,
-              "usd_equivalent": 72794.74,
-              "fx_assumption": "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
-              "payments": [
-                {
-                  "payment_id": "P50042",
-                  "client_id": "C2003",
-                  "beneficiary_name": "Desert Star LLC",
-                  "beneficiary_country": "UAE",
-                  "beneficiary_country_code": "AE",
-                  "amount": 72794.74,
-                  "currency": "HKD",
-                  "channel": "Branch",
-                  "payment_date": "2026-04-18"
                 }
               ]
             }
@@ -839,304 +498,10 @@
             "threshold_currency": "USD",
             "triggered": true,
             "each_payment_below_structuring_threshold": true
-          },
-          {
-            "source": "global_payment_policy.md",
-            "rule": "- Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
-            "kind": "structuring",
-            "operator": ">",
-            "currency": "CHF",
-            "threshold": 100000.0,
-            "payment_date": "2026-01-26",
-            "count": 1,
-            "payment_ids": [
-              "P50004"
-            ],
-            "individual_amounts": [
-              48000.0
-            ],
-            "channels": [
-              "RM-assisted"
-            ],
-            "totals_by_currency": {
-              "CHF": 48000.0
-            },
-            "total_amount": 48000.0,
-            "usd_equivalent": 48000.0,
-            "fx_assumption": "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
-            "payments": [
-              {
-                "payment_id": "P50004",
-                "client_id": "C2003",
-                "beneficiary_name": "Redwood Services",
-                "beneficiary_country": "UK",
-                "beneficiary_country_code": "CH",
-                "amount": 48000.0,
-                "currency": "CHF",
-                "channel": "RM-assisted",
-                "payment_date": "2026-01-26"
-              }
-            ],
-            "beneficiary_name": "Redwood Services",
-            "threshold_currency": "USD",
-            "triggered": false,
-            "each_payment_below_structuring_threshold": true
-          },
-          {
-            "source": "global_payment_policy.md",
-            "rule": "- Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
-            "kind": "structuring",
-            "operator": ">",
-            "currency": "GBP",
-            "threshold": 100000.0,
-            "payment_date": "2026-05-01",
-            "count": 1,
-            "payment_ids": [
-              "P50068"
-            ],
-            "individual_amounts": [
-              23714.57
-            ],
-            "channels": [
-              "RM-assisted"
-            ],
-            "totals_by_currency": {
-              "GBP": 23714.57
-            },
-            "total_amount": 23714.57,
-            "usd_equivalent": 23714.57,
-            "fx_assumption": "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
-            "payments": [
-              {
-                "payment_id": "P50068",
-                "client_id": "C2003",
-                "beneficiary_name": "Redwood Services",
-                "beneficiary_country": "UK",
-                "beneficiary_country_code": "GB",
-                "amount": 23714.57,
-                "currency": "GBP",
-                "channel": "RM-assisted",
-                "payment_date": "2026-05-01"
-              }
-            ],
-            "beneficiary_name": "Redwood Services",
-            "threshold_currency": "USD",
-            "triggered": false,
-            "each_payment_below_structuring_threshold": true
-          },
-          {
-            "source": "global_payment_policy.md",
-            "rule": "- Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
-            "kind": "structuring",
-            "operator": ">",
-            "currency": "CHF",
-            "threshold": 100000.0,
-            "payment_date": "2026-02-18",
-            "count": 1,
-            "payment_ids": [
-              "P50005"
-            ],
-            "individual_amounts": [
-              47000.0
-            ],
-            "channels": [
-              "Online"
-            ],
-            "totals_by_currency": {
-              "CHF": 47000.0
-            },
-            "total_amount": 47000.0,
-            "usd_equivalent": 47000.0,
-            "fx_assumption": "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
-            "payments": [
-              {
-                "payment_id": "P50005",
-                "client_id": "C2003",
-                "beneficiary_name": "Pacific Holdings",
-                "beneficiary_country": "UAE",
-                "beneficiary_country_code": "AE",
-                "amount": 47000.0,
-                "currency": "CHF",
-                "channel": "Online",
-                "payment_date": "2026-02-18"
-              }
-            ],
-            "beneficiary_name": "Pacific Holdings",
-            "threshold_currency": "USD",
-            "triggered": false,
-            "each_payment_below_structuring_threshold": true
-          },
-          {
-            "source": "global_payment_policy.md",
-            "rule": "- Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
-            "kind": "structuring",
-            "operator": ">",
-            "currency": "HKD",
-            "threshold": 100000.0,
-            "payment_date": "2026-03-12",
-            "count": 1,
-            "payment_ids": [
-              "P50141"
-            ],
-            "individual_amounts": [
-              9327.26
-            ],
-            "channels": [
-              "RM-assisted"
-            ],
-            "totals_by_currency": {
-              "HKD": 9327.26
-            },
-            "total_amount": 9327.26,
-            "usd_equivalent": 9327.26,
-            "fx_assumption": "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
-            "payments": [
-              {
-                "payment_id": "P50141",
-                "client_id": "C2003",
-                "beneficiary_name": "Pacific Holdings",
-                "beneficiary_country": "Hong Kong",
-                "beneficiary_country_code": "HK",
-                "amount": 9327.26,
-                "currency": "HKD",
-                "channel": "RM-assisted",
-                "payment_date": "2026-03-12"
-              }
-            ],
-            "beneficiary_name": "Pacific Holdings",
-            "threshold_currency": "USD",
-            "triggered": false,
-            "each_payment_below_structuring_threshold": true
-          },
-          {
-            "source": "global_payment_policy.md",
-            "rule": "- Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
-            "kind": "structuring",
-            "operator": ">",
-            "currency": "USD",
-            "threshold": 100000.0,
-            "payment_date": "2026-07-15",
-            "count": 1,
-            "payment_ids": [
-              "P50109"
-            ],
-            "individual_amounts": [
-              23666.73
-            ],
-            "channels": [
-              "RM-assisted"
-            ],
-            "totals_by_currency": {
-              "USD": 23666.73
-            },
-            "total_amount": 23666.73,
-            "usd_equivalent": 23666.73,
-            "fx_assumption": null,
-            "payments": [
-              {
-                "payment_id": "P50109",
-                "client_id": "C2003",
-                "beneficiary_name": "Pacific Holdings",
-                "beneficiary_country": "Hong Kong",
-                "beneficiary_country_code": "HK",
-                "amount": 23666.73,
-                "currency": "USD",
-                "channel": "RM-assisted",
-                "payment_date": "2026-07-15"
-              }
-            ],
-            "beneficiary_name": "Pacific Holdings",
-            "threshold_currency": "USD",
-            "triggered": false,
-            "each_payment_below_structuring_threshold": true
-          },
-          {
-            "source": "global_payment_policy.md",
-            "rule": "- Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
-            "kind": "structuring",
-            "operator": ">",
-            "currency": "CHF",
-            "threshold": 100000.0,
-            "payment_date": "2026-04-11",
-            "count": 1,
-            "payment_ids": [
-              "P50183"
-            ],
-            "individual_amounts": [
-              25000.0
-            ],
-            "channels": [
-              "Online"
-            ],
-            "totals_by_currency": {
-              "CHF": 25000.0
-            },
-            "total_amount": 25000.0,
-            "usd_equivalent": 25000.0,
-            "fx_assumption": "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
-            "payments": [
-              {
-                "payment_id": "P50183",
-                "client_id": "C2003",
-                "beneficiary_name": "Desert Star LLC",
-                "beneficiary_country": "UAE",
-                "beneficiary_country_code": "AE",
-                "amount": 25000.0,
-                "currency": "CHF",
-                "channel": "Online",
-                "payment_date": "2026-04-11"
-              }
-            ],
-            "beneficiary_name": "Desert Star LLC",
-            "threshold_currency": "USD",
-            "triggered": false,
-            "each_payment_below_structuring_threshold": true
-          },
-          {
-            "source": "global_payment_policy.md",
-            "rule": "- Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
-            "kind": "structuring",
-            "operator": ">",
-            "currency": "HKD",
-            "threshold": 100000.0,
-            "payment_date": "2026-04-18",
-            "count": 1,
-            "payment_ids": [
-              "P50042"
-            ],
-            "individual_amounts": [
-              72794.74
-            ],
-            "channels": [
-              "Branch"
-            ],
-            "totals_by_currency": {
-              "HKD": 72794.74
-            },
-            "total_amount": 72794.74,
-            "usd_equivalent": 72794.74,
-            "fx_assumption": "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
-            "payments": [
-              {
-                "payment_id": "P50042",
-                "client_id": "C2003",
-                "beneficiary_name": "Desert Star LLC",
-                "beneficiary_country": "UAE",
-                "beneficiary_country_code": "AE",
-                "amount": 72794.74,
-                "currency": "HKD",
-                "channel": "Branch",
-                "payment_date": "2026-04-18"
-              }
-            ],
-            "beneficiary_name": "Desert Star LLC",
-            "threshold_currency": "USD",
-            "triggered": false,
-            "each_payment_below_structuring_threshold": true
           }
         ],
         "potential_structuring": true,
-        "compliance_escalation_required": true,
+        "compliance_escalation_recommended": true,
         "assumptions": [
           "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
           "Only calendar dates are supplied: same-date payments are treated as one 24-hour window; true rolling or cross-midnight windows cannot be determined."
@@ -1160,7 +525,7 @@
     "question": "Does the data show a possible transaction-splitting pattern for C2003? Explain."
   },
   {
-    "answer": "Retrieve these four applicable documents before considering a release recommendation for P50001:\n\n- **global_payment_policy.md** \u2014 Establishes enhanced review before release for payments above USD 100,000, additional review for high-risk destinations, and same-client/same-beneficiary aggregation rules for potential structuring. P50001\u2019s USD 125,000 triggers enhanced review using its native currency.\n- **regional_singapore.md** \u2014 Applies because initiating client C2001 is based in Singapore. It adds RM review above USD 75,000 and also requires enhanced review above USD 100,000 and additional review for high-risk destinations. Regional requirements supplement, not replace, global rules.\n- **high_risk_jurisdictions.md** \u2014 Confirms that authoritative beneficiary country code AE (UAE) is high-risk in this exercise, triggering additional destination review.\n- **investigation_procedure.md** \u2014 Requires establishing payment/client facts, identifying applicable policy, checking destination risk and possible splitting, separating facts from assumptions, and recording evidence supporting the recommendation.\n\n**Release is not yet supported by the supplied evidence.** RM review, enhanced review, and additional destination review are required; their completion has not been established. Client history and relevant beneficiary aggregates must also be checked for possible splitting before a release recommendation. The client\u2019s Low risk rating does not override these requirements, and the triggers do not themselves prove suspicious activity.",
+    "answer": "Retrieve these four documents before considering a release recommendation for P50001:\n\n- **`global_payment_policy.md`** \u2014 Always applicable. P50001\u2019s USD 125,000 exceeds the USD 100,000 threshold, requiring enhanced review **before release**. It also covers high-risk destinations and potential splitting.\n- **`regional_singapore.md`** \u2014 Applies because client C2001 is in Singapore; it adds to, rather than replaces, global rules. The payment exceeds the USD 75,000 RM-review and USD 100,000 enhanced-review thresholds. Comparisons use native USD, with no FX assumption.\n- **`high_risk_jurisdictions.md`** \u2014 Confirms that authoritative beneficiary code **AE (UAE)** is high-risk under the exercise\u2019s high-risk list, requiring additional destination review.\n- **`investigation_procedure.md`** \u2014 Provides the framework for establishing facts, identifying policy, checking destination risk and possible splitting, separating facts from assumptions, and recording supporting evidence.\n\n**Release is not supported by the supplied evidence alone:** completion of the required reviews is not established. The client\u2019s Low risk rating does not override these triggers. Before a release recommendation, apply the investigation procedure, including history-based splitting checks; none of these documents grants automatic release permission.",
     "citations": [
       "global_payment_policy.md",
       "regional_singapore.md",
@@ -1244,7 +609,7 @@
         "structuring_checked": false,
         "structuring_checks": [],
         "potential_structuring": null,
-        "compliance_escalation_required": null,
+        "compliance_escalation_recommended": null,
         "assumptions": [],
         "limitations": [
           "A policy trigger does not establish intent or suspicious activity.",
@@ -1263,12 +628,11 @@
     "question": "Which policy documents should the assistant retrieve before recommending release of P50001?"
   },
   {
-    "answer": "**Recommendation: conduct RM review and additional destination review for P50002, and resolve the country-field discrepancy. The evidence does not establish suspicious activity.**\n\n**Factual evidence**\n- P50002 is USD 85,000 to Pacific Holdings, through Branch, dated 27 April 2026.\n- C2002 is a Singapore-based individual, rated Medium risk, with an 11.5-year relationship. Global rules and Singapore\u2019s additional requirements apply.\n- The displayed beneficiary country is Hong Kong, but the authoritative code is AE (UAE). AE is high-risk under this exercise\u2019s list; the discrepancy\u2019s cause is unknown (high_risk_jurisdictions.md).\n- The policy assessment confirms RM review is triggered above USD 75,000. The payment does not trigger the above-USD-100,000 enhanced-review requirement. Additional destination review remains required independently (regional_singapore.md; global_payment_policy.md).\n- Full supplied history contains only this payment to Pacific Holdings. Aggregation also checked every repeated beneficiary\u2014Desert Star LLC, Northstar Trading and Redwood Services\u2014and identified no qualifying same-date structuring window (global_payment_policy.md).\n\n**Assumptions and unknowns**\nSame-calendar-date grouping is the exercise\u2019s 24-hour proxy, not a true rolling-window test. P50002 uses native USD comparisons; non-USD history comparisons used permitted 1:1 exercise equivalence, not observed FX rates. Purpose, supporting documents, source of funds, beneficiary relationship, channel rationale and precise timestamps are not supplied. Neither the destination discrepancy nor the Branch channel proves evasion or illegitimacy.\n\n**Next actions**\nComplete the two required reviews and reconcile the destination information. As investigator recommendations, obtain the payment purpose, relevant invoices/contracts, source-of-funds evidence and beneficiary relationship; seek timestamps if further splitting analysis is needed. Record evidence and unresolved limitations (investigation_procedure.md). No mandatory Compliance escalation for structuring is established by these results; this is not automatic release permission.",
+    "answer": "P50002 requires RM review and additional destination review; the supplied evidence does not establish suspicious activity.\n\n**Observed facts:** P50002 is a USD 85,000 Branch payment to Pacific Holdings dated 27 April 2026. Client C2002 is a Singapore-based individual with a Medium risk rating and an 11.5-year relationship. The beneficiary country is displayed as \u201cHong Kong,\u201d while its country code is AE.\n\n**Policy conclusions:** Singapore rules apply alongside global rules. USD 85,000 exceeds the strict USD 75,000 RM-review threshold but does not exceed either applicable USD 100,000 enhanced-review threshold. These are native-USD comparisons; no FX assumption is needed (regional_singapore.md; global_payment_policy.md). The authoritative code AE identifies UAE, a high-risk destination under the exercise\u2019s high-risk list, requiring additional review despite the displayed name (high_risk_jurisdictions.md).\n\n**Assumptions and missing evidence:** Neither deliberate evasion nor a legitimate business explanation is established. Purpose, supporting documents, source of funds and beneficiary relationship are not supplied. Splitting has not been assessed; no conclusion about its presence or absence is warranted.\n\n**Grounded recommendation:** Conduct the required RM and destination reviews and clarify the country-field discrepancy. As investigator recommendations, request the payment purpose, relevant invoices/contracts, source-of-funds evidence and beneficiary relationship to assess the economic rationale. The discrepancy\u2019s cause remains unknown; a policy trigger alone is not proof of wrongdoing (global_payment_policy.md).",
     "citations": [
       "global_payment_policy.md",
       "regional_singapore.md",
-      "high_risk_jurisdictions.md",
-      "investigation_procedure.md"
+      "high_risk_jurisdictions.md"
     ],
     "facts": {
       "payment_id": "P50002",
@@ -1284,267 +648,6 @@
       "client_risk_rating": "Medium",
       "client_type": "Individual",
       "relationship_years": 11.5,
-      "beneficiary_analyses": [
-        {
-          "client_id": "C2002",
-          "beneficiary_name": "Pacific Holdings",
-          "date_assumption": "Only calendar dates are supplied: same-date payments are treated as one 24-hour window; true rolling or cross-midnight windows cannot be determined.",
-          "windows": [
-            {
-              "payment_date": "2026-04-27",
-              "count": 1,
-              "payment_ids": [
-                "P50002"
-              ],
-              "individual_amounts": [
-                85000.0
-              ],
-              "channels": [
-                "Branch"
-              ],
-              "totals_by_currency": {
-                "USD": 85000.0
-              },
-              "currency": "USD",
-              "total_amount": 85000.0,
-              "usd_equivalent": 85000.0,
-              "fx_assumption": null,
-              "payments": [
-                {
-                  "payment_id": "P50002",
-                  "client_id": "C2002",
-                  "beneficiary_name": "Pacific Holdings",
-                  "beneficiary_country": "Hong Kong",
-                  "beneficiary_country_code": "AE",
-                  "amount": 85000.0,
-                  "currency": "USD",
-                  "channel": "Branch",
-                  "payment_date": "2026-04-27"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "client_id": "C2002",
-          "beneficiary_name": "Desert Star LLC",
-          "date_assumption": "Only calendar dates are supplied: same-date payments are treated as one 24-hour window; true rolling or cross-midnight windows cannot be determined.",
-          "windows": [
-            {
-              "payment_date": "2026-02-02",
-              "count": 1,
-              "payment_ids": [
-                "P50139"
-              ],
-              "individual_amounts": [
-                17926.05
-              ],
-              "channels": [
-                "RM-assisted"
-              ],
-              "totals_by_currency": {
-                "HKD": 17926.05
-              },
-              "currency": "HKD",
-              "total_amount": 17926.05,
-              "usd_equivalent": 17926.05,
-              "fx_assumption": "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
-              "payments": [
-                {
-                  "payment_id": "P50139",
-                  "client_id": "C2002",
-                  "beneficiary_name": "Desert Star LLC",
-                  "beneficiary_country": "UAE",
-                  "beneficiary_country_code": "AE",
-                  "amount": 17926.05,
-                  "currency": "HKD",
-                  "channel": "RM-assisted",
-                  "payment_date": "2026-02-02"
-                }
-              ]
-            },
-            {
-              "payment_date": "2026-03-05",
-              "count": 1,
-              "payment_ids": [
-                "P50074"
-              ],
-              "individual_amounts": [
-                34671.03
-              ],
-              "channels": [
-                "RM-assisted"
-              ],
-              "totals_by_currency": {
-                "USD": 34671.03
-              },
-              "currency": "USD",
-              "total_amount": 34671.03,
-              "usd_equivalent": 34671.03,
-              "fx_assumption": null,
-              "payments": [
-                {
-                  "payment_id": "P50074",
-                  "client_id": "C2002",
-                  "beneficiary_name": "Desert Star LLC",
-                  "beneficiary_country": "UAE",
-                  "beneficiary_country_code": "AE",
-                  "amount": 34671.03,
-                  "currency": "USD",
-                  "channel": "RM-assisted",
-                  "payment_date": "2026-03-05"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "client_id": "C2002",
-          "beneficiary_name": "Northstar Trading",
-          "date_assumption": "Only calendar dates are supplied: same-date payments are treated as one 24-hour window; true rolling or cross-midnight windows cannot be determined.",
-          "windows": [
-            {
-              "payment_date": "2026-06-25",
-              "count": 1,
-              "payment_ids": [
-                "P50049"
-              ],
-              "individual_amounts": [
-                2222.65
-              ],
-              "channels": [
-                "RM-assisted"
-              ],
-              "totals_by_currency": {
-                "HKD": 2222.65
-              },
-              "currency": "HKD",
-              "total_amount": 2222.65,
-              "usd_equivalent": 2222.65,
-              "fx_assumption": "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
-              "payments": [
-                {
-                  "payment_id": "P50049",
-                  "client_id": "C2002",
-                  "beneficiary_name": "Northstar Trading",
-                  "beneficiary_country": "Singapore",
-                  "beneficiary_country_code": "SG",
-                  "amount": 2222.65,
-                  "currency": "HKD",
-                  "channel": "RM-assisted",
-                  "payment_date": "2026-06-25"
-                }
-              ]
-            },
-            {
-              "payment_date": "2026-06-27",
-              "count": 1,
-              "payment_ids": [
-                "P50131"
-              ],
-              "individual_amounts": [
-                28066.05
-              ],
-              "channels": [
-                "RM-assisted"
-              ],
-              "totals_by_currency": {
-                "USD": 28066.05
-              },
-              "currency": "USD",
-              "total_amount": 28066.05,
-              "usd_equivalent": 28066.05,
-              "fx_assumption": null,
-              "payments": [
-                {
-                  "payment_id": "P50131",
-                  "client_id": "C2002",
-                  "beneficiary_name": "Northstar Trading",
-                  "beneficiary_country": "Singapore",
-                  "beneficiary_country_code": "SG",
-                  "amount": 28066.05,
-                  "currency": "USD",
-                  "channel": "RM-assisted",
-                  "payment_date": "2026-06-27"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "client_id": "C2002",
-          "beneficiary_name": "Redwood Services",
-          "date_assumption": "Only calendar dates are supplied: same-date payments are treated as one 24-hour window; true rolling or cross-midnight windows cannot be determined.",
-          "windows": [
-            {
-              "payment_date": "2026-06-12",
-              "count": 1,
-              "payment_ids": [
-                "P50009"
-              ],
-              "individual_amounts": [
-                167436.16
-              ],
-              "channels": [
-                "Online"
-              ],
-              "totals_by_currency": {
-                "HKD": 167436.16
-              },
-              "currency": "HKD",
-              "total_amount": 167436.16,
-              "usd_equivalent": 167436.16,
-              "fx_assumption": "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
-              "payments": [
-                {
-                  "payment_id": "P50009",
-                  "client_id": "C2002",
-                  "beneficiary_name": "Redwood Services",
-                  "beneficiary_country": "UK",
-                  "beneficiary_country_code": "GB",
-                  "amount": 167436.16,
-                  "currency": "HKD",
-                  "channel": "Online",
-                  "payment_date": "2026-06-12"
-                }
-              ]
-            },
-            {
-              "payment_date": "2026-07-13",
-              "count": 1,
-              "payment_ids": [
-                "P50092"
-              ],
-              "individual_amounts": [
-                69173.03
-              ],
-              "channels": [
-                "RM-assisted"
-              ],
-              "totals_by_currency": {
-                "HKD": 69173.03
-              },
-              "currency": "HKD",
-              "total_amount": 69173.03,
-              "usd_equivalent": 69173.03,
-              "fx_assumption": "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
-              "payments": [
-                {
-                  "payment_id": "P50092",
-                  "client_id": "C2002",
-                  "beneficiary_name": "Redwood Services",
-                  "beneficiary_country": "UK",
-                  "beneficiary_country_code": "GB",
-                  "amount": 69173.03,
-                  "currency": "HKD",
-                  "channel": "RM-assisted",
-                  "payment_date": "2026-07-13"
-                }
-              ]
-            }
-          ]
-        }
-      ],
       "policy_assessment": {
         "payment_id": "P50002",
         "client_country": "Singapore",
@@ -1552,8 +655,7 @@
         "sources": [
           "global_payment_policy.md",
           "regional_singapore.md",
-          "high_risk_jurisdictions.md",
-          "investigation_procedure.md"
+          "high_risk_jurisdictions.md"
         ],
         "missing_policy_sources": [],
         "threshold_checks": [
@@ -1605,309 +707,11 @@
         "enhanced_review_required": false,
         "rm_review_required": true,
         "additional_review_required": true,
-        "structuring_checked": true,
-        "structuring_checks": [
-          {
-            "source": "global_payment_policy.md",
-            "rule": "- Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
-            "kind": "structuring",
-            "operator": ">",
-            "currency": "USD",
-            "threshold": 100000.0,
-            "payment_date": "2026-04-27",
-            "count": 1,
-            "payment_ids": [
-              "P50002"
-            ],
-            "individual_amounts": [
-              85000.0
-            ],
-            "channels": [
-              "Branch"
-            ],
-            "totals_by_currency": {
-              "USD": 85000.0
-            },
-            "total_amount": 85000.0,
-            "usd_equivalent": 85000.0,
-            "fx_assumption": null,
-            "payments": [
-              {
-                "payment_id": "P50002",
-                "client_id": "C2002",
-                "beneficiary_name": "Pacific Holdings",
-                "beneficiary_country": "Hong Kong",
-                "beneficiary_country_code": "AE",
-                "amount": 85000.0,
-                "currency": "USD",
-                "channel": "Branch",
-                "payment_date": "2026-04-27"
-              }
-            ],
-            "beneficiary_name": "Pacific Holdings",
-            "threshold_currency": "USD",
-            "triggered": false,
-            "each_payment_below_structuring_threshold": true
-          },
-          {
-            "source": "global_payment_policy.md",
-            "rule": "- Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
-            "kind": "structuring",
-            "operator": ">",
-            "currency": "HKD",
-            "threshold": 100000.0,
-            "payment_date": "2026-02-02",
-            "count": 1,
-            "payment_ids": [
-              "P50139"
-            ],
-            "individual_amounts": [
-              17926.05
-            ],
-            "channels": [
-              "RM-assisted"
-            ],
-            "totals_by_currency": {
-              "HKD": 17926.05
-            },
-            "total_amount": 17926.05,
-            "usd_equivalent": 17926.05,
-            "fx_assumption": "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
-            "payments": [
-              {
-                "payment_id": "P50139",
-                "client_id": "C2002",
-                "beneficiary_name": "Desert Star LLC",
-                "beneficiary_country": "UAE",
-                "beneficiary_country_code": "AE",
-                "amount": 17926.05,
-                "currency": "HKD",
-                "channel": "RM-assisted",
-                "payment_date": "2026-02-02"
-              }
-            ],
-            "beneficiary_name": "Desert Star LLC",
-            "threshold_currency": "USD",
-            "triggered": false,
-            "each_payment_below_structuring_threshold": true
-          },
-          {
-            "source": "global_payment_policy.md",
-            "rule": "- Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
-            "kind": "structuring",
-            "operator": ">",
-            "currency": "USD",
-            "threshold": 100000.0,
-            "payment_date": "2026-03-05",
-            "count": 1,
-            "payment_ids": [
-              "P50074"
-            ],
-            "individual_amounts": [
-              34671.03
-            ],
-            "channels": [
-              "RM-assisted"
-            ],
-            "totals_by_currency": {
-              "USD": 34671.03
-            },
-            "total_amount": 34671.03,
-            "usd_equivalent": 34671.03,
-            "fx_assumption": null,
-            "payments": [
-              {
-                "payment_id": "P50074",
-                "client_id": "C2002",
-                "beneficiary_name": "Desert Star LLC",
-                "beneficiary_country": "UAE",
-                "beneficiary_country_code": "AE",
-                "amount": 34671.03,
-                "currency": "USD",
-                "channel": "RM-assisted",
-                "payment_date": "2026-03-05"
-              }
-            ],
-            "beneficiary_name": "Desert Star LLC",
-            "threshold_currency": "USD",
-            "triggered": false,
-            "each_payment_below_structuring_threshold": true
-          },
-          {
-            "source": "global_payment_policy.md",
-            "rule": "- Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
-            "kind": "structuring",
-            "operator": ">",
-            "currency": "HKD",
-            "threshold": 100000.0,
-            "payment_date": "2026-06-25",
-            "count": 1,
-            "payment_ids": [
-              "P50049"
-            ],
-            "individual_amounts": [
-              2222.65
-            ],
-            "channels": [
-              "RM-assisted"
-            ],
-            "totals_by_currency": {
-              "HKD": 2222.65
-            },
-            "total_amount": 2222.65,
-            "usd_equivalent": 2222.65,
-            "fx_assumption": "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
-            "payments": [
-              {
-                "payment_id": "P50049",
-                "client_id": "C2002",
-                "beneficiary_name": "Northstar Trading",
-                "beneficiary_country": "Singapore",
-                "beneficiary_country_code": "SG",
-                "amount": 2222.65,
-                "currency": "HKD",
-                "channel": "RM-assisted",
-                "payment_date": "2026-06-25"
-              }
-            ],
-            "beneficiary_name": "Northstar Trading",
-            "threshold_currency": "USD",
-            "triggered": false,
-            "each_payment_below_structuring_threshold": true
-          },
-          {
-            "source": "global_payment_policy.md",
-            "rule": "- Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
-            "kind": "structuring",
-            "operator": ">",
-            "currency": "USD",
-            "threshold": 100000.0,
-            "payment_date": "2026-06-27",
-            "count": 1,
-            "payment_ids": [
-              "P50131"
-            ],
-            "individual_amounts": [
-              28066.05
-            ],
-            "channels": [
-              "RM-assisted"
-            ],
-            "totals_by_currency": {
-              "USD": 28066.05
-            },
-            "total_amount": 28066.05,
-            "usd_equivalent": 28066.05,
-            "fx_assumption": null,
-            "payments": [
-              {
-                "payment_id": "P50131",
-                "client_id": "C2002",
-                "beneficiary_name": "Northstar Trading",
-                "beneficiary_country": "Singapore",
-                "beneficiary_country_code": "SG",
-                "amount": 28066.05,
-                "currency": "USD",
-                "channel": "RM-assisted",
-                "payment_date": "2026-06-27"
-              }
-            ],
-            "beneficiary_name": "Northstar Trading",
-            "threshold_currency": "USD",
-            "triggered": false,
-            "each_payment_below_structuring_threshold": true
-          },
-          {
-            "source": "global_payment_policy.md",
-            "rule": "- Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
-            "kind": "structuring",
-            "operator": ">",
-            "currency": "HKD",
-            "threshold": 100000.0,
-            "payment_date": "2026-06-12",
-            "count": 1,
-            "payment_ids": [
-              "P50009"
-            ],
-            "individual_amounts": [
-              167436.16
-            ],
-            "channels": [
-              "Online"
-            ],
-            "totals_by_currency": {
-              "HKD": 167436.16
-            },
-            "total_amount": 167436.16,
-            "usd_equivalent": 167436.16,
-            "fx_assumption": "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
-            "payments": [
-              {
-                "payment_id": "P50009",
-                "client_id": "C2002",
-                "beneficiary_name": "Redwood Services",
-                "beneficiary_country": "UK",
-                "beneficiary_country_code": "GB",
-                "amount": 167436.16,
-                "currency": "HKD",
-                "channel": "Online",
-                "payment_date": "2026-06-12"
-              }
-            ],
-            "beneficiary_name": "Redwood Services",
-            "threshold_currency": "USD",
-            "triggered": false,
-            "each_payment_below_structuring_threshold": false
-          },
-          {
-            "source": "global_payment_policy.md",
-            "rule": "- Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
-            "kind": "structuring",
-            "operator": ">",
-            "currency": "HKD",
-            "threshold": 100000.0,
-            "payment_date": "2026-07-13",
-            "count": 1,
-            "payment_ids": [
-              "P50092"
-            ],
-            "individual_amounts": [
-              69173.03
-            ],
-            "channels": [
-              "RM-assisted"
-            ],
-            "totals_by_currency": {
-              "HKD": 69173.03
-            },
-            "total_amount": 69173.03,
-            "usd_equivalent": 69173.03,
-            "fx_assumption": "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
-            "payments": [
-              {
-                "payment_id": "P50092",
-                "client_id": "C2002",
-                "beneficiary_name": "Redwood Services",
-                "beneficiary_country": "UK",
-                "beneficiary_country_code": "GB",
-                "amount": 69173.03,
-                "currency": "HKD",
-                "channel": "RM-assisted",
-                "payment_date": "2026-07-13"
-              }
-            ],
-            "beneficiary_name": "Redwood Services",
-            "threshold_currency": "USD",
-            "triggered": false,
-            "each_payment_below_structuring_threshold": true
-          }
-        ],
-        "potential_structuring": false,
-        "compliance_escalation_required": false,
-        "assumptions": [
-          "Only calendar dates are supplied: same-date payments are treated as one 24-hour window; true rolling or cross-midnight windows cannot be determined.",
-          "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate."
-        ],
+        "structuring_checked": false,
+        "structuring_checks": [],
+        "potential_structuring": null,
+        "compliance_escalation_recommended": null,
+        "assumptions": [],
         "limitations": [
           "A policy trigger does not establish intent or suspicious activity.",
           "Payment purpose, source of funds, supporting documents, beneficiary relationship and precise timestamps are not supplied."
@@ -1917,9 +721,7 @@
     "tools_used": [
       "get_payment",
       "get_client_profile",
-      "get_client_payments",
       "search_policy",
-      "aggregate_beneficiary_24h",
       "assess_payment_policy"
     ],
     "question_id": "Q06",
@@ -1927,10 +729,10 @@
     "question": "Separate factual evidence from assumptions for P50002 and give a grounded recommendation."
   },
   {
-    "answer": "Request supporting information now, but do not delay Compliance escalation: potential structuring must be escalated under Switzerland\u2019s procedure (regional_switzerland.md).\n\n**Established basis:** Swiss client C2003 made three payments to Northstar Trading on 11 April 2026: P50003 CHF 45,000 (Branch), P50180 CHF 35,000 (Online), and P50181 CHF 30,000 (RM-assisted). Their CHF 110,000 total triggers the global same-beneficiary structuring review rule (global_payment_policy.md). This uses same-calendar-date payments as the exercise\u2019s 24-hour proxy and permitted 1:1 CHF/USD equivalence\u2014not actual timestamps or an observed exchange rate.\n\n**Recommended investigator requests\u2014not verbatim policy document mandates:**\n- Business purpose of each payment, with invoices, contracts and payment schedules showing whether they settle separate obligations or one obligation.\n- Explanation for dividing the amount into three payments and using different channels, with relevant client instructions and RM correspondence.\n- Source of funds and supporting account or funding records.\n- Nature and duration of the relationship with Northstar Trading and confirmation of the beneficiary\u2019s identity and account details.\n- Precise execution timestamps and time zones to validate the timing.\n- Clarification of the destination discrepancy: the displayed country is Singapore, but authoritative code CH identifies Switzerland. CH is not on this exercise\u2019s high-risk list; that is not a general safety assessment (high_risk_jurisdictions.md).\n\nThese details are not supplied in the exercise; they are not established to be absent at the bank. Record available evidence, outstanding requests and assumptions in the escalation (investigation_procedure.md). P50003 alone does not trigger amount-based RM or enhanced review, but that does not remove the separate structuring escalation requirement. Channel variation and the review trigger do not prove evasion or suspicious intent; the client\u2019s Low risk rating does not override the requirement.",
+    "answer": "Request the following evidence to support the recommended Compliance escalation. These are investigator recommendations; the Swiss procedure does not specify document-collection timing or sequence.\n\n- **Purpose and commercial support:** invoices, contracts and settlement schedules linking each payment to an obligation, to assess whether separate payments have a business explanation.\n- **Beneficiary relationship:** the client\u2019s relationship with Northstar Trading and relevant trading history, to establish commercial context.\n- **Source of funds:** funding-account records and supporting evidence explaining the funds\u2019 origin.\n- **Splitting and channels:** why CHF 45,000, CHF 35,000 and CHF 30,000 were sent through Branch, Online and RM-assisted channels; request payment instructions and relevant RM communications.\n- **Precise timestamps:** to establish actual timing. Same-calendar-date payments are the exercise\u2019s 24-hour proxy; rolling windows cannot be verified.\n- **Destination clarification:** beneficiary/bank details resolving displayed \u201cSingapore\u201d versus authoritative code CH (Switzerland). CH is not high-risk under the exercise\u2019s high-risk list (high_risk_jurisdictions.md).\n\n**Escalation basis:** C2003\u2019s Northstar payments P50003, P50180 and P50181 total CHF 110,000 on 11 April 2026, exceeding the global USD 100,000 structuring threshold using the permitted 1:1 CHF/USD exercise equivalence\u2014not an observed FX rate (global_payment_policy.md). For this Swiss client, potential structuring should be escalated to Compliance (regional_switzerland.md).\n\nThe pattern supports review, not proven evasion. Record the evidence and distinguish facts from assumptions (investigation_procedure.md).",
     "citations": [
-      "regional_switzerland.md",
       "global_payment_policy.md",
+      "regional_switzerland.md",
       "high_risk_jurisdictions.md",
       "investigation_procedure.md"
     ],
@@ -2152,7 +954,7 @@
           }
         ],
         "potential_structuring": true,
-        "compliance_escalation_required": true,
+        "compliance_escalation_recommended": true,
         "assumptions": [
           "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
           "Only calendar dates are supplied: same-date payments are treated as one 24-hour window; true rolling or cross-midnight windows cannot be determined."
@@ -2176,7 +978,7 @@
     "question": "What additional information should be requested before escalating the potential structuring pattern?"
   },
   {
-    "answer": "The client is based in **Switzerland**, so Swiss thresholds apply **in addition to\u2014not instead of\u2014the global rules**:\n\n- **Above CHF 80,000 equivalent:** RM review.\n- **Above CHF 120,000 equivalent:** enhanced review. Both Swiss requirements come from `regional_switzerland.md`.\n- **Above USD 100,000 equivalent:** global enhanced review before release remains mandatory (`global_payment_policy.md`).\n\nAll thresholds are strictly \u201cabove\u201d; equality does not trigger them.\n\n**P50004 is CHF 48,000 and does not trigger any of these individual-payment amount thresholds.** Swiss comparisons use native CHF; the global comparison uses the exercise\u2019s permitted **1:1 CHF/USD equivalence**, not an observed exchange rate.\n\nSeparately, the authoritative beneficiary country code is **CH (Switzerland)**, which conflicts with the displayed country \u201cUK\u201d; this discrepancy should be clarified. CH is not on this exercise\u2019s high-risk list, so no destination-review trigger applies (`high_risk_jurisdictions.md`). This is not a general safety determination or release authorization; historical structuring has not been assessed.",
+    "answer": "The client is based in **Switzerland**, so Swiss thresholds apply **in addition to global rules**:\n\n- **Above CHF 80,000 equivalent:** RM review is required.\n- **Above CHF 120,000 equivalent:** enhanced review is required. (regional_switzerland.md)\n- **Above USD 100,000 equivalent:** global enhanced review before release remains required; the Swiss threshold does not replace it. (global_payment_policy.md)\n\nAll thresholds are strictly \u201cabove,\u201d not \u201cat or above.\u201d **P50004 is CHF 48,000 and triggers none of these individual amount thresholds.** Swiss comparisons use native CHF; the global comparison uses the exercise\u2019s permitted 1:1 equivalence because no FX rate is supplied.\n\nThe authoritative destination code **CH** is not high-risk under the exercise\u2019s high-risk list, but conflicts with the displayed country \u201cUK\u201d (high_risk_jurisdictions.md). I recommend standard monitoring and clarification of that discrepancy; this assessment does not address splitting.",
     "citations": [
       "regional_switzerland.md",
       "global_payment_policy.md",
@@ -2258,7 +1060,7 @@
         "structuring_checked": false,
         "structuring_checks": [],
         "potential_structuring": null,
-        "compliance_escalation_required": null,
+        "compliance_escalation_recommended": null,
         "assumptions": [
           "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate."
         ],
@@ -2279,7 +1081,7 @@
     "question": "What payment-review threshold applies based on the client's region?"
   },
   {
-    "answer": "Recommend additional destination-risk review even though the payment is below the global amount threshold. High-risk destination review is an independent requirement, not conditional on payment size (global_payment_policy.md; high_risk_jurisdictions.md).\n\nFor P50005, the payment is CHF 47,000 to Pacific Holdings in UAE. The authoritative destination code, AE, is high-risk under this exercise\u2019s list and agrees with the displayed country name. The assessment confirms that:\n- The global enhanced-review threshold of above USD 100,000 equivalent is not triggered, using the exercise\u2019s permitted 1:1 CHF\u2013USD equivalence\u2014not an observed FX rate.\n- Because the client is Swiss, Switzerland\u2019s additional rules apply. Neither the above-CHF 80,000 RM-review threshold nor the above-CHF 120,000 enhanced-review threshold is triggered, using native CHF comparisons (regional_switzerland.md).\n\nAs investigator recommendations for the additional review, request the payment purpose, supporting invoices/contracts, source of funds and beneficiary relationship; these are not supplied. The client\u2019s low risk rating does not override the destination-review requirement. This trigger alone neither proves suspicious activity nor establishes a requirement for Compliance escalation, and being below the amount thresholds is not automatic permission to release.",
+    "answer": "Recommend additional destination-risk review: it is required even when the payment is below the global amount threshold (global_payment_policy.md; high_risk_jurisdictions.md).\n\nFor P50005, CHF 47,000 is being paid to Pacific Holdings in UAE, country code AE\u2014a high-risk destination under the exercise\u2019s high-risk list. Using the permitted 1:1 CHF/USD exercise equivalence, not an observed FX rate, it is below the global USD 100,000 enhanced-review threshold. The Swiss client\u2019s payment also falls below the native-currency CHF 80,000 RM-review and CHF 120,000 enhanced-review thresholds (regional_switzerland.md). Those amount-based reviews are not triggered, but destination review remains required regardless of the client\u2019s Low risk rating.\n\nAs investigator recommendations, request the payment purpose, supporting invoices/contracts, source of funds and beneficiary relationship to inform that review; these are not supplied. The destination trigger alone does not establish suspicious activity or automatically require Compliance escalation.",
     "citations": [
       "global_payment_policy.md",
       "high_risk_jurisdictions.md",
@@ -2361,7 +1163,7 @@
         "structuring_checked": false,
         "structuring_checks": [],
         "potential_structuring": null,
-        "compliance_escalation_required": null,
+        "compliance_escalation_recommended": null,
         "assumptions": [
           "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate."
         ],
@@ -2382,7 +1184,7 @@
     "question": "If a payment is below the global threshold but the destination is high-risk, what should be recommended?"
   },
   {
-    "answer": "Follow the six-step investigation procedure below. For P50006, the supplied evidence triggers no enhanced review, additional destination review, RM review or Compliance escalation; this is not automatic release permission.\n\n1. **Establish facts.** P50006 is an RM-assisted payment of SGD 24,110.41 on 19 January 2026 to Pacific Holdings, Hong Kong (HK). Client C2023 is a UK individual, rated Medium risk, with a 7.7-year relationship.\n\n2. **Identify applicable policy.** Global rules apply; neither Singapore nor Switzerland regional rules apply to this UK client. The assessment finds the payment does not exceed the strict USD 100,000-equivalent enhanced-review threshold (global_payment_policy.md). The comparison uses the exercise\u2019s permitted 1:1 SGD/USD equivalence, not an observed FX rate.\n\n3. **Check destination risk.** Authoritative code HK agrees with the displayed country and is not on the exercise\u2019s high-risk list, which lists AE only. This is not a general safety assessment (high_risk_jurisdictions.md).\n\n4. **Check splitting.** Review the complete supplied history and aggregate repeated beneficiaries. Pacific Holdings is the only repeated beneficiary: P50006 and P50061, the latter SGD 21,391.94 on 27 April 2026 via Online. Each date contains one payment; neither window triggers structuring review (global_payment_policy.md). Same-calendar-date windows are the exercise\u2019s 24-hour proxy; actual rolling or cross-midnight windows cannot be established.\n\n5. **Separate facts from assumptions.** Channel variation does not prove evasion. Purpose, supporting documents, source of funds, beneficiary relationship and precise timestamps are not supplied. As investigator recommendations, seek these and any relevant explanation of payment timing/channels\u2014not as evidence already checked or verbatim policy mandates.\n\n6. **Record evidence and recommendation.** Document the facts, history checks, policy assessment, FX/date assumptions and unresolved evidence; reassess if further information changes the findings. These six steps follow investigation_procedure.md.",
+    "answer": "Follow the six-step investigation procedure; the supplied evidence triggers no enhanced review, RM review, additional destination review or structuring escalation for P50006.\n\n1. **Establish facts.** P50006 is an RM-assisted SGD 24,110.41 payment on 19 January 2026 to Pacific Holdings, Hong Kong (HK). Client C2023 is a UK individual rated Medium risk.\n\n2. **Identify applicable policy.** UK clients have global rules only\u2014not Singapore rules because the currency is SGD. Enhanced review before release is required strictly above USD 100,000 equivalent; this payment does not trigger it. Comparisons use the permitted 1:1 exercise FX equivalence, not an observed rate (global_payment_policy.md).\n\n3. **Check destination risk.** Authoritative code HK agrees with Hong Kong and is not high-risk under the exercise\u2019s high-risk list; no additional destination review is triggered (high_risk_jurisdictions.md).\n\n4. **Check splitting.** Full supplied history identifies Pacific Holdings as the only repeated beneficiary: SGD 24,110.41 on 19 January and SGD 21,391.94 on 27 April. Each date contains one payment; neither window triggers the global combined-value rule above USD 100,000. Same-calendar-date windows are the 24-hour proxy; rolling or cross-midnight windows cannot be determined (global_payment_policy.md).\n\n5. **Separate facts from assumptions.** Different channels do not prove evasion. Purpose, supporting documents, source of funds, beneficiary relationship and precise timestamps are not supplied. Obtaining these if clarification is needed is an investigator recommendation.\n\n6. **Record evidence and recommendation.** Retain payment/history findings, policy checks and assumptions. Recommend standard monitoring; this is not automatic release permission (investigation_procedure.md).",
     "citations": [
       "investigation_procedure.md",
       "global_payment_policy.md",
@@ -2600,7 +1402,7 @@
           }
         ],
         "potential_structuring": false,
-        "compliance_escalation_required": false,
+        "compliance_escalation_recommended": false,
         "assumptions": [
           "No exchange rates are supplied. For non-matching currencies, the exercise's permitted 1:1 equivalence is assumed; this is not an observed FX rate.",
           "Only calendar dates are supplied: same-date payments are treated as one 24-hour window; true rolling or cross-midnight windows cannot be determined."

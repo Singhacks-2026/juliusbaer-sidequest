@@ -74,7 +74,9 @@ only the separately labelled assumed USD equivalent is combined.
 The 24-hour proxy groups payments by **client + beneficiary + calendar date**.
 All matching dates are returned. The supplied data cannot establish true rolling
 windows across midnight. Multiple payments exceeding the combined threshold are
-potential structuring, not proof of intent. Requests for invoices, payment
+potential structuring, not proof of intent. Swiss guidance supports a Compliance
+escalation recommendation; the policy supplies no deadline or document-collection
+sequence. This is recorded as `compliance_escalation_recommended`. Requests for invoices, payment
 purpose and similar records are recommendations, not invented policy mandates.
 
 The lexical retrieval filter and rule parser intentionally target the supplied
@@ -90,7 +92,7 @@ policy changes, additive Swiss/global rules, authoritative risk codes, the two
 structuring distractors, decimal precision, date separation, mixed currencies,
 missing evidence, retrieval ranking, whole-rule chunks, evidence guards, a
 simulated multi-round tool loop, and honest API failure behavior. The suite now
-contains 30 tests, including replay of all 78 submitted tool calls, missing-policy
+contains 30 tests, including replay of all 66 submitted tool calls, missing-policy
 uncertainty, target-specific assessment freshness, and artifact-tampering checks.
 The validator recomputes derived facts from the original records instead of
 trusting submitted aggregates or a matching trace.
