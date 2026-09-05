@@ -92,14 +92,16 @@ def _client() -> OpenAI:
 
 def _facts(payment_id: str, events: list[dict]) -> dict:
     """Output facts come only from successful tool returns, never model prose."""
-    facts = {}
+    facts = next((dict(event["result"]) for event in reversed(events)
+                  if event["tool"] == "get_payment" and "error" not in event["result"]
+                  and event["result"]["payment_id"] == payment_id), {})
+    if not facts:
+        return {}
     for event in events:
         name, result = event["tool"], event["result"]
         if isinstance(result, dict) and "error" in result:
             continue
-        if name == "get_payment" and result["payment_id"] == payment_id:
-            facts.update(result)
-        elif name == "get_client_profile" and result["client_id"] == facts.get("client_id"):
+        if name == "get_client_profile" and result["client_id"] == facts.get("client_id"):
             facts.update({"client_country": result["country"], "client_risk_rating": result["risk_rating"],
                           "client_type": result["client_type"], "relationship_years": result["relationship_years"]})
         elif name == "assess_payment_policy" and result["payment_id"] == payment_id:
@@ -143,8 +145,12 @@ def _final_errors(result: dict, facts: dict, retrieved: set[str], events: list[d
         errors.append("Complete assess_payment_policy with all applicable sources before finalizing")
     if "client_country" not in facts:
         errors.append("Retrieve the target payment and its client profile")
-    analysis_positions = [i for i, e in enumerate(events) if e["tool"] == "aggregate_beneficiary_24h"]
-    assessment_positions = [i for i, e in enumerate(events) if e["tool"] == "assess_payment_policy" and "error" not in e["result"]]
+    analysis_positions = [i for i, e in enumerate(events)
+                          if e["tool"] == "aggregate_beneficiary_24h" and "error" not in e["result"]
+                          and e["result"]["client_id"] == facts.get("client_id")]
+    assessment_positions = [i for i, e in enumerate(events)
+                            if e["tool"] == "assess_payment_policy" and "error" not in e["result"]
+                            and e["result"]["payment_id"] == facts.get("payment_id")]
     if analysis_positions and (not assessment_positions or max(analysis_positions) > max(assessment_positions)):
         errors.append("Rerun assess_payment_policy to include the latest aggregation")
     return errors

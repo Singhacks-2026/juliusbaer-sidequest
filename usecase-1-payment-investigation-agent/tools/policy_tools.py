@@ -112,6 +112,7 @@ def assess_payment_policy(payment_id: str, sources: list[str],
                      "GB": "UK", "HK": "Hong Kong", "US": "USA"}
     authoritative_name = country_names.get(payment["beneficiary_country_code"])
     structuring_triggered = any(check["triggered"] for check in structuring_checks)
+    structuring_known = bool(aggregations) and any(rule["kind"] == "structuring" for rule in rules)
     escalation = structuring_triggered and any(
         "structuring should be escalated to Compliance" in doc["text"] for doc in selected)
     return {
@@ -126,10 +127,10 @@ def assess_payment_policy(payment_id: str, sources: list[str],
         "enhanced_review_required": any(c["triggered"] and c["kind"] == "enhanced_review" for c in threshold_checks) if not missing else None,
         "rm_review_required": any(c["triggered"] and c["kind"] == "rm_review" for c in threshold_checks) if not missing else None,
         "additional_review_required": high_risk,
-        "structuring_checked": bool(aggregations),
+        "structuring_checked": structuring_known,
         "structuring_checks": structuring_checks,
-        "potential_structuring": structuring_triggered if aggregations else None,
-        "compliance_escalation_required": escalation if aggregations else None,
+        "potential_structuring": structuring_triggered if structuring_known else None,
+        "compliance_escalation_required": escalation if structuring_known and regional not in missing else None,
         "assumptions": list(dict.fromkeys(assumptions)),
         "limitations": ["A policy trigger does not establish intent or suspicious activity.",
                         "Payment purpose, source of funds, supporting documents, beneficiary relationship and precise timestamps are not supplied."],

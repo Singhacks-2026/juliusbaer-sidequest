@@ -1,10 +1,12 @@
 """Offline regressions: python -m unittest -v test_solution."""
 import json
+from copy import deepcopy
+from pathlib import Path
 import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from agent.agent import _execute, _final_errors, run_agent
+from agent.agent import _execute, _facts, _final_errors, run_agent
 from rag.pipeline import build_index, chunk_documents, retrieve
 from tools.client_tools import get_client_profile
 from tools.payment_tools import aggregate_beneficiary_24h, get_client_payments, get_payment
@@ -98,6 +100,36 @@ class DataAndPolicyTests(unittest.TestCase):
         self.assertIsNone(result['potential_structuring'])
 
 
+    def test_structuring_unknown_without_global_rule(self):
+        analysis = aggregate_beneficiary_24h('C2003', 'Northstar Trading')
+        for sources in [[SWISS, RISK], [RISK]]:
+            with self.subTest(sources=sources):
+                result = assess_payment_policy('P50003', sources, [analysis])
+                self.assertIsNone(result['potential_structuring'])
+                self.assertIsNone(result['compliance_escalation_required'])
+
+    def test_missing_region_does_not_clear_escalation(self):
+        analysis = aggregate_beneficiary_24h('C2003', 'Northstar Trading')
+        result = assess_payment_policy('P50003', [GLOBAL, RISK], [analysis])
+        self.assertTrue(result['potential_structuring'])
+        self.assertIsNone(result['compliance_escalation_required'])
+
+    def test_single_large_payment_is_not_structuring(self):
+        result = aggregate_beneficiary_24h('C2001', 'Desert Star LLC')
+        assessment = assess_payment_policy('P50001', [GLOBAL, SG, RISK], [result])
+        self.assertTrue(assessment['enhanced_review_required'])
+        self.assertFalse(assessment['potential_structuring'])
+
+    def test_swiss_threshold_boundaries(self):
+        for threshold, kind in [(80000, 'rm_review'), (120000, 'enhanced_review')]:
+            for delta in [-0.01, 0, 0.01]:
+                with self.subTest(threshold=threshold, delta=delta):
+                    with patch('tools.policy_tools.get_payment', return_value={**get_payment('P50004'), 'amount': threshold + delta}):
+                        result = assess_payment_policy('P50004', [GLOBAL, SWISS, RISK])
+                    check = next(c for c in result['threshold_checks'] if c['source'] == SWISS and c['kind'] == kind)
+                    self.assertEqual(delta > 0, check['triggered'])
+
+
 class RetrievalTests(unittest.TestCase):
     def test_focused_queries(self):
         cases = {'global enhanced review threshold': GLOBAL, 'Singapore regional procedure': SG,
@@ -171,6 +203,50 @@ class AgentTests(unittest.TestCase):
             result = run_agent('Review this payment.', 'P50001')
         self.assertEqual('OpenAIError', result['error'])
         self.assertEqual(([], [], {}), (result['citations'], result['tools_used'], result['facts']))
+
+
+    def test_facts_do_not_depend_on_tool_completion_order(self):
+        events = [dict(tool='get_client_profile', result=get_client_profile('C2003')),
+                  dict(tool='aggregate_beneficiary_24h', result=aggregate_beneficiary_24h('C2003', 'Northstar Trading')),
+                  dict(tool='get_payment', result=get_payment('P50003'))]
+        facts = _facts('P50003', events)
+        self.assertEqual('Switzerland', facts['client_country'])
+        self.assertEqual(110000, facts['beneficiary_analyses'][0]['windows'][0]['total_amount'])
+
+    def test_other_payment_cannot_hide_stale_target_assessment(self):
+        target = assess_payment_policy('P50003', [GLOBAL, SWISS, RISK])
+        events = [dict(tool='assess_payment_policy', result=target),
+                  dict(tool='aggregate_beneficiary_24h', result=aggregate_beneficiary_24h('C2003', 'Northstar Trading')),
+                  dict(tool='assess_payment_policy', result=assess_payment_policy('P50001', [GLOBAL, SG, RISK]))]
+        facts = {**get_payment('P50003'), 'client_country': 'Switzerland', 'policy_assessment': target}
+        errors = _final_errors({'answer': 'Needs review', 'citations': [GLOBAL]}, facts, {GLOBAL}, events)
+        self.assertTrue(any('latest aggregation' in e for e in errors))
+
+    def test_invalid_answers_stop_at_turn_limit(self):
+        response = SimpleNamespace(status='completed', usage=None, output=[], output_text='not JSON')
+        with patch('agent.agent._client') as client, patch.dict('os.environ', {'INVESTIGATION_TRACE': ''}):
+            client.return_value.responses.create.return_value = response
+            result = run_agent('Review payment', 'P50001')
+        self.assertIn('error', result)
+        self.assertEqual(12, client.return_value.responses.create.call_count)
+        self.assertEqual([], result['citations'])
+
+    def test_replay_every_submitted_tool_call(self):
+        root = Path(__file__).resolve().parent
+        traces = [json.loads(line) for line in (root/'artifacts/trace.jsonl').read_text().splitlines()]
+        self.assertEqual(10, len(traces))
+        for trace in traces:
+            events, retrieved = [], set()
+            for event in trace['tool_calls']:
+                with self.subTest(question=trace['question'], tool=event['tool']):
+                    output = _execute(event['tool'], event['arguments'], events, retrieved)
+                    self.assertEqual(event['result'], output)
+                events.append({**event, 'result': output})
+                if event['tool'] == 'search_policy':
+                    retrieved.update(hit['source'] for hit in output)
+            facts = _facts(trace['payment_id'], events)
+            self.assertEqual(trace['result']['facts'], facts)
+            self.assertEqual([], _final_errors(trace['result'], facts, retrieved, events))
 
 
 if __name__ == '__main__':
