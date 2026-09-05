@@ -10,8 +10,21 @@ All 29 offline tests pass, including actual SDK serialization with simulated
 HTTP responses, evidence retention across tool calls, and the unchanged
 main.py processing all ten official questions with a simulated LLM. Dependency
 checks also pass. These tests verify the implementation and output plumbing;
-they do not establish live model answer quality. A complete live submission
-has not yet been generated and verified.
+they do not establish live model answer quality.
+
+A live ten-question output is now available in submission_2.json, generated
+using the configured OpenAI gpt-4o model and validated against source facts
+and execution traces. The run used LLM_MAX_ROUNDS=24. Three answers were
+regenerated through the same agent after prose review and merged by their
+unchanged official question IDs. All final answers match their traces in
+artifacts/submission_2_traces. This does not certify a private evaluation score.
+
+To validate this particular output in PowerShell:
+
+```powershell
+$env:LLM_TRACE_DIR = 'artifacts/submission_2_traces'
+.\.venv\Scripts\python.exe validate_submission.py --submission submission_2.json --traces
+```
 
 ## Start in PowerShell
 
@@ -67,6 +80,11 @@ one provider is configured, explicitly set LLM_PROVIDER to openai, anthropic,
 or azure. LLM_API can override the OpenAI API choice. A model must support the
 chosen API and function calling; an API-compatible endpoint alone does not
 guarantee that every model or feature is supported.
+
+Native OpenAI Responses requests use a strict JSON schema for the final answer
+and citations to prevent repeated malformed-JSON failures. The selected model
+must support structured outputs as well as function calling. Custom endpoints
+keep their existing request format.
 
 LLM_MAX_ROUNDS bounds the loop; LLM_MAX_OUTPUT_TOKENS bounds each response;
 LLM_TIMEOUT_SECONDS bounds each request. The SDK retries a transient request
@@ -140,6 +158,7 @@ it does not reproduce the organiser's private answer key or certify a score.
 Tool traces go to artifacts/traces/ by default (git-ignored). They contain
 synthetic source evidence, model-requested arguments, effective tool
 arguments/results (including accumulated evidence), and the final answer.
+They also record final-answer validation errors encountered during correction.
 Each filename is a hash of the payment ID and question. Re-running a question
 replaces its trace, so validate a submission against the traces from that run.
 Set LLM_TRACE_DIR to an empty value to disable traces, and then omit --traces

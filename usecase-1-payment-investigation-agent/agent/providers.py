@@ -5,6 +5,14 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
+FINAL_ANSWER_FORMAT = {
+    "type": "json_schema", "name": "investigation_answer", "strict": True,
+    "schema": {"type": "object", "additionalProperties": False,
+               "properties": {"answer": {"type": "string"},
+                              "citations": {"type": "array", "items": {"type": "string"}}},
+               "required": ["answer", "citations"]},
+}
+
 
 class ConfigurationError(ValueError):
     pass
@@ -104,8 +112,12 @@ class Conversation:
         Conversation._last_request_at = time.monotonic()
         common = {"model": self.settings.model}
         if self.settings.api == "responses":
+            # Native OpenAI supports schema-constrained final answers alongside
+            # function calling. Custom endpoints retain their existing API shape.
+            output_format = ({"text": {"format": FINAL_ANSWER_FORMAT}}
+                             if self.settings.provider == "openai" and not os.getenv("OPENAI_BASE_URL") else {})
             response = self.client.responses.create(
-                **common, instructions=self.system, input=self.messages,
+                **common, **output_format, instructions=self.system, input=self.messages,
                 tools=[{"type": "function", **schema} for schema in schemas],
                 max_output_tokens=self.settings.max_output_tokens,
                 store=False, include=["reasoning.encrypted_content"],

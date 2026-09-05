@@ -66,6 +66,8 @@ class ProviderTests(unittest.TestCase):
         self.assertEqual(history[-1]["type"], "function_call_output")
         self.assertEqual(history[-1]["call_id"], "call_1")
         self.assertFalse(requests[1]["store"])
+        self.assertEqual(requests[1]["text"]["format"]["type"], "json_schema")
+        self.assertTrue(requests[1]["text"]["format"]["strict"])
         self.assertEqual(requests[0]["tools"][0]["name"], "get_payment")
 
     def test_anthropic_batches_results_immediately_after_tool_use(self):

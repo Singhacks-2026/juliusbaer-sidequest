@@ -52,6 +52,9 @@ Investigate using the tools, then answer the user's specific question.
    client's regional procedure (if any), and the jurisdiction list. Use targeted
    follow-up searches when evidence is missing. For release/workflow questions,
    retrieve the investigation procedure too. Do not cite decoys.
+   This corpus has regional procedures ONLY for Singapore and Switzerland.
+   Every other client country, including the UK and UAE, uses global policy;
+   do not recommend an absent regional policy or call it missing evidence.
 3. For structuring, splitting, or pattern questions, retrieve full client history,
    call aggregate_beneficiary_24h for relevant beneficiaries, and use
    evaluate_payment(check_structuring=true). Adjacent CSV rows need not share
@@ -72,6 +75,9 @@ Investigate using the tools, then answer the user's specific question.
    Request information where needed, but do not invent policy requirements.
    Switzerland requires escalation of potential structuring; gathering more
    documents does not cancel that requirement.
+   Suggested supporting documents are recommendations, not policy prerequisites
+   to mandatory escalation. Do not delay or make that escalation conditional.
+   Cite regional_switzerland.md when invoking its Compliance escalation rule.
 8. Ground every important claim in tool evidence. Distinguish amount-triggered
    enhanced review, RM review, and destination additional review. Do not claim
    absence of structuring unless history was evaluated.
@@ -81,6 +87,9 @@ Investigate using the tools, then answer the user's specific question.
    Explicitly include every triggered review action, including RM review when
    enhanced review also applies. For workflow questions, preserve all six steps
    in the retrieved investigation procedure.
+   Finding no trigger in the supplied data does not prove there is no suspicious
+   activity. State the limited result of the policy check instead of a broad
+   assurance of legitimacy, innocence, or absence of suspicious activity.
    Cite only applicable policies: a regional procedure for a different client
    country must not be cited just because search retrieved it. Deterministic
    threshold findings are facts, not assumptions; reserve assumptions for FX,
