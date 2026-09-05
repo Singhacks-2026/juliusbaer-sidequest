@@ -1,8 +1,9 @@
 [
   {
-    "answer": "Payment P50000 (USD 12,000, client C2000/UAE, beneficiary \"Redwood Services\", beneficiary_country_code=SG) does NOT require enhanced review.\n\nBasis:\n1. Global enhanced-review threshold is USD 100,000 equivalent (global_payment_policy.md). At USD 12,000, the payment is far below this and the deterministic threshold_evaluation confirms enhanced_review_required=false.\n2. High-risk jurisdiction check: only AE (UAE) is designated high-risk (high_risk_jurisdictions.md). The authoritative beneficiary_country_code is SG (not AE), so no additional-review trigger applies to the destination. Note: the client's own domicile is UAE (on the high-risk list), but the policy's high-risk trigger is destination-based (beneficiary jurisdiction), not origin-based, so this does not create a trigger for this payment.\n3. No regional procedure (e.g., Singapore, Switzerland) applies, since those are keyed to the client's jurisdiction, and the client is based in UAE with no applicable_regional_policy identified.\n4. Structuring/splitting check: find_repeated_beneficiaries shows two payments to Redwood Services (P50000, P50083) but no same-day cluster, so the 24-hour combined-value structuring threshold (USD 100,000) is not implicated (global_payment_policy.md).\n\nAssumptions: none needed for currency conversion (payment and threshold both in USD). A data-quality note: beneficiary_country name field says \"UK\" while the authoritative beneficiary_country_code is \"SG\" \u2014 code was used per policy guidance, and SG is not high-risk.\n\nMissing evidence: none required for this determination.\n\nRecommendation: Process as standard; no enhanced, RM, or additional review required. Flag the beneficiary_country/code mismatch for data-quality follow-up only.",
+    "answer": "Payment P50000 (USD 12,000, client C2000/UAE/Medium risk, beneficiary \"Redwood Services\", beneficiary_country_code=SG) does NOT require enhanced review. Reasoning: Per global_payment_policy.md, enhanced review is triggered only for payments above USD 100,000 equivalent; at USD 12,000 this is well under threshold. No regional procedure applies (client is UAE-domiciled, not Singapore/Switzerland), consistent with threshold_evaluation showing applicable_regional_policy=null. High-risk jurisdiction review (high_risk_jurisdictions.md) is triggered only when the destination code is AE; here the authoritative beneficiary_country_code is SG, not AE, so this check is not triggered even though the client's residency happens to be UAE (residency is irrelevant to this destination-based check). Structuring review (global_payment_policy.md) also does not apply: find_repeated_beneficiaries shows two payments to Redwood Services (P50000, P50083) but no same-day cluster and no evidence combined value exceeds USD 100,000. Note/assumption: The beneficiary_country name field reads \"UK\" while the authoritative code is \"SG\" \u2014 a data discrepancy that does not affect the outcome since code is authoritative for risk assessment, but should be flagged for data-quality correction. No exchange-rate assumption was needed since the payment is already in USD. Recommendation: No enhanced, RM, or additional review is required; process as standard. Flag the country-name/code mismatch for data quality follow-up.",
     "citations": [
-      "global_payment_policy.md"
+      "global_payment_policy.md",
+      "high_risk_jurisdictions.md"
     ],
     "facts": {
       "payment_id": "P50000",
@@ -42,7 +43,7 @@
     "question": "Should P50000 require enhanced review? Explain using policy."
   },
   {
-    "answer": "P50001 (USD 125,000, Singapore client C2001 \u2192 Desert Star LLC, UAE) triggers three concurrent, independently sufficient review requirements:\n\n1. Global enhanced review (global_payment_policy.md): amount exceeds the USD 100,000 global enhanced-review threshold.\n2. Regional RM review and regional enhanced review (regional_singapore.md): amount exceeds both the USD 75,000 RM-review threshold and USD 100,000 enhanced-review threshold applicable to Singapore-domiciled clients.\n3. Additional review for high-risk destination (high_risk_jurisdictions.md): beneficiary_country_code AE (UAE) is on the high-risk jurisdiction list, which mandates additional review regardless of amount.\n\nStructuring was checked but not triggered: although the client has 3 historical payments to Desert Star LLC, only P50001 falls on 2026-05-11 and no same-day cluster exists, so the 24-hour combined-value structuring threshold in global_payment_policy.md does not apply.\n\nAssumptions: 1:1 currency equivalence used since all amounts are already in USD (no conversion needed); payment_date has no time component, so same-day payments would be treated as one 24-hour window (not relevant here as no cluster exists); beneficiary_country_code (AE) was treated as authoritative over the beneficiary_country name field, though in this case they agree.\n\nMissing evidence: no supporting documentation (invoice, source-of-funds) for the UAE transfer, and no detail on the timing/purpose of the other two Desert Star LLC payments relative to this one.\n\nRecommended action: Hold payment pending completion of RM review, enhanced review, and additional (high-risk jurisdiction) review \u2014 all three are independently mandated. A policy trigger alone does not establish suspicious activity, but all applicable review layers must be completed before release.",
+    "answer": "Payment P50001 (USD 125,000, client C2001, Singapore individual, Low risk, to Desert Star LLC in UAE/AE, branch channel) requires three concurrent review layers: RM review, enhanced review, and additional (high-risk destination) review. Why: 1. Global policy: amount (125,000) exceeds the USD 100,000 enhanced-review threshold \u2192 enhanced review required. AE is a listed high-risk jurisdiction \u2192 additional review required (global_payment_policy.md, high_risk_jurisdictions.md). 2. Singapore regional procedure applies because the client is Singapore-domiciled: amount exceeds the USD 75,000 RM-review threshold \u2192 RM review required; it also independently exceeds the USD 100,000 regional enhanced-review threshold and the destination is high-risk, reinforcing the same two triggers at the regional level (regional_singapore.md). 3. High-risk jurisdiction list explicitly names AE as high-risk, confirming the additional-review requirement (high_risk_jurisdictions.md). No currency conversion assumption was needed since payment currency (USD) matches all threshold currencies. Beneficiary_country_code (AE) and beneficiary_country name (\"UAE\") agree, so there is no jurisdiction-field discrepancy to flag. Structuring check: Desert Star LLC has received 3 payments from this client historically, but none fall within the same 24-hour window as P50001 (window count = 1), so the structuring trigger is not met and no Compliance escalation is required on that basis. Missing evidence: no documentation yet on business purpose/source of funds for the UAE beneficiary or prior KYC notes for Desert Star LLC \u2014 this should be obtained before the enhanced/additional review is closed. Recommendation: Route P50001 for RM review, enhanced review, and additional (high-risk jurisdiction) review before release, per both global and Singapore regional policy; a policy trigger alone does not establish suspicious activity, so classification should await the additional documentation.",
     "citations": [
       "global_payment_policy.md",
       "regional_singapore.md",
@@ -92,7 +93,28 @@
         "amount exceeds the regional RM-review threshold",
         "destination AE is on the high-risk jurisdiction list"
       ],
-      "currency_assumption": "No exchange-rate data is provided; where the payment currency differs from the threshold currency, 1:1 equivalence is assumed."
+      "currency_assumption": "No exchange-rate data is provided; where the payment currency differs from the threshold currency, 1:1 equivalence is assumed.",
+      "structuring_analysis": {
+        "beneficiary_name": "Desert Star LLC",
+        "window_date": "2026-05-11",
+        "window_assumption": "payment_date has no time component; payments sharing a calendar date are treated as being within the same 24-hour window",
+        "payment_count_in_window": 1,
+        "payment_ids_in_window": [
+          "P50001"
+        ],
+        "combined_amount": 125000.0,
+        "combined_currency": "USD",
+        "threshold_comparison": {
+          "threshold_amount": 100000,
+          "threshold_currency": "USD",
+          "payment_amount": 125000.0,
+          "payment_currency": "USD",
+          "exceeds": true,
+          "comparison_basis": "native currency"
+        },
+        "structuring_review_triggered": false,
+        "escalation_to_compliance_required": false
+      }
     },
     "tools_used": [
       "get_payment",
@@ -107,7 +129,7 @@
     "question": "What review requirement applies to P50001 and why?"
   },
   {
-    "answer": "Payment P50002 ($85,000 USD, Branch, client C2002, Singapore, Medium risk, 11.5yr relationship) to \"Pacific Holdings\" shows two policy triggers: (1) amount exceeds the Singapore regional RM-review threshold of USD 75,000 (does NOT exceed the USD 100,000 global/regional enhanced-review threshold, so enhanced review is not required); (2) the authoritative beneficiary_country_code is AE, which is on the high-risk jurisdiction list, triggering mandatory additional review under both global and regional policy. Note the beneficiary_country name field (\"Hong Kong\") disagrees with the authoritative code (AE) \u2014 this discrepancy should be verified operationally, but per policy the code governs jurisdiction-risk determination. A check for transaction-splitting/structuring found no same-day payment clusters to this or any other beneficiary for C2002, so no structuring indicator applies. No exchange-rate assumption was needed since amount/thresholds are both in USD. Missing evidence: no documentation explaining the country name/code mismatch, and no KYC/SWIFT detail on \"Pacific Holdings\" was reviewed. Recommendation: route payment for RM review (amount trigger) and additional review (high-risk AE destination) before release; enhanced review is not triggered; resolve the beneficiary country discrepancy before final disposition. A policy trigger alone does not establish suspicious activity, but both conditions here are independently sufficient to require review and hold prior to release.</answer>\n<parameter name=\"citations\">[\"global_payment_policy.md\", \"regional_singapore.md\", \"high_risk_jurisdictions.md\"]",
+    "answer": "Payment P50002 (C2002, Singapore, Medium risk individual, 11.5yr relationship) is USD 85,000 to beneficiary \"Pacific Holdings,\" Branch channel, dated 2026-04-27. Risk indicators identified: (1) Amount exceeds the Singapore regional RM-review threshold of USD 75,000 (does not exceed the USD 100,000 global/regional enhanced-review threshold, so enhanced review is NOT required); (2) The beneficiary_country_code field (authoritative for jurisdiction risk) is \"AE,\" which is on the high-risk jurisdiction list, triggering mandatory additional review \u2014 this overrides the conflicting beneficiary_country name field (\"Hong Kong\"), which appears to be a data discrepancy requiring clarification; (3) No structuring indicator was found \u2014 find_repeated_beneficiaries shows no same-day clusters for this client and \"Pacific Holdings\" is not even a repeated beneficiary, so the structuring trigger does not apply. Currency assumption: none needed here since payment and threshold currencies both natively USD. Additional review required: YES \u2014 driven jointly by the RM-review amount threshold breach and the high-risk AE destination flag (per policy, a high-risk jurisdiction alone mandates additional review independent of amount). Recommended action: route to RM for review and require Compliance to resolve the beneficiary country name/code mismatch before payment release; enhanced review is not triggered and no structuring escalation is warranted at this time. Missing evidence: no documentation explaining why the beneficiary is coded AE while labeled Hong Kong (e.g., intermediary bank/routing jurisdiction vs. ultimate beneficiary location) \u2014 this should be obtained before final sign-off.",
     "citations": [
       "global_payment_policy.md",
       "regional_singapore.md",
@@ -170,7 +192,7 @@
     "question": "Identify the risk indicators for P50002 and state the additional review required."
   },
   {
-    "answer": "Yes \u2014 the data shows a probable transaction-splitting pattern for C2003 involving beneficiary \"Northstar Trading.\"\n\nFacts: P50003 (CHF 45,000, Branch) was made on 2026-04-11. On that same calendar date, C2003 sent two additional payments to the identical beneficiary: P50180 (CHF 35,000, Online) and P50181 (CHF 30,000, RM-assisted). Combined same-day value to this single beneficiary = CHF 110,000 across three payments, each routed through a different channel (Branch/Online/RM-assisted).\n\nPolicy trigger: Individually, none of the three payments breaches any threshold (global USD 100,000 enhanced-review line, Swiss CHF 80,000 RM-review line, or Swiss CHF 120,000 enhanced-review line). However, the global policy requires review for potential structuring when multiple same-day payments to the same beneficiary combine to exceed USD 100,000 equivalent. Using the stated 1:1 CHF/USD equivalence assumption, CHF 110,000 exceeds that threshold, so `structuring_review_triggered = true` and `escalation_to_compliance_required = true`. The Swiss regional procedure independently mandates escalating potential structuring to Compliance.\n\nAdditional note: beneficiary_country lists \"Singapore\" while the authoritative beneficiary_country_code is \"CH\" \u2014 a discrepancy that should be clarified but does not itself indicate high-risk jurisdiction exposure (AE is the only listed high-risk code, not implicated here).\n\nAssumption: 1:1 CHF/USD equivalence per policy's stated basis; no time-of-day data exists, so same-calendar-date payments are treated as within a 24-hour window.\n\nMissing evidence: no documented business rationale (e.g., separate invoices) for splitting across three channels in one day; true beneficiary jurisdiction (Singapore vs. CH code) unresolved.\n\nRecommendation: Escalate the CHF 110,000 same-day cluster (P50003, P50180, P50181) to Compliance for a structuring review before further release, per policy. A trigger alone does not establish suspicious activity, but the pattern warrants investigation.</answer>\n<citations>[\"global_payment_policy.md\", \"regional_switzerland.md\", \"investigation_procedure.md\"]</citations>\n</invoke>\n",
+    "answer": "Yes \u2014 the data shows a probable transaction-splitting (structuring) pattern for C2003 around P50003. On its own, P50003 (CHF 45,000, 2026-04-11, Branch, to \"Northstar Trading\") clears all individual thresholds: below the CHF 80,000 RM-review and CHF 120,000 enhanced-review levels (regional_switzerland.md) and below the USD 100,000 global enhanced-review level (global_payment_policy.md). However, the same client made two additional payments to the identical beneficiary \"Northstar Trading\" on the same calendar date: P50180 (CHF 35,000, Online) and P50181 (CHF 30,000, RM-assisted) \u2014 each via a different channel. Aggregated, these three payments total CHF 110,000 within the same 24-hour window, exceeding the USD 100,000-equivalent threshold that global_payment_policy.md sets for reviewing same-beneficiary, same-client payments for potential structuring. This combination \u2014 three separate, sub-threshold payments split across three different channels (Branch/Online/RM-assisted) to the same counterparty on the same day, cumulatively exceeding the review threshold \u2014 is a classic structuring red flag. Per regional_switzerland.md, \"potential structuring should be escalated to Compliance,\" and the structuring evaluation confirms escalation_to_compliance_required = true. Note also a data-quality flag: beneficiary_country is listed as \"Singapore\" while beneficiary_country_code is \"CH\" (Switzerland) \u2014 this mismatch should be resolved, though it does not affect the structuring assessment since CH is not a high-risk jurisdiction. Assumptions: CHF treated 1:1 vs USD (no FX data available); same calendar date used as proxy for a 24-hour window (no timestamps to confirm true intraday proximity). A policy trigger alone does not prove wrongdoing, but the pattern warrants holding all three Northstar Trading payments and escalating to Compliance for structuring review before release.",
     "citations": [
       "global_payment_policy.md",
       "regional_switzerland.md"
@@ -215,7 +237,30 @@
       "rm_review_required": false,
       "additional_review_required": false,
       "policy_triggers": [],
-      "currency_assumption": "No exchange-rate data is provided; where the payment currency differs from the threshold currency, 1:1 equivalence is assumed."
+      "currency_assumption": "No exchange-rate data is provided; where the payment currency differs from the threshold currency, 1:1 equivalence is assumed.",
+      "structuring_analysis": {
+        "beneficiary_name": "Northstar Trading",
+        "window_date": "2026-04-11",
+        "window_assumption": "payment_date has no time component; payments sharing a calendar date are treated as being within the same 24-hour window",
+        "payment_count_in_window": 3,
+        "payment_ids_in_window": [
+          "P50003",
+          "P50180",
+          "P50181"
+        ],
+        "combined_amount": 110000.0,
+        "combined_currency": "CHF",
+        "threshold_comparison": {
+          "threshold_amount": 100000,
+          "threshold_currency": "USD",
+          "payment_amount": 110000.0,
+          "payment_currency": "CHF",
+          "exceeds": true,
+          "comparison_basis": "1:1 equivalence assumed between CHF and USD"
+        },
+        "structuring_review_triggered": true,
+        "escalation_to_compliance_required": true
+      }
     },
     "tools_used": [
       "get_payment",
@@ -232,11 +277,12 @@
     "question": "Does the data show a possible transaction-splitting pattern for C2003? Explain."
   },
   {
-    "answer": "Before recommending release of P50001, the assistant must retrieve and apply four policy documents.\n\nObserved facts: P50001 is a USD 125,000 Branch payment from client C2001 (Singapore, Individual, Low risk, 3.1yr relationship) to Desert Star LLC in AE (UAE), dated 2026-05-11.\n\nPolicy triggers identified:\n1. global_payment_policy.md \u2014 sets the USD 100,000 global enhanced-review threshold (exceeded) and requires additional review for high-risk-jurisdiction destinations.\n2. regional_singapore.md \u2014 as the client's country policy, sets an RM-review threshold of USD 75,000 (exceeded) and an enhanced-review threshold of USD 100,000 (exceeded), plus additional review for high-risk destinations.\n3. high_risk_jurisdictions.md \u2014 confirms AE (UAE) is the authoritative high-risk jurisdiction (via beneficiary_country_code, not the possibly-mismatched name field), triggering mandatory additional review.\n4. investigation_procedure.md \u2014 the required workflow: establish facts, identify applicable policy, check high-risk destination, check transaction splitting, separate facts from assumptions, document evidence. This directed a structuring check.\n\nStructuring check (per investigation_procedure.md, using deterministic tools): find_repeated_beneficiaries and aggregate_beneficiary_24h show 3 historical payments to Desert Star LLC, but no same-day cluster \u2014 P50001 is the only payment on 2026-05-11, with other payments to this beneficiary on unrelated dates/currencies. No structuring indicated for this payment.\n\nAssumption: no FX data provided; 1:1 currency equivalence assumed for threshold comparison (native USD here, so this is moot).\n\nNot applicable: regional_switzerland.md (client is Singapore-based, not Swiss).\n\nRecommendation: All three thresholds (global enhanced, regional RM, regional enhanced) plus the high-risk-destination flag are triggered \u2014 release cannot be recommended until enhanced review, RM review, and additional review (per the three substantive policies) are completed and documented per the investigation procedure. A trigger alone does not establish wrongdoing, but full review is mandatory first.",
+    "answer": "Before recommending release of P50001 (C2001, USD 125,000 to Desert Star LLC, beneficiary country code AE/UAE), the assistant must retrieve and apply four policy documents: 1. global_payment_policy.md \u2013 sets the USD 100,000 global enhanced-review threshold and the high-risk-jurisdiction additional-review rule, both exceeded/triggered here (125,000 > 100,000; destination AE is high-risk). 2. regional_singapore.md \u2013 applicable because client C2001 is Singapore-domiciled; adds a USD 75,000 RM-review threshold and a USD 100,000 enhanced-review threshold, both exceeded, plus a high-risk-destination additional-review requirement. 3. high_risk_jurisdictions.md \u2013 confirms AE is on the high-risk list (authoritative via beneficiary_country_code, consistent with the beneficiary_country name field here), requiring additional review. 4. investigation_procedure.md \u2013 the required workflow (establish facts, identify applicable policy, check high-risk indicators, check for splitting/structuring, separate facts from assumptions, document evidence), which was followed: repeated-beneficiary check found 3 historical payments to Desert Star LLC but no same-day cluster, and evaluate_structuring confirms only one payment (this one) in the 24h window, so the structuring trigger is not met. Observed facts: amount exceeds both global and regional RM/enhanced thresholds; destination is high-risk; no structuring pattern evidenced. Assumption: 1:1 currency equivalence (payment already in USD, so no conversion risk in this case). Missing evidence: no KYC/source-of-funds documentation or sanctions-screening result was provided, which enhanced/additional review would typically require before final release. Recommendation: Do not release P50001 automatically. Route for RM review, enhanced review, and additional (high-risk-jurisdiction) review per policy; a trigger alone does not establish suspicious activity, but all three thresholds are independently met, so full review completion is required before any release decision.",
     "citations": [
       "global_payment_policy.md",
       "regional_singapore.md",
-      "high_risk_jurisdictions.md"
+      "high_risk_jurisdictions.md",
+      "investigation_procedure.md"
     ],
     "facts": {
       "payment_id": "P50001",
@@ -282,7 +328,28 @@
         "amount exceeds the regional RM-review threshold",
         "destination AE is on the high-risk jurisdiction list"
       ],
-      "currency_assumption": "No exchange-rate data is provided; where the payment currency differs from the threshold currency, 1:1 equivalence is assumed."
+      "currency_assumption": "No exchange-rate data is provided; where the payment currency differs from the threshold currency, 1:1 equivalence is assumed.",
+      "structuring_analysis": {
+        "beneficiary_name": "Desert Star LLC",
+        "window_date": "2026-05-11",
+        "window_assumption": "payment_date has no time component; payments sharing a calendar date are treated as being within the same 24-hour window",
+        "payment_count_in_window": 1,
+        "payment_ids_in_window": [
+          "P50001"
+        ],
+        "combined_amount": 125000.0,
+        "combined_currency": "USD",
+        "threshold_comparison": {
+          "threshold_amount": 100000,
+          "threshold_currency": "USD",
+          "payment_amount": 125000.0,
+          "payment_currency": "USD",
+          "exceeds": true,
+          "comparison_basis": "native currency"
+        },
+        "structuring_review_triggered": false,
+        "escalation_to_compliance_required": false
+      }
     },
     "tools_used": [
       "get_payment",
@@ -290,17 +357,17 @@
       "evaluate_payment_thresholds",
       "search_policy",
       "find_repeated_beneficiaries",
-      "aggregate_beneficiary_24h"
+      "evaluate_structuring"
     ],
     "question_id": "Q05",
     "payment_id": "P50001",
     "question": "Which policy documents should the assistant retrieve before recommending release of P50001?"
   },
   {
-    "answer": "Payment P50002: USD 85,000 branch transfer from C2002 (Singapore, Medium-risk Individual, 11.5-yr relationship) to \"Pacific Holdings,\" beneficiary_country listed as Hong Kong but beneficiary_country_code = AE (authoritative per policy) \u2014 a factual discrepancy that should be clarified with KYC/source data before final release.\n\nFacts vs. thresholds: Amount (USD 85,000) exceeds the Singapore regional RM-review threshold (USD 75,000) but does NOT exceed the enhanced-review threshold (USD 100,000), confirmed consistently by regional_singapore.md and global_payment_policy.md. AE is on the high-risk jurisdiction list (high_risk_jurisdictions.md), which independently mandates additional review regardless of amount. No currency conversion assumption was needed since both payment and thresholds are in USD.\n\nStructuring check: find_repeated_beneficiaries for C2002 shows only three repeat beneficiaries (Desert Star LLC, Redwood Services, Northstar Trading), none with same-day clusters, and \"Pacific Holdings\" is not among them. There is no factual evidence of transaction splitting or structuring tied to this payment.\n\nAssumptions/gaps: The mismatch between beneficiary_country (Hong Kong) and beneficiary_country_code (AE) is unexplained by available data \u2014 this is a data-quality/verification gap, not a resolved fact. Per global_payment_policy.md, a policy trigger alone does not establish suspicious activity.\n\nRecommendation: Route P50002 for RM review (mandatory, threshold exceeded) and additional review (mandatory, high-risk AE destination trigger). Enhanced review is not required by amount. Before final disposition, resolve the beneficiary country/code discrepancy with the source system or client documentation. No structuring escalation is warranted based on current evidence.",
+    "answer": "Facts: P50002 is a USD 85,000 Branch payment (27-Apr-2026) from client C2002 (Singapore, Individual, Medium risk, 11.5yr relationship) to \"Pacific Holdings.\" The beneficiary_country name field reads \"Hong Kong\" but the authoritative beneficiary_country_code is AE (UAE) \u2014 a data mismatch, with the code governing risk classification per convention. No same-day or repeated-payment clustering to this beneficiary was found in transaction history. Policy triggers (facts, not assumptions): - Singapore regional RM-review threshold (USD 75,000) is exceeded (85,000>75,000) \u2192 RM review required (regional_singapore.md). - AE is on the high-risk jurisdiction list \u2192 additional review required regardless of amount (high_risk_jurisdictions.md). - Global and regional enhanced-review thresholds (USD 100,000) are NOT exceeded. - No structuring indicators: beneficiary does not appear in the repeated-beneficiary/same-day cluster results. Assumptions: 1:1 USD-currency equivalence assumed (no FX data provided); country-code (AE) taken as authoritative over the conflicting country-name field, per stated policy convention. A policy trigger alone does not establish suspicious activity (global_payment_policy.md). Missing evidence: no explanation on file for the Hong Kong/AE country discrepancy; no purpose-of-payment or beneficiary KYC documentation retrieved. Recommendation: Do not treat as an enhanced-review case (threshold not met), but route for mandatory RM review (Singapore threshold breach) and mandatory additional review due to the AE high-risk destination flag. Before release, compliance should resolve the beneficiary country name/code discrepancy to confirm true beneficiary jurisdiction. No structuring escalation is warranted based on current evidence.",
     "citations": [
-      "regional_singapore.md",
       "global_payment_policy.md",
+      "regional_singapore.md",
       "high_risk_jurisdictions.md"
     ],
     "facts": {
@@ -360,10 +427,11 @@
     "question": "Separate factual evidence from assumptions for P50002 and give a grounded recommendation."
   },
   {
-    "answer": "Payment P50003 (CHF 45,000) individually breaches no threshold, but three same-day payments from client C2003 to beneficiary \"Northstar Trading\" (P50003, P50180, P50181) total CHF 110,000, exceeding the USD 100,000 24h same-beneficiary structuring threshold (1:1 CHF/USD assumed). evaluate_structuring confirms structuring_review_triggered=true and escalation_to_compliance_required=true under global_payment_policy.md (\"multiple payments to same beneficiary within 24h reviewed for structuring if combined >USD 100k equivalent\") and regional_switzerland.md (\"potential structuring should be escalated to Compliance\"). Per investigation_procedure.md, before escalating we must separate facts from assumptions and document supporting evidence, not just flag the trigger (\"a policy trigger does not by itself establish suspicious activity\").\n\nAdditional information needed before escalation: (1) exact transaction timestamps for P50003/P50180/P50181 to confirm they fall within a true rolling 24h window rather than just sharing a calendar date; (2) resolution of the beneficiary_country/beneficiary_country_code mismatch (name says Singapore, code says CH) via beneficiary bank/SWIFT/account details, since jurisdiction risk relies on the authoritative code; (3) underlying invoices, contracts, or business rationale explaining why three separate payments were made to the same beneficiary the same day via three different channels (Branch, Online, RM-assisted) rather than one consolidated payment; (4) RM/client explanation of payment purpose and whether this pattern is consistent with the client's normal 12-year corporate payment history; (5) confirmation of actual CHF/USD FX rate used, since the threshold comparison currently relies on an unverified 1:1 assumption. Only after gathering this evidence should the case be escalated to Compliance, per policy.",
+    "answer": "P50003 (CHF 45,000, 2026-04-11, C2003\u2192Northstar Trading) does not trigger any single-payment threshold: beneficiary_country_code is authoritative and shows CH (domestic), not the high-risk-listed AE, and the amount is below RM (CHF 80k), regional enhanced (CHF 120k) and global enhanced (USD 100k) thresholds. However, aggregating same-day same-beneficiary payments (P50003 45k + P50180 35k + P50181 30k = CHF 110,000 on 2026-04-11, across Branch/Online/RM-assisted channels) exceeds the USD 100,000-equivalent structuring threshold, so evaluate_structuring returns structuring_review_triggered=true and escalation_to_compliance_required=true, consistent with regional_switzerland.md's instruction that potential structuring be escalated to Compliance. Per global_payment_policy.md, a policy trigger alone does not establish suspicious activity, so before escalating, the following should be requested: (1) business/commercial rationale or supporting documentation (invoices, contracts) for splitting payment to Northstar Trading across three same-day transactions; (2) exact timestamps for the three payments to confirm they genuinely fall within a 24h window (current data is date-only); (3) clarification/verification of Northstar Trading's true beneficiary jurisdiction, since beneficiary_country states Singapore while beneficiary_country_code states CH \u2014 a discrepancy needing resolution; (4) explanation for use of three different channels for the split payments, which could indicate deliberate avoidance of single-channel scrutiny; (5) historical payment behavior with this beneficiary to assess whether same-day, multi-channel splitting is typical or anomalous (no other beneficiary for this client shows same-day clustering). Recommendation: hold P50003 together with P50180/P50181 as a linked set, gather the above before formal escalation to Compliance, per investigation_procedure.md's requirement to separate facts from assumptions and check for transaction splitting.",
     "citations": [
       "global_payment_policy.md",
-      "regional_switzerland.md"
+      "regional_switzerland.md",
+      "investigation_procedure.md"
     ],
     "facts": {
       "payment_id": "P50003",
@@ -405,7 +473,30 @@
       "rm_review_required": false,
       "additional_review_required": false,
       "policy_triggers": [],
-      "currency_assumption": "No exchange-rate data is provided; where the payment currency differs from the threshold currency, 1:1 equivalence is assumed."
+      "currency_assumption": "No exchange-rate data is provided; where the payment currency differs from the threshold currency, 1:1 equivalence is assumed.",
+      "structuring_analysis": {
+        "beneficiary_name": "Northstar Trading",
+        "window_date": "2026-04-11",
+        "window_assumption": "payment_date has no time component; payments sharing a calendar date are treated as being within the same 24-hour window",
+        "payment_count_in_window": 3,
+        "payment_ids_in_window": [
+          "P50003",
+          "P50180",
+          "P50181"
+        ],
+        "combined_amount": 110000.0,
+        "combined_currency": "CHF",
+        "threshold_comparison": {
+          "threshold_amount": 100000,
+          "threshold_currency": "USD",
+          "payment_amount": 110000.0,
+          "payment_currency": "CHF",
+          "exceeds": true,
+          "comparison_basis": "1:1 equivalence assumed between CHF and USD"
+        },
+        "structuring_review_triggered": true,
+        "escalation_to_compliance_required": true
+      }
     },
     "tools_used": [
       "get_payment",
@@ -422,10 +513,11 @@
     "question": "What additional information should be requested before escalating the potential structuring pattern?"
   },
   {
-    "answer": "Payment P50004 (client C2003, Swiss corporate, Low risk) is CHF 48,000 to \"Redwood Services,\" beneficiary_country_code CH (authoritative; the \"UK\" name-field entry conflicts with it but is not used for jurisdiction risk).\n\nApplicable region: Switzerland (client_country = Switzerland), governed by regional_switzerland.md, alongside global_payment_policy.md.\n\nThresholds applied:\n- Global (global_payment_policy.md): enhanced review required above USD 100,000 equivalent. CHF 48,000 (1:1 CHF/USD assumed, no FX data available) does not exceed this \u2014 not triggered.\n- Regional Switzerland (regional_switzerland.md): RM review required above CHF 80,000; enhanced review required above CHF 120,000 (native-currency comparison, no assumption needed). CHF 48,000 exceeds neither \u2014 not triggered.\n- High-risk jurisdiction check (high_risk_jurisdictions.md): only AE is listed as high-risk; beneficiary_country_code CH is not high-risk \u2014 no additional-review trigger.\n- Structuring/repeat-beneficiary check: Redwood Services appears twice for this client (P50004, P50068) but on different dates with no same-day cluster, so the 24-hour structuring aggregation rule does not apply.\n\nResult: No threshold is breached under either the global or Switzerland-specific regional policy; no enhanced, RM, or additional review is triggered for this payment.\n\nAssumption: 1:1 CHF/USD equivalence used solely for the global USD-denominated threshold comparison, per standard convention when no FX rate is provided.\n\nMissing evidence: Clarification needed on why beneficiary_country name (\"UK\") disagrees with beneficiary_country_code (CH); does not affect this threshold determination since CH is not high-risk.\n\nRecommendation: Standard processing \u2014 no elevated review required based on regional (Swiss) or global thresholds.",
+    "answer": "Payment P50004: Client C2003 is domiciled in Switzerland, so the applicable regional threshold is regional_switzerland.md, applied alongside global_payment_policy.md. Regional thresholds (native currency, CHF): - RM review threshold: CHF 80,000 \u2014 payment is CHF 48,000, does NOT exceed. - Enhanced review threshold: CHF 120,000 \u2014 payment is CHF 48,000, does NOT exceed. Global threshold (USD equivalence assumed 1:1 with CHF given no FX data): enhanced review at USD 100,000 equivalent \u2014 CHF 48,000 does NOT exceed. High-risk jurisdiction check: only AE is listed as high-risk (high_risk_jurisdictions.md). The authoritative beneficiary_country_code is CH (not high-risk); note the beneficiary_country name field says \"UK\", which conflicts with the code \u2014 per the evidence, the code is authoritative for jurisdiction risk, so this is treated as a Swiss-linked beneficiary and no high-risk trigger applies. This name/code mismatch is a data-quality flag that should be verified operationally but does not itself change the threshold outcome. Structuring check: Redwood Services has only 2 payments from this client (P50004, P50068) with no same-day cluster, so no structuring trigger under the global policy's 24-hour combined-value rule. Conclusion: No RM review, enhanced review, or additional review threshold is triggered for P50004 under either the Swiss regional policy or the global policy. Assumptions relied upon: 1:1 CHF/USD equivalence for the global check, and country-code (CH) treated as authoritative over the conflicting country-name field (UK). Recommended action: standard processing; flag the beneficiary_country name/code discrepancy for data-quality follow-up before final release.",
     "citations": [
       "regional_switzerland.md",
-      "global_payment_policy.md"
+      "global_payment_policy.md",
+      "high_risk_jurisdictions.md"
     ],
     "facts": {
       "payment_id": "P50004",
@@ -481,11 +573,11 @@
     "question": "What payment-review threshold applies based on the client's region?"
   },
   {
-    "answer": "Payment P50005 (CHF 47,000, client C2003, Switzerland, Low risk) is below all monetary thresholds: global enhanced review (USD 100,000 eq.), Swiss RM review (CHF 80,000), and Swiss enhanced review (CHF 120,000) are all not exceeded (1:1 CHF/USD equivalence assumed, no FX data provided). However, the beneficiary_country_code is AE (UAE), which is on the high-risk jurisdiction list. Per global_payment_policy.md and high_risk_jurisdictions.md, payments to high-risk jurisdictions require additional review regardless of amount \u2014 this trigger is independent of and not contingent on the monetary thresholds. A check for repeated-beneficiary structuring (Pacific Holdings, 3 payments total including P50005) found no same-day cluster, so there is no structuring indicator for this payment. Note per policy that a trigger alone does not establish suspicious activity.\n\nRecommendation: Route P50005 for additional review specifically due to the high-risk AE destination, even though no RM or enhanced review is required on amount grounds. No further escalation (e.g., to Compliance for structuring) is warranted based on current evidence. Missing evidence: beneficiary KYC/source-of-funds documentation for the AE relationship, which would typically support closing out the additional review.",
+    "answer": "Payment P50005 (CHF 47,000, client C2003 \u2192 Pacific Holdings, beneficiary_country_code AE/UAE) does not exceed any amount threshold: global enhanced-review (USD 100,000 eq., 1:1 CHF/USD assumed), Swiss RM-review (CHF 80,000) or Swiss enhanced-review (CHF 120,000) limits. However, AE is explicitly on the high-risk jurisdiction list, and both the global policy and the high-risk jurisdiction list state that payments to high-risk destinations require additional review regardless of amount. This trigger is amount-independent, so the sub-threshold value does not exempt the payment. A check for structuring (find_repeated_beneficiaries) shows Pacific Holdings has 3 payments from this client historically but no same-day clustering, so structuring is not indicated for this payment. Recommendation: route P50005 for additional review under the high-risk-destination rule (not RM/enhanced amount review, since thresholds aren't met). This is a policy trigger only and does not by itself establish suspicious activity \u2014 the reviewer should confirm the business rationale/KYC for the UAE beneficiary before clearing. Key assumption: 1:1 CHF/USD equivalence used for the global threshold comparison, per stated policy convention (no FX data provided). Missing evidence: underlying purpose of payment, KYC/sanctions status of \"Pacific Holdings,\" and any prior additional-review outcomes for this beneficiary.",
     "citations": [
       "global_payment_policy.md",
-      "high_risk_jurisdictions.md",
-      "regional_switzerland.md"
+      "regional_switzerland.md",
+      "high_risk_jurisdictions.md"
     ],
     "facts": {
       "payment_id": "P50005",
@@ -543,9 +635,11 @@
     "question": "If a payment is below the global threshold but the destination is high-risk, what should be recommended?"
   },
   {
-    "answer": "Workflow applied (per investigation_procedure.md): (1) Establish client/payment facts; (2) Identify applicable policy; (3) Check high-risk destination; (4) Check transaction splitting/structuring; (5) Separate facts from assumptions; (6) Record supporting evidence.\n\nApplied to P50006: Client C2023 is UK-domiciled (Medium risk, Individual, 7.7yr tenure), so only the global_payment_policy.md applies\u2014no Singapore/Switzerland regional procedure. Beneficiary jurisdiction code is HK, which is NOT on the high-risk list (only AE/UAE per high_risk_jurisdictions.md), so no additional-review trigger. Repeated-beneficiary check found two payments to \"Pacific Holdings\" (P50006, P50061) but no same-day cluster, so the 24-hour structuring/splitting aggregation rule does not apply. Threshold evaluation shows SGD 24,110.41 does not exceed the USD 100,000-equivalent enhanced-review threshold (1:1 SGD/USD equivalence assumed, as no FX data exists). No policy triggers fired (any_trigger: false); RM-review, enhanced-review, and additional-review are all not required.\n\nAssumptions: 1:1 currency equivalence used for threshold comparison per stated policy convention.\n\nMissing evidence: None outstanding\u2014jurisdiction is unambiguous (HK code, not AE), no same-day clustering, no threshold breach.\n\nRecommendation: Proceed with standard processing. No escalation warranted. The RM-assisted channel already provides an appropriate level of human oversight given the payment's low risk profile (no high-risk destination, no threshold breach, no structuring pattern, established client relationship).",
+    "answer": "Investigation workflow applied (per investigation_procedure.md): (1) Establish client and payment facts; (2) Identify the applicable policy; (3) Check high-risk destination indicators; (4) Check for possible transaction splitting; (5) Separate observed facts from assumptions; (6) Record evidence supporting the recommendation. Applied to P50006: Client C2023 (UK, Medium risk, Individual, 7.7yr tenure) sent SGD 24,110.41 via RM-assisted channel on 2026-01-19 to \"Pacific Holdings\" (beneficiary_country name = Hong Kong, authoritative code = HK; no discrepancy present). Since the client is UK-based, no regional procedure (Singapore/Switzerland) applies\u2014only the global_payment_policy.md governs. Global enhanced-review threshold (USD 100,000 equivalent) is not exceeded. HK is not on the high-risk jurisdiction list (only AE is listed per high_risk_jurisdictions.md), so no additional review is triggered. Structuring check: client has a second payment to the same beneficiary (P50061), but evaluate_structuring confirms no same-day cluster\u2014only P50006 fell in its 24h window, well under the USD 100,000 structuring threshold\u2014so no escalation to Compliance is required. Assumptions: 1:1 SGD-to-USD equivalence used absent FX data; calendar-date payments treated as same 24h window per policy convention. Missing evidence: precise FX rate; context on the nature of the Pacific Holdings relationship or purpose of P50061. Recommendation: No policy trigger fires (enhanced review, RM review, additional review, or structuring escalation all false). The payment may proceed under standard processing. The recurring beneficiary may be noted for informational awareness but does not independently require escalation.",
     "citations": [
-      "global_payment_policy.md"
+      "investigation_procedure.md",
+      "global_payment_policy.md",
+      "high_risk_jurisdictions.md"
     ],
     "facts": {
       "payment_id": "P50006",
@@ -571,14 +665,36 @@
       "rm_review_required": false,
       "additional_review_required": false,
       "policy_triggers": [],
-      "currency_assumption": "No exchange-rate data is provided; where the payment currency differs from the threshold currency, 1:1 equivalence is assumed."
+      "currency_assumption": "No exchange-rate data is provided; where the payment currency differs from the threshold currency, 1:1 equivalence is assumed.",
+      "structuring_analysis": {
+        "beneficiary_name": "Pacific Holdings",
+        "window_date": "2026-01-19",
+        "window_assumption": "payment_date has no time component; payments sharing a calendar date are treated as being within the same 24-hour window",
+        "payment_count_in_window": 1,
+        "payment_ids_in_window": [
+          "P50006"
+        ],
+        "combined_amount": 24110.41,
+        "combined_currency": "SGD",
+        "threshold_comparison": {
+          "threshold_amount": 100000,
+          "threshold_currency": "USD",
+          "payment_amount": 24110.41,
+          "payment_currency": "SGD",
+          "exceeds": false,
+          "comparison_basis": "1:1 equivalence assumed between SGD and USD"
+        },
+        "structuring_review_triggered": false,
+        "escalation_to_compliance_required": false
+      }
     },
     "tools_used": [
       "get_payment",
       "get_client_profile",
       "evaluate_payment_thresholds",
       "search_policy",
-      "find_repeated_beneficiaries"
+      "find_repeated_beneficiaries",
+      "evaluate_structuring"
     ],
     "question_id": "Q10",
     "payment_id": "P50006",
