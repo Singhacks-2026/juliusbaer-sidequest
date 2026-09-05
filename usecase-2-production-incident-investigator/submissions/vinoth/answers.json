@@ -1,0 +1,83 @@
+{
+  "incident_a_pool_exhaustion": {
+    "root_cause": "ConnectionPoolTimeoutException in payment-gateway-adapter: 5 ERROR entries from 2026-09-02 14:47, beginning 17 minutes after deployment v2.4.1 to payment-gateway-adapter (Reduced connection pool size from 50 to 10 (memory optimization for the upcoming cost-reduction initiative)). Matches known issue KI-101 (ConnectionPoolTimeoutException in payment-gateway-adapter) and prior incident INC-2031, whose root cause was: connection pool size was set too low for peak traffic during a configuration change made in that day's deploy.",
+    "supporting_evidence": [
+      {
+        "source": "logs.md",
+        "excerpt": "2026-09-02 14:47:12 ERROR payment-gateway-adapter  ConnectionPoolTimeoutException: no available connection after 5000ms"
+      },
+      {
+        "source": "logs.md",
+        "excerpt": "2026-09-02 14:52:01 ERROR payment-gateway-adapter  ConnectionPoolTimeoutException: no available connection after 5000ms"
+      },
+      {
+        "source": "logs.md",
+        "excerpt": "2026-09-02 14:47:12 ERROR payment-service          Charge failed order_id=ORD-88350 reason=GATEWAY_TIMEOUT"
+      },
+      {
+        "source": "deployment_history.md",
+        "excerpt": "v2.4.1 | 2026-09-02 14:30 | payment-gateway-adapter | Reduced connection pool size from 50 to 10 (memory optimization for the upcoming cost-reduction initiative)"
+      },
+      {
+        "source": "known_issues.csv",
+        "excerpt": "issue_id: KI-101 | title: ConnectionPoolTimeoutException in payment-gateway-adapter | signature: A ConnectionPoolTimeoutException in payment-gateway-adapter logs is a known signature of an undersized connection pool relative to current traffic; cross-reference..."
+      },
+      {
+        "source": "previous_incidents.md",
+        "excerpt": "**Summary**: Intermittent payment failures, `payment-gateway-adapter` logging `ConnectionPoolTimeoutException` under normal (not elevated) traffic."
+      },
+      {
+        "source": "runbooks.md",
+        "excerpt": "**Symptoms**: `ConnectionPoolTimeoutException` appearing in `payment-gateway-adapter` logs; intermittent (not total) payment failures; `payment-service` logging `GATEWAY_TIMEOUT`."
+      },
+      {
+        "source": "architecture.md",
+        "excerpt": "- **payment-gateway-adapter**: owns a bounded connection pool to the external Payment Provider's API. Pool size is a static configuration value, set at deploy time. When the pool is exhausted, new requests wait up to a fixed timeout and then fail with `Connect..."
+      }
+    ],
+    "impacted_systems": [
+      "payment-gateway-adapter",
+      "payment-service"
+    ],
+    "mttr_minutes": 20,
+    "remediation": "Roll back deployment v2.4.1 on payment-gateway-adapter (Reduced connection pool size from 50 to 10 (memory optimization for the upcoming cost-reduction initiative)). Per runbook RB-014: revert the pool size to the prior baseline value, or scale the pool size upward to match current traffic; redeploy `payment-gateway-adapter`. Precedent INC-2031 was resolved by: reverted the pool size to its prior value (50) and redeployed.",
+    "confidence_score": 92.0,
+    "needs_human_review": false
+  },
+  "incident_b_ambiguous_delay": {
+    "root_cause": "UNCONFIRMED. Leading hypothesis: a backlog or slowdown in notification-service - the only signal is 'Queue depth elevated: 340 messages' logged by notification-service at 2026-08-15 11:10. The evidence is too thin to name a root cause: no ERROR-level log entries; no known issue with this signature; no deployment to notification-service before the symptom; no prior incident with this signature; the only runbook (RB-002) describes itself as unverified. Needs human investigation.",
+    "supporting_evidence": [
+      {
+        "source": "logs.md",
+        "excerpt": "2026-08-15 11:10:02 WARN  notification-service     Queue depth elevated: 340 messages"
+      },
+      {
+        "source": "runbooks.md",
+        "excerpt": "**Symptoms**: `notification-service` logging elevated queue depth warnings."
+      },
+      {
+        "source": "api_specs.md",
+        "excerpt": "`notification-service` has no public HTTP API \u2014 it is a queue consumer only, triggered internally by events published from `order-service` and `payment-service`. There is no documented SLA for email delivery latency in the current API specification; this is it..."
+      },
+      {
+        "source": "deployment_history.md",
+        "excerpt": "No deployment touched `notification-service` in the month before this incident (2026-08-15). The two entries above both post-date this incident and involve unrelated components \u2014 there is no deployment correlated with the email delay pattern."
+      },
+      {
+        "source": "previous_incidents.md",
+        "excerpt": "No previous incident in the historical record involves `notification-service` email delivery latency. The two incidents on file (payment gateway connection pool exhaustion, and a database failover affecting `order-service`) are both unrelated to email delivery..."
+      },
+      {
+        "source": "architecture.md",
+        "excerpt": "- **notification-service**: subscribes to an internal message queue; each order/payment event is queued as a message, and a pool of consumer workers dequeues and sends the corresponding email. Consumer pool size and the third-party email provider's own latency..."
+      }
+    ],
+    "impacted_systems": [
+      "notification-service"
+    ],
+    "mttr_minutes": null,
+    "remediation": "Do not act on a single-signal hypothesis. Escalate to a human and gather evidence first - check consumer count and downstream email provider latency. Neither is currently exposed as a metric \u2014 this runbook is incomplete pending better instrumentation. The sources themselves flag instrumentation gaps (api_specs.md; architecture.md) that must be closed before a confident diagnosis is possible. Only then consider: Per runbook RB-002: scale notification-service consumers (unverified whether this is actually the bottleneck). RB-002 quotes an MTTR of 15 minutes but flags that figure as unconfirmed for this symptom, so none is reported.",
+    "confidence_score": 18.0,
+    "needs_human_review": true
+  }
+}
