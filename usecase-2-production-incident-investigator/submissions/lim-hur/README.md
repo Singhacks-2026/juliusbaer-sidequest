@@ -1,8 +1,6 @@
 # Production incident investigator
 
 Participant: Lim Hur (GitHub: `lhurr`).
-Phone: pending participant-provided submission details.
-Email: pending participant-provided submission details.
 
 This submission implements use case 2 with Python 3.10+ and the standard library.
 It runs offline without an API key or model download.
@@ -41,29 +39,34 @@ It must retain enough positive coverage that returning "unknown" for everything 
 
 ## Design
 
-1. **Parse source roles and retain provenance.** Content identifies logs, deployment records, catalog CSV, architecture descriptions, and procedural sections.
+1. **Parse source roles and retain provenance.**
+   Content identifies logs, deployment records, catalog CSV, architecture descriptions, and procedural sections.
    Filenames are citation labels rather than incident identifiers or answer selectors.
    CSV parsing supports quoted commas and multiline fields.
    Runbook sections remain intact so recommendations keep their scope and uncertainty qualifiers.
    Example logs inside a runbook do not become observations of the current incident.
    All returned excerpts must be nonempty exact substrings of their named sources.
-2. **Retrieve candidate evidence.** BM25 ranks passages with term-frequency saturation and length normalization (`k1=1.5`, `b=0.75`).
+2. **Retrieve candidate evidence.**
+   BM25 ranks passages with term-frequency saturation and length normalization (`k1=1.5`, `b=0.75`).
    Query normalization scopes the operation and component, then an affirmative runtime signature expands retrieval to matching catalog mechanisms and references.
    Signatures include exception names, status identifiers, and limited structured symptom phrases.
    Retrieval scores rank candidates; they do not establish causality or determine confidence.
-3. **Check applicability and chronology.** Runtime observations must affirm the relevant failure, rather than negate it, report zero occurrences, or describe resolved/example events.
+3. **Check applicability and chronology.**
+   Runtime observations must affirm the relevant failure, rather than negate it, report zero occurrences, or describe resolved/example events.
    Operation and resource qualifiers prevent a refund failure from explaining a charge incident or a provider pool from explaining a database pool.
    Runbooks, history, and deployment changes must satisfy their own applicability checks.
    Configuration values are associated with their resource, preventing a retry-count change from becoming a pool-capacity recommendation.
    The latest relevant preceding configuration change is considered; an intervening logging-only release does not erase an earlier pool change.
    A later mitigation is context, not evidence that it caused the earlier onset or proved recovery.
    Timestamps normalize to UTC, including fractional seconds and numeric offsets; unzoned timestamps are assumed UTC.
-4. **Correlate impact and queue observations.** Downstream impact needs an explicit directed dependency, a matching operation, and linked failures.
+4. **Correlate impact and queue observations.**
+   Downstream impact needs an explicit directed dependency, a matching operation, and linked failures.
    Shared identifiers support linkage within a bounded 30-second window; an exact-time, matching-signature fallback handles the supplied legacy logs.
    Queue measurements prefer unique message IDs over broader request, trace, or order IDs.
    Pairs must be one-to-one, chronological, in the same component, affirmative successful sends, and consistent on every shared identifier.
    Ambiguous duplicates or conflicting metadata are excluded rather than silently paired.
-5. **Render a supported answer or explicit uncertainty.** Competing hypotheses and contradictions are checked before rendering recommendations.
+5. **Render a supported answer or explicit uncertainty.**
+   Competing hypotheses and contradictions are checked before rendering recommendations.
    Insufficient evidence produces an unconfirmed hypothesis and diagnostic steps without prescribing an unsupported rollback.
    A recovery estimate requires an applicable, qualified source; queue waiting time never supplies MTTR.
    The output uses the seven required fields, with `needs_human_review` derived from the final score.
