@@ -1,0 +1,700 @@
+[
+  {
+    "answer": "Payment P50000 does not require enhanced review. The payment amount is USD 12,000, which is below the global enhanced review threshold of USD 100,000. Additionally, the payment does not trigger any high-risk destination review as the beneficiary country code is SG (Singapore), which is not listed as high-risk. There is no evidence of structuring as the total amount for the day is USD 12,000, which is below the structuring threshold of USD 100,000. Note: beneficiary_country is 'UK' while beneficiary_country_code is 'SG'; the code is authoritative for jurisdiction risk. Client country/region is UAE (risk rating: Medium).",
+    "citations": [
+      "global_payment_policy.md"
+    ],
+    "facts": {
+      "payment_id": "P50000",
+      "amount": 12000.0,
+      "currency": "USD",
+      "beneficiary_country_code": "SG",
+      "beneficiary_country": "UK",
+      "beneficiary_name": "Redwood Services",
+      "client_id": "C2000",
+      "channel": "Branch",
+      "payment_date": "2026-01-23",
+      "client_country": "UAE",
+      "client_risk_rating": "Medium",
+      "requires_rm_review": false,
+      "requires_enhanced_review": false,
+      "requires_additional_review": false,
+      "high_risk_destination": false,
+      "possible_structuring": false,
+      "recommendations": [
+        "standard_monitoring"
+      ],
+      "policy_triggers": [],
+      "applicable_policies": [
+        "global_payment_policy.md",
+        "investigation_procedure.md"
+      ],
+      "beneficiary_24h_count": 1,
+      "beneficiary_24h_total": 12000.0,
+      "beneficiary_24h_date": "2026-01-23",
+      "beneficiary_24h_payment_ids": [
+        "P50000"
+      ],
+      "beneficiary_24h_individual_amounts": [
+        12000.0
+      ],
+      "global_enhanced_threshold": 100000.0,
+      "structuring_threshold": 100000.0,
+      "same_day_total_amount": 12000.0
+    },
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "evaluate_review_requirements",
+      "search_policy"
+    ],
+    "question_id": "Q01",
+    "payment_id": "P50000",
+    "question": "Should P50000 require enhanced review? Explain using policy."
+  },
+  {
+    "answer": "The payment P50001 requires RM review, enhanced review, and additional review due to being sent to a high-risk jurisdiction (AE - UAE). The payment amount of USD 125,000 exceeds both the regional RM review threshold of USD 75,000 and the enhanced review threshold of USD 100,000 for Singapore. Additionally, since the beneficiary country code is AE, which is listed as a high-risk jurisdiction, an additional review is required.",
+    "citations": [
+      "global_payment_policy.md",
+      "regional_singapore.md",
+      "high_risk_jurisdictions.md"
+    ],
+    "facts": {
+      "payment_id": "P50001",
+      "amount": 125000.0,
+      "currency": "USD",
+      "beneficiary_country_code": "AE",
+      "beneficiary_country": "UAE",
+      "beneficiary_name": "Desert Star LLC",
+      "client_id": "C2001",
+      "channel": "Branch",
+      "payment_date": "2026-05-11",
+      "client_country": "Singapore",
+      "client_risk_rating": "Low",
+      "requires_rm_review": true,
+      "requires_enhanced_review": true,
+      "requires_additional_review": true,
+      "high_risk_destination": true,
+      "possible_structuring": false,
+      "recommendations": [
+        "enhanced_review_before_release",
+        "additional_review_high_risk_destination"
+      ],
+      "policy_triggers": [
+        "rm_review",
+        "enhanced_review",
+        "additional_review_high_risk_destination"
+      ],
+      "applicable_policies": [
+        "global_payment_policy.md",
+        "regional_singapore.md",
+        "high_risk_jurisdictions.md",
+        "investigation_procedure.md"
+      ],
+      "beneficiary_24h_count": 1,
+      "beneficiary_24h_total": 125000.0,
+      "beneficiary_24h_date": "2026-05-11",
+      "beneficiary_24h_payment_ids": [
+        "P50001"
+      ],
+      "beneficiary_24h_individual_amounts": [
+        125000.0
+      ],
+      "client_type": "Individual",
+      "regional_thresholds": {
+        "rm_review": 75000.0,
+        "enhanced_review": 100000.0
+      }
+    },
+    "tools_used": [
+      "get_payment",
+      "evaluate_review_requirements",
+      "get_client_profile",
+      "search_policy"
+    ],
+    "question_id": "Q02",
+    "payment_id": "P50001",
+    "question": "What review requirement applies to P50001 and why?"
+  },
+  {
+    "answer": "The payment P50002 has several risk indicators that require additional review. The payment amount of USD 85,000 exceeds the regional RM review threshold of USD 75,000 for Singapore, necessitating a Relationship Manager (RM) review. Additionally, the beneficiary country code is AE (United Arab Emirates), which is classified as a high-risk jurisdiction, requiring further review. There is no evidence of structuring as the total amount for the day is USD 85,000, which is below the structuring threshold of USD 100,000. The payment should undergo RM review and additional review due to the high-risk destination. Note: beneficiary_country is 'Hong Kong' while beneficiary_country_code is 'AE'; the code is authoritative for jurisdiction risk.",
+    "citations": [
+      "global_payment_policy.md",
+      "regional_singapore.md",
+      "high_risk_jurisdictions.md",
+      "investigation_procedure.md"
+    ],
+    "facts": {
+      "payment_id": "P50002",
+      "amount": 85000.0,
+      "currency": "USD",
+      "beneficiary_country_code": "AE",
+      "beneficiary_country": "Hong Kong",
+      "beneficiary_name": "Pacific Holdings",
+      "client_id": "C2002",
+      "channel": "Branch",
+      "payment_date": "2026-04-27",
+      "client_country": "Singapore",
+      "client_risk_rating": "Medium",
+      "requires_rm_review": true,
+      "requires_enhanced_review": false,
+      "requires_additional_review": true,
+      "high_risk_destination": true,
+      "possible_structuring": false,
+      "recommendations": [
+        "rm_review",
+        "additional_review_high_risk_destination"
+      ],
+      "policy_triggers": [
+        "rm_review",
+        "additional_review_high_risk_destination"
+      ],
+      "applicable_policies": [
+        "global_payment_policy.md",
+        "regional_singapore.md",
+        "high_risk_jurisdictions.md",
+        "investigation_procedure.md"
+      ],
+      "beneficiary_24h_count": 1,
+      "beneficiary_24h_total": 85000.0,
+      "beneficiary_24h_date": "2026-04-27",
+      "beneficiary_24h_payment_ids": [
+        "P50002"
+      ],
+      "beneficiary_24h_individual_amounts": [
+        85000.0
+      ],
+      "client_type": "Individual",
+      "regional_thresholds": {
+        "rm_review": {
+          "amount": 75000.0,
+          "currency": "USD"
+        },
+        "enhanced_review": {
+          "amount": 100000.0,
+          "currency": "USD"
+        }
+      },
+      "same_day_beneficiary_window": {
+        "count": 1,
+        "total_amount": 85000.0,
+        "currency": "USD",
+        "payment_date": "2026-04-27",
+        "payment_ids": [
+          "P50002"
+        ],
+        "individual_amounts": [
+          85000.0
+        ],
+        "channels": [
+          "Branch"
+        ]
+      }
+    },
+    "tools_used": [
+      "get_payment",
+      "evaluate_review_requirements",
+      "get_client_profile",
+      "search_policy"
+    ],
+    "question_id": "Q03",
+    "payment_id": "P50002",
+    "question": "Identify the risk indicators for P50002 and state the additional review required."
+  },
+  {
+    "answer": "The data indicates a possible transaction-splitting pattern for client C2003. On 2026-04-11, three payments were made to the same beneficiary, Northstar Trading, totaling CHF 110,000. Each payment was below the individual RM and enhanced thresholds for Switzerland (CHF 80,000 and CHF 120,000 respectively), but the combined total exceeds the global structuring threshold of USD 100,000 equivalent. The payments were made through different channels: Branch (P50003, CHF 45,000), Online (P50180, CHF 35,000), and RM-assisted (P50181, CHF 30,000). Given the potential structuring, this should be escalated to Compliance as per regional policy. Note: beneficiary_country is 'Singapore' while beneficiary_country_code is 'CH'; the code is authoritative for jurisdiction risk. This is an observed pattern / policy trigger only; it does not by itself establish suspicious activity or intent.",
+    "citations": [
+      "regional_switzerland.md",
+      "global_payment_policy.md"
+    ],
+    "facts": {
+      "payment_id": "P50003",
+      "amount": 45000.0,
+      "currency": "CHF",
+      "beneficiary_country_code": "CH",
+      "beneficiary_country": "Singapore",
+      "beneficiary_name": "Northstar Trading",
+      "client_id": "C2003",
+      "channel": "Branch",
+      "payment_date": "2026-04-11",
+      "client_country": "Switzerland",
+      "client_risk_rating": "Low",
+      "client_type": "Corporate",
+      "requires_rm_review": false,
+      "requires_enhanced_review": false,
+      "requires_additional_review": false,
+      "high_risk_destination": false,
+      "possible_structuring": true,
+      "recommendations": [
+        "escalate_potential_structuring_to_compliance"
+      ],
+      "policy_triggers": [
+        "possible_structuring_24h"
+      ],
+      "applicable_policies": [
+        "global_payment_policy.md",
+        "regional_switzerland.md",
+        "investigation_procedure.md"
+      ],
+      "currency_assumption": "Global USD thresholds compared 1:1 to payment currency (no FX data provided).",
+      "beneficiary_24h_count": 3,
+      "beneficiary_24h_total": 110000.0,
+      "beneficiary_24h_date": "2026-04-11",
+      "beneficiary_24h_payment_ids": [
+        "P50003",
+        "P50180",
+        "P50181"
+      ],
+      "beneficiary_24h_individual_amounts": [
+        45000.0,
+        35000.0,
+        30000.0
+      ],
+      "same_day_payments": [
+        {
+          "payment_id": "P50003",
+          "amount": 45000.0,
+          "channel": "Branch"
+        },
+        {
+          "payment_id": "P50180",
+          "amount": 35000.0,
+          "channel": "Online"
+        },
+        {
+          "payment_id": "P50181",
+          "amount": 30000.0,
+          "channel": "RM-assisted"
+        }
+      ],
+      "total_amount": 110000.0,
+      "regional_thresholds": {
+        "rm_review": 80000.0,
+        "enhanced_review": 120000.0
+      },
+      "structuring_threshold": 100000.0
+    },
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "evaluate_review_requirements",
+      "search_policy"
+    ],
+    "question_id": "Q04",
+    "payment_id": "P50003",
+    "question": "Does the data show a possible transaction-splitting pattern for C2003? Explain."
+  },
+  {
+    "answer": "The assistant should retrieve the following policy documents before recommending the release of payment P50001: regional_singapore.md, global_payment_policy.md, high_risk_jurisdictions.md, and investigation_procedure.md.",
+    "citations": [
+      "regional_singapore.md",
+      "global_payment_policy.md",
+      "high_risk_jurisdictions.md",
+      "investigation_procedure.md"
+    ],
+    "facts": {
+      "payment_id": "P50001",
+      "amount": 125000.0,
+      "currency": "USD",
+      "beneficiary_country_code": "AE",
+      "beneficiary_country": "UAE",
+      "beneficiary_name": "Desert Star LLC",
+      "client_id": "C2001",
+      "channel": "Branch",
+      "payment_date": "2026-05-11",
+      "client_country": "Singapore",
+      "client_risk_rating": "Low",
+      "requires_rm_review": true,
+      "requires_enhanced_review": true,
+      "requires_additional_review": true,
+      "high_risk_destination": true,
+      "possible_structuring": false,
+      "recommendations": [
+        "enhanced_review_before_release",
+        "additional_review_high_risk_destination"
+      ],
+      "policy_triggers": [
+        "rm_review",
+        "enhanced_review",
+        "additional_review_high_risk_destination"
+      ],
+      "applicable_policies": [
+        "global_payment_policy.md",
+        "regional_singapore.md",
+        "high_risk_jurisdictions.md",
+        "investigation_procedure.md"
+      ],
+      "beneficiary_24h_count": 1,
+      "beneficiary_24h_total": 125000.0,
+      "beneficiary_24h_date": "2026-05-11",
+      "beneficiary_24h_payment_ids": [
+        "P50001"
+      ],
+      "beneficiary_24h_individual_amounts": [
+        125000.0
+      ],
+      "client_type": "Individual",
+      "regional_thresholds": {
+        "rm_review": 75000.0,
+        "enhanced_review": 100000.0
+      }
+    },
+    "tools_used": [
+      "get_payment",
+      "evaluate_review_requirements",
+      "get_client_profile",
+      "search_policy"
+    ],
+    "question_id": "Q05",
+    "payment_id": "P50001",
+    "question": "Which policy documents should the assistant retrieve before recommending release of P50001?"
+  },
+  {
+    "answer": "Facts: The payment P50002 is for USD 85,000 to Pacific Holdings, with a beneficiary country code of AE (United Arab Emirates), which is a high-risk jurisdiction. The client is based in Singapore, and the payment was made through a branch channel. The regional threshold for Singapore requires RM review for payments above USD 75,000, and enhanced review for payments above USD 100,000. The payment exceeds the RM review threshold but not the enhanced review threshold. The payment is also subject to additional review due to the high-risk jurisdiction (AE). There is no evidence of structuring as the total amount for the day is USD 85,000, which is below the structuring threshold of USD 100,000.\n\nAssumptions: The payment's high-risk jurisdiction status is based on the beneficiary country code (AE), despite the beneficiary country being listed as Hong Kong. The policy triggers for RM review and additional review due to high-risk destination are indicators and do not establish suspicious activity or intent.\n\nRecommendation: Conduct an RM review and additional review due to the high-risk jurisdiction. Follow the investigation procedure to ensure compliance with the applicable policies.",
+    "citations": [
+      "regional_singapore.md",
+      "high_risk_jurisdictions.md",
+      "global_payment_policy.md",
+      "investigation_procedure.md"
+    ],
+    "facts": {
+      "payment_id": "P50002",
+      "amount": 85000.0,
+      "currency": "USD",
+      "beneficiary_country_code": "AE",
+      "beneficiary_country": "Hong Kong",
+      "beneficiary_name": "Pacific Holdings",
+      "client_id": "C2002",
+      "channel": "Branch",
+      "payment_date": "2026-04-27",
+      "client_country": "Singapore",
+      "client_risk_rating": "Medium",
+      "requires_rm_review": true,
+      "requires_enhanced_review": false,
+      "requires_additional_review": true,
+      "high_risk_destination": true,
+      "possible_structuring": false,
+      "recommendations": [
+        "rm_review",
+        "additional_review_high_risk_destination"
+      ],
+      "policy_triggers": [
+        "rm_review",
+        "additional_review_high_risk_destination"
+      ],
+      "applicable_policies": [
+        "global_payment_policy.md",
+        "regional_singapore.md",
+        "high_risk_jurisdictions.md",
+        "investigation_procedure.md"
+      ],
+      "beneficiary_24h_count": 1,
+      "beneficiary_24h_total": 85000.0,
+      "beneficiary_24h_date": "2026-04-27",
+      "beneficiary_24h_payment_ids": [
+        "P50002"
+      ],
+      "beneficiary_24h_individual_amounts": [
+        85000.0
+      ],
+      "client_type": "Individual",
+      "regional_thresholds": {
+        "rm_review": {
+          "amount": 75000.0,
+          "currency": "USD"
+        },
+        "enhanced_review": {
+          "amount": 100000.0,
+          "currency": "USD"
+        }
+      },
+      "same_day_beneficiary_window": {
+        "count": 1,
+        "total_amount": 85000.0,
+        "currency": "USD",
+        "payment_date": "2026-04-27",
+        "payment_ids": [
+          "P50002"
+        ],
+        "individual_amounts": [
+          85000.0
+        ],
+        "channels": [
+          "Branch"
+        ]
+      }
+    },
+    "tools_used": [
+      "get_payment",
+      "evaluate_review_requirements",
+      "get_client_profile",
+      "search_policy"
+    ],
+    "question_id": "Q06",
+    "payment_id": "P50002",
+    "question": "Separate factual evidence from assumptions for P50002 and give a grounded recommendation."
+  },
+  {
+    "answer": "Before escalating the potential structuring pattern, ensure that all relevant payment details and client information are documented. The payments in question are P50003 (CHF 45,000), P50180 (CHF 35,000), and P50181 (CHF 30,000), all made to Northstar Trading on 2026-04-11. Each payment is below the individual RM and enhanced thresholds for Switzerland (CHF 80,000 and CHF 120,000 respectively). However, the combined total of CHF 110,000 exceeds the structuring threshold of USD 100,000 equivalent, indicating a potential structuring pattern. As per regional policy for Switzerland, this should be escalated to Compliance. Note: beneficiary_country is 'Singapore' while beneficiary_country_code is 'CH'; the code is authoritative for jurisdiction risk. This is an observed pattern / policy trigger only; it does not by itself establish suspicious activity or intent.",
+    "citations": [
+      "regional_switzerland.md",
+      "global_payment_policy.md"
+    ],
+    "facts": {
+      "payment_id": "P50003",
+      "amount": 45000.0,
+      "currency": "CHF",
+      "beneficiary_country_code": "CH",
+      "beneficiary_country": "Singapore",
+      "beneficiary_name": "Northstar Trading",
+      "client_id": "C2003",
+      "channel": "Branch",
+      "payment_date": "2026-04-11",
+      "client_country": "Switzerland",
+      "client_risk_rating": "Low",
+      "requires_rm_review": false,
+      "requires_enhanced_review": false,
+      "requires_additional_review": false,
+      "high_risk_destination": false,
+      "possible_structuring": true,
+      "recommendations": [
+        "escalate_potential_structuring_to_compliance"
+      ],
+      "policy_triggers": [
+        "possible_structuring_24h"
+      ],
+      "applicable_policies": [
+        "global_payment_policy.md",
+        "regional_switzerland.md",
+        "investigation_procedure.md"
+      ],
+      "currency_assumption": "Global USD thresholds compared 1:1 to payment currency (no FX data provided).",
+      "beneficiary_24h_count": 3,
+      "beneficiary_24h_total": 110000.0,
+      "beneficiary_24h_date": "2026-04-11",
+      "beneficiary_24h_payment_ids": [
+        "P50003",
+        "P50180",
+        "P50181"
+      ],
+      "beneficiary_24h_individual_amounts": [
+        45000.0,
+        35000.0,
+        30000.0
+      ],
+      "client_type": "Corporate",
+      "payment_ids": [
+        "P50003",
+        "P50180",
+        "P50181"
+      ],
+      "individual_amounts": [
+        45000.0,
+        35000.0,
+        30000.0
+      ],
+      "total_amount": 110000.0,
+      "regional_thresholds": {
+        "rm_review": 80000.0,
+        "enhanced_review": 120000.0
+      },
+      "structuring_threshold": 100000.0
+    },
+    "tools_used": [
+      "get_payment",
+      "evaluate_review_requirements",
+      "get_client_profile",
+      "aggregate_beneficiary_24h",
+      "search_policy"
+    ],
+    "question_id": "Q07",
+    "payment_id": "P50003",
+    "question": "What additional information should be requested before escalating the potential structuring pattern?"
+  },
+  {
+    "answer": "For the client based in Switzerland, the regional payment-review thresholds are as follows: Payments above CHF 80,000 require RM review, and payments above CHF 120,000 require enhanced review. The payment under investigation (P50004) of CHF 48,000 does not exceed these thresholds, so no additional review is required based on the amount. Note: beneficiary_country is 'UK' while beneficiary_country_code is 'CH'; the code is authoritative for jurisdiction risk.",
+    "citations": [
+      "regional_switzerland.md"
+    ],
+    "facts": {
+      "payment_id": "P50004",
+      "amount": 48000.0,
+      "currency": "CHF",
+      "beneficiary_country_code": "CH",
+      "beneficiary_country": "UK",
+      "beneficiary_name": "Redwood Services",
+      "client_id": "C2003",
+      "channel": "RM-assisted",
+      "payment_date": "2026-01-26",
+      "client_country": "Switzerland",
+      "client_risk_rating": "Low",
+      "requires_rm_review": false,
+      "requires_enhanced_review": false,
+      "requires_additional_review": false,
+      "high_risk_destination": false,
+      "possible_structuring": false,
+      "recommendations": [
+        "standard_monitoring"
+      ],
+      "policy_triggers": [],
+      "applicable_policies": [
+        "global_payment_policy.md",
+        "regional_switzerland.md",
+        "investigation_procedure.md"
+      ],
+      "currency_assumption": "Global USD thresholds compared 1:1 to payment currency (no FX data provided).",
+      "beneficiary_24h_count": 1,
+      "beneficiary_24h_total": 48000.0,
+      "beneficiary_24h_date": "2026-01-26",
+      "beneficiary_24h_payment_ids": [
+        "P50004"
+      ],
+      "beneficiary_24h_individual_amounts": [
+        48000.0
+      ],
+      "client_type": "Corporate",
+      "regional_thresholds": {
+        "rm_review": {
+          "amount": 80000.0,
+          "currency": "CHF"
+        },
+        "enhanced_review": {
+          "amount": 120000.0,
+          "currency": "CHF"
+        }
+      }
+    },
+    "tools_used": [
+      "get_payment",
+      "evaluate_review_requirements",
+      "get_client_profile",
+      "search_policy"
+    ],
+    "question_id": "Q08",
+    "payment_id": "P50004",
+    "question": "What payment-review threshold applies based on the client's region?"
+  },
+  {
+    "answer": "The payment to a high-risk jurisdiction (AE) requires additional review, even though it is below the global threshold. This is because AE is listed as a high-risk destination, triggering the need for further scrutiny. Client country/region is Switzerland (risk rating: Low).",
+    "citations": [
+      "high_risk_jurisdictions.md",
+      "global_payment_policy.md",
+      "investigation_procedure.md"
+    ],
+    "facts": {
+      "payment_id": "P50005",
+      "amount": 47000.0,
+      "currency": "CHF",
+      "beneficiary_country_code": "AE",
+      "beneficiary_country": "UAE",
+      "beneficiary_name": "Pacific Holdings",
+      "client_id": "C2003",
+      "channel": "Online",
+      "payment_date": "2026-02-18",
+      "client_country": "Switzerland",
+      "client_risk_rating": "Low",
+      "requires_rm_review": false,
+      "requires_enhanced_review": false,
+      "requires_additional_review": true,
+      "high_risk_destination": true,
+      "possible_structuring": false,
+      "recommendations": [
+        "additional_review_high_risk_destination"
+      ],
+      "policy_triggers": [
+        "additional_review_high_risk_destination"
+      ],
+      "applicable_policies": [
+        "global_payment_policy.md",
+        "regional_switzerland.md",
+        "high_risk_jurisdictions.md",
+        "investigation_procedure.md"
+      ],
+      "currency_assumption": "Global USD thresholds compared 1:1 to payment currency (no FX data provided).",
+      "beneficiary_24h_count": 1,
+      "beneficiary_24h_total": 47000.0,
+      "beneficiary_24h_date": "2026-02-18",
+      "beneficiary_24h_payment_ids": [
+        "P50005"
+      ],
+      "beneficiary_24h_individual_amounts": [
+        47000.0
+      ],
+      "client_type": "Corporate",
+      "regional_thresholds": {
+        "rm_review": {
+          "amount": 80000.0,
+          "currency": "CHF"
+        },
+        "enhanced_review": {
+          "amount": 120000.0,
+          "currency": "CHF"
+        }
+      },
+      "global_enhanced_threshold": {
+        "amount": 100000.0,
+        "currency": "USD"
+      }
+    },
+    "tools_used": [
+      "get_payment",
+      "evaluate_review_requirements",
+      "get_client_profile",
+      "search_policy"
+    ],
+    "question_id": "Q09",
+    "payment_id": "P50005",
+    "question": "If a payment is below the global threshold but the destination is high-risk, what should be recommended?"
+  },
+  {
+    "answer": "The investigation workflow for payment P50006 should follow these steps:\n\n1. Establish client and payment facts: Retrieve and confirm details such as client ID, beneficiary name, country, payment amount, currency, and channel.\n2. Identify the applicable policy: For this payment, the applicable policy is the global_payment_policy.md.\n3. Check high-risk destination indicators: The beneficiary country is Hong Kong (HK), which is not a high-risk jurisdiction.\n4. Check for possible transaction splitting: Evaluate if multiple payments to the same beneficiary within 24 hours exceed structuring thresholds. For P50006, only one payment of SGD 24,110.41 was made, which does not exceed the structuring threshold of USD 100,000 equivalent.\n5. Separate observed facts from assumptions: Clearly distinguish between verified data and any assumptions made during the investigation.\n6. Record the evidence supporting the recommendation: Document all findings and the rationale for any recommendations made, such as standard monitoring in this case.",
+    "citations": [
+      "investigation_procedure.md",
+      "global_payment_policy.md"
+    ],
+    "facts": {
+      "payment_id": "P50006",
+      "amount": 24110.41,
+      "currency": "SGD",
+      "beneficiary_country_code": "HK",
+      "beneficiary_country": "Hong Kong",
+      "beneficiary_name": "Pacific Holdings",
+      "client_id": "C2023",
+      "channel": "RM-assisted",
+      "payment_date": "2026-01-19",
+      "client_country": "UK",
+      "client_risk_rating": "Medium",
+      "requires_rm_review": false,
+      "requires_enhanced_review": false,
+      "requires_additional_review": false,
+      "high_risk_destination": false,
+      "possible_structuring": false,
+      "recommendations": [
+        "standard_monitoring"
+      ],
+      "policy_triggers": [],
+      "applicable_policies": [
+        "global_payment_policy.md",
+        "investigation_procedure.md"
+      ],
+      "currency_assumption": "Global USD thresholds compared 1:1 to payment currency (no FX data provided).",
+      "beneficiary_24h_count": 1,
+      "beneficiary_24h_total": 24110.41,
+      "beneficiary_24h_date": "2026-01-19",
+      "beneficiary_24h_payment_ids": [
+        "P50006"
+      ],
+      "beneficiary_24h_individual_amounts": [
+        24110.41
+      ]
+    },
+    "tools_used": [
+      "get_payment",
+      "evaluate_review_requirements",
+      "search_policy"
+    ],
+    "question_id": "Q10",
+    "payment_id": "P50006",
+    "question": "Summarize the investigation workflow that should be followed."
+  }
+]

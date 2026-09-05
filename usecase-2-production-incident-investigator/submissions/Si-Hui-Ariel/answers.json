@@ -1,0 +1,63 @@
+{
+  "incident_a_pool_exhaustion": {
+    "root_cause": "Root cause: payment-gateway-adapter connection pool was reduced from 50 to 10, which saturates under normal traffic and surfaces as ConnectionPoolTimeoutException (with caller-side timeouts). Independent sources that agree: ERROR logs, deployment history, a matching known issue, the matching runbook, and a prior incident. No material disagreement across the corroborating sources.",
+    "supporting_evidence": [
+      {
+        "source": "logs.md",
+        "excerpt": "2026-09-02 14:47:12 ERROR payment-gateway-adapter  ConnectionPoolTimeoutException: no available connection after 5000ms"
+      },
+      {
+        "source": "deployment_history.md",
+        "excerpt": "| **v2.4.1** | **2026-09-02 14:30** | **payment-gateway-adapter** | **Reduced connection pool size from 50 to 10 (memory optimization for the upcoming cost-reduction initiative)** |"
+      },
+      {
+        "source": "known_issues.csv",
+        "excerpt": "KI-101,ConnectionPoolTimeoutException in payment-gateway-adapter,A ConnectionPoolTimeoutException in payment-gateway-adapter logs is a known signature of an undersized connection pool relative to current traffic; cross-reference against deployment history for any recent pool siz\u2026"
+      },
+      {
+        "source": "runbooks.md",
+        "excerpt": "## RB-014: Payment Gateway Timeout Spike\n\n**Symptoms**: `ConnectionPoolTimeoutException` appearing in\n`payment-gateway-adapter` logs; intermittent (not total) payment\nfailures; `payment-service` logging `GATEWAY_TIMEOUT`.\n\n**Diagnostic steps**:\n1. Check `payment-gateway-adapter`\u2026"
+      },
+      {
+        "source": "previous_incidents.md",
+        "excerpt": "## INC-2031 (2026-03-14)\n\n**Summary**: Intermittent payment failures, `payment-gateway-adapter`\nlogging `ConnectionPoolTimeoutException` under normal (not elevated)\ntraffic.\n\n**Root cause**: connection pool size was set too low for peak traffic\nduring a configuration change made\u2026"
+      }
+    ],
+    "impacted_systems": [
+      "payment-gateway-adapter",
+      "payment-service"
+    ],
+    "mttr_minutes": 20,
+    "remediation": "Recommended action for on-call: Revert the pool size to the prior baseline value, or scale the pool size upward to match current traffic; redeploy `payment-gateway-adapter`. Confirm pool utilization is back below saturation after the change, then monitor charge success rate for a short soak window.",
+    "confidence_score": 96.0,
+    "needs_human_review": false
+  },
+  "incident_b_ambiguous_delay": {
+    "root_cause": "No confirmed root cause for the reported symptoms around notification-service. Independent sources that agree: log warnings, and a runbook (weak/unverified). Where evidence is thin or disagrees: no correlated deployment; no matching known-issue signature; no clear precedent; documents explicitly mark related guidance as unverified or unrelated. A confident attribution would be unwarranted on this evidence.",
+    "supporting_evidence": [
+      {
+        "source": "logs.md",
+        "excerpt": "2026-08-15 11:10:02 WARN  notification-service     Queue depth elevated: 340 messages | Delay pattern: 2026-08-15 08:55:03 INFO  notification-service     Email queued order_id=ORD-55021 \u2192 2026-08-15 09:41:38 INFO  notification-service     Email sent order_id=ORD-55021 (queued 08:55:03, sent 09:41:38)"
+      },
+      {
+        "source": "deployment_history.md",
+        "excerpt": "No deployment touched `notification-service` in the month before this\nincident (2026-08-15). The two entries above both post-date this\nincident and involve unrelated components \u2014 there is no deployment\ncorrelated with the email delay pattern."
+      },
+      {
+        "source": "runbooks.md",
+        "excerpt": "## RB-002: Elevated Notification Queue Depth\n\n**Symptoms**: `notification-service` logging elevated queue depth\nwarnings.\n\n**Diagnostic steps**: check consumer count and downstream email provider\nlatency. Neither is currently exposed as a metric \u2014 this runbook is\nincomplete pend\u2026"
+      },
+      {
+        "source": "previous_incidents.md",
+        "excerpt": "# Previous incidents\n\nNo previous incident in the historical record involves\n`notification-service` email delivery latency. The two incidents on file\n(payment gateway connection pool exhaustion, and a database failover\naffecting `order-service`) are both unrelated to email delivery timing.\n\nThis is\u2026"
+      }
+    ],
+    "impacted_systems": [
+      "notification-service"
+    ],
+    "mttr_minutes": null,
+    "remediation": "Recommended action for on-call: escalate for human review before changing production. The only runbook hint on file is: \"Scale notification-service consumers (unverified whether this is actually the bottleneck).\" \u2014 that guidance is explicitly unverified. Prefer gathering queue/consumer and email-provider metrics over an immediate scale-up.",
+    "confidence_score": 18.0,
+    "needs_human_review": true
+  }
+}
