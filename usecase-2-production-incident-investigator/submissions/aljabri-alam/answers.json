@@ -1,0 +1,78 @@
+{
+  "incident_a_pool_exhaustion": {
+    "root_cause": "ConnectionPoolTimeoutException: no available connection after 5000ms in payment-gateway-adapter. The signature appears 5x at ERROR level, starting 2026-09-02 14:47:12 and continuing to 15:41:18, with successful requests interleaved - a saturation pattern rather than a hard outage. It correlates with deployment v2.4.1 on payment-gateway-adapter at 2026-09-02 14:30, 17 minutes before the first error: Reduced connection pool size from 50 to 10 (memory optimization for the upcoming cost-reduction initiative). Corroborated by the known-issues catalog - KI-101 matches on 'connectionpooltimeoutexception'. Corroborated by a prior incident - INC-2031 (2026-03-14). Corroborated by the architecture/API documentation - explains the failure mode. 5 independent sources agree (application logs, deployment history, the known-issues catalog, a prior incident, the runbook).",
+    "supporting_evidence": [
+      {
+        "source": "logs.md",
+        "excerpt": "2026-09-02 14:47:12 ERROR payment-gateway-adapter ConnectionPoolTimeoutException: no available connection after 5000ms / 2026-09-02 14:52:01 ERROR payment-gateway-adapter ConnectionPoolTimeoutException: no available connection after 5000ms [5 occurrences of this signature in total]"
+      },
+      {
+        "source": "deployment_history.md",
+        "excerpt": "v2.4.1 2026-09-02 14:30 payment-gateway-adapter Reduced connection pool size from 50 to 10 (memory optimization for the upcoming cost-reduction initiative)"
+      },
+      {
+        "source": "known_issues.csv",
+        "excerpt": "KI-101 ConnectionPoolTimeoutException in payment-gateway-adapter A ConnectionPoolTimeoutException in payment-gateway-adapter logs is a known signature of an undersized connection pool relative to current traffic; cross-reference against deployment history for any recent pool size change payment-gateway-adapter Recurred more than once - see previous incidents; both prior occurrences traced back to a pool size reductio ..."
+      },
+      {
+        "source": "previous_incidents.md",
+        "excerpt": "INC-2031 (2026-03-14) **Summary**: Intermittent payment failures, `payment-gateway-adapter` logging `ConnectionPoolTimeoutException` under normal (not elevated) traffic. **Root cause**: connection pool size was set too low for peak traffic during a configuration change made in that day's deploy. **Resolution**: reverted the pool size to its prior value (50) and redeployed. **MTTR**: 22 minutes (from first error log t ..."
+      },
+      {
+        "source": "runbooks.md",
+        "excerpt": "RB-014: Payment Gateway Timeout Spike **Symptoms**: `ConnectionPoolTimeoutException` appearing in `payment-gateway-adapter` logs; intermittent (not total) payment failures; `payment-service` logging `GATEWAY_TIMEOUT`. **Diagnostic steps**: 1. Check `payment-gateway-adapter` connection pool utilization metrics for saturation. 2. Check recent deployments touching `payment-gateway-adapter` (see deployment history) for p ..."
+      },
+      {
+        "source": "architecture.md",
+        "excerpt": "Components - **payment-service**: stateless, horizontally scaled, calls `payment-gateway-adapter` synchronously for every charge. - **payment-gateway-adapter**: owns a bounded connection pool to the external Payment Provider's API. Pool size is a static configuration value, set at deploy time. When the pool is exhausted, new requests wait up to a fixed timeout and then fail with `ConnectionPoolTimeoutException`. - ** ..."
+      }
+    ],
+    "impacted_systems": [
+      "payment-gateway-adapter",
+      "payment-service",
+      "customer-facing impact: Payments are intermittently failing after yesterday's deployment"
+    ],
+    "mttr_minutes": 20,
+    "remediation": "Apply the documented remediation for this signature (RB-014: Payment Gateway Timeout Spike): revert the pool size to the prior baseline value, or scale the pool size upward to match current traffic; redeploy `payment-gateway-adapter`. This matches how the precedent was resolved (INC-2031 (2026-03-14)).  Concretely: reverse the correlated change (Reduced connection pool size from 50 to 10 (memory optimization for the upcoming cost-reduction initiative)) and redeploy payment-gateway-adapter, then confirm the signature stops appearing. Follow-up: alert on the saturating resource before it reaches exhaustion, and treat this configuration value as a capacity-reviewed change rather than an optimisation.",
+    "confidence_score": 92.0,
+    "needs_human_review": false
+  },
+  "incident_b_ambiguous_delay": {
+    "root_cause": "Low confidence - the available evidence does not support naming a root cause. The single plausible lead is notification-service: 1x WARN 'Queue depth elevated: 340 messages', together with elapsed times up to 75 minutes between the first and last event for the same correlation id inside that component. Corroboration actively fails: deployment history - no deployment correlates with the observed window; a prior incident - no precedent on record. No supporting signal at all from the known-issues catalog. Sources that do match discount themselves: runbooks.md (RB-002: Elevated Notification Queue Dept ...) is self-declared unverified; architecture.md notes: outside this service's direct control; api_specs.md notes: no documented sla. Escalate to a human with access to the metrics this corpus does not contain.",
+    "supporting_evidence": [
+      {
+        "source": "logs.md",
+        "excerpt": "2026-08-15 11:10:02 WARN notification-service Queue depth elevated: 340 messages"
+      },
+      {
+        "source": "logs.md",
+        "excerpt": "Derived from the log: elapsed time between the first and last event for the same correlation id within notification-service - ORD-55071: 75 min, ORD-55090: 56 min, ORD-55021: 46 min, ORD-55040: 42 min."
+      },
+      {
+        "source": "runbooks.md",
+        "excerpt": "[weak/hedged] RB-002: Elevated Notification Queue Depth **Symptoms**: `notification-service` logging elevated queue depth warnings. **Diagnostic steps**: check consumer count and downstream email provider latency. Neither is currently exposed as a metric \u2014 this runbook is incomplete pending better instrumentation. **Remediation**: scale notification-service consumers (unverified whether this is actually the bottleneck). **Typical ..."
+      },
+      {
+        "source": "architecture.md",
+        "excerpt": "[weak/hedged] Components - **notification-service**: subscribes to an internal message queue; each order/payment event is queued as a message, and a pool of consumer workers dequeues and sends the corresponding email. Consumer pool size and the third-party email provider's own latency are both outside this service's direct control and are not currently instrumented with per-stage timing. - **payment-service** / **payment-gateway-a ..."
+      },
+      {
+        "source": "deployment_history.md",
+        "excerpt": "[disconfirming] Deployment history No deployment touched `notification-service` in the month before this incident (2026-08-15). The two entries above both post-date this incident and involve unrelated components \u2014 there is no deployment correlated with the email delay pattern."
+      },
+      {
+        "source": "previous_incidents.md",
+        "excerpt": "[disconfirming] Previous incidents No previous incident in the historical record involves `notification-service` email delivery latency. The two incidents on file (payment gateway connection pool exhaustion, and a database failover affecting `order-service`) are both unrelated to email delivery timing. This is the first recorded report of this symptom."
+      }
+    ],
+    "impacted_systems": [
+      "notification-service",
+      "third-party email provider (external dependency)",
+      "customer-facing impact: Customers are reporting that order confirmation emails are arriving late, sometimes over an hour after purchase"
+    ],
+    "mttr_minutes": null,
+    "remediation": "Do not ship a fix on this evidence. First close the observability gap that makes the incident undiagnosable: add per-stage timing across notification-service's path and expose the throughput and downstream-latency figures the existing documentation says are not instrumented. Those numbers separate the candidate causes, which this corpus cannot (the known-issues catalog, deployment history, a prior incident provide no signal). The one candidate action on file is 'scale notification-service consumers (unverified whether this is actually the bottleneck).' - that runbook flags it as unverified, so treat it as a hypothesis to test, not a fix. Then either scale the saturated stage or escalate to the external dependency with the timing data, and define the missing service-level objective for this path.",
+    "confidence_score": 23.0,
+    "needs_human_review": true
+  }
+}

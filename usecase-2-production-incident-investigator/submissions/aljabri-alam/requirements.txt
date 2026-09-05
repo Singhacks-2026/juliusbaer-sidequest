@@ -1,0 +1,3 @@
+# Only the demo surface (app.py) needs a dependency. solution.py itself is
+# standard library only - investigate() has no third-party imports at all.
+streamlit>=1.32
