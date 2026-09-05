@@ -1,54 +1,36 @@
 """
-Client data-access tool interfaces.
+Client data-access tools.
 
-These methods intentionally contain NO implementations.
-
-The candidate must implement the data lookup using the supplied
-``data/clients.csv`` file.
-
-The AI agent should interact with these methods rather than directly reading
-the CSV. This creates a clean separation between:
-    - AI orchestration;
-    - deterministic data access;
-    - final answer generation.
+Deterministic lookups over ``data/clients.csv``. The agent calls these rather
+than reading the CSV directly, which keeps a clean separation between AI
+orchestration, data access and answer generation.
 """
+
+from __future__ import annotations
+
+from tools._data import clients_df, row_to_dict
 
 
 def get_client_profile(client_id: str) -> dict:
     """
     Retrieve one client's profile.
 
-    Parameters
-    ----------
-    client_id:
-        Example: ``"C2001"``.
-
-    Returns
-    -------
-    dict
-        Client information including country, risk rating, client type and
-        relationship duration.
-
-    Implementation requirement
-    --------------------------
-    Return a structured result for known clients and handle unknown IDs
-    gracefully.
+    Returns ``{"found": False, "client_id": ..., "error": ...}`` for unknown
+    IDs rather than raising, so the agent can explain the missing evidence.
     """
-    pass
+    client_id = (client_id or "").strip()
+    df = clients_df()
+    match = df[df["client_id"] == client_id]
+    if match.empty:
+        return {"found": False, "client_id": client_id, "error": "client not found"}
+    record = row_to_dict(match.iloc[0])
+    record["found"] = True
+    return record
 
 
 def get_clients_by_country(country: str) -> list[dict]:
-    """
-    OPTIONAL: Retrieve clients associated with a given country.
-
-    Parameters
-    ----------
-    country:
-        Country name.
-
-    Returns
-    -------
-    list[dict]
-        Matching client records.
-    """
-    pass
+    """Retrieve every client whose relationship country matches (case-insensitive)."""
+    country = (country or "").strip().lower()
+    df = clients_df()
+    match = df[df["country"].str.lower() == country]
+    return [row_to_dict(r) for _, r in match.iterrows()]

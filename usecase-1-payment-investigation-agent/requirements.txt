@@ -1,9 +1,11 @@
 pandas>=2.0
 numpy>=1.24
 
-# Install ONE of the following based on your chosen LLM provider:
-# openai>=1.0
-# anthropic>=0.18
+# LLM providers for the tool-calling loop in agent/agent.py.
+# Anthropic is used when ANTHROPIC_API_KEY is set; otherwise any
+# OpenAI-compatible endpoint via OPENAI_API_KEY (+ OPENAI_BASE_URL).
+anthropic>=0.18
+openai>=1.0
 
 # Optional: for TF-IDF / cosine similarity RAG (can also implement from scratch):
 # scikit-learn>=1.3
