@@ -13,6 +13,23 @@ the CSV. This creates a clean separation between:
     - final answer generation.
 """
 
+import csv
+from functools import lru_cache
+from pathlib import Path
+
+
+_CLIENTS_PATH = Path(__file__).resolve().parents[1] / "data" / "clients.csv"
+
+
+@lru_cache(maxsize=1)
+def _clients() -> tuple[dict, ...]:
+    with _CLIENTS_PATH.open(encoding="utf-8", newline="") as handle:
+        rows = []
+        for row in csv.DictReader(handle):
+            row["relationship_years"] = float(row["relationship_years"])
+            rows.append(row)
+        return tuple(rows)
+
 
 def get_client_profile(client_id: str) -> dict:
     """
@@ -34,7 +51,8 @@ def get_client_profile(client_id: str) -> dict:
     Return a structured result for known clients and handle unknown IDs
     gracefully.
     """
-    pass
+    key = client_id.strip().upper()
+    return next((dict(row) for row in _clients() if row["client_id"] == key), {})
 
 
 def get_clients_by_country(country: str) -> list[dict]:
@@ -51,4 +69,5 @@ def get_clients_by_country(country: str) -> list[dict]:
     list[dict]
         Matching client records.
     """
-    pass
+    key = country.strip().casefold()
+    return [dict(row) for row in _clients() if row["country"].casefold() == key]

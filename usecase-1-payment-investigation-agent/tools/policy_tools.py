@@ -9,6 +9,7 @@ assistant can cite the evidence.
 """
 
 import os
+from functools import lru_cache
 
 _POLICY_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -71,7 +72,7 @@ def search_policy(
         def search_policy(query, top_k=5):
             return retrieve(_get_index(), query, top_k)
     """
-    pass
+    return retrieve_policy_evidence(_get_index(), query, top_k=top_k)
 
 
 def get_policy_document(source: str) -> dict:
@@ -80,4 +81,20 @@ def get_policy_document(source: str) -> dict:
 
     Useful after the agent has already identified the relevant document.
     """
-    pass
+    safe_source = os.path.basename(source)
+    if safe_source != source or not safe_source.endswith(".md"):
+        return {}
+    path = os.path.join(_POLICY_DIR, safe_source)
+    if not os.path.isfile(path):
+        return {}
+    with open(path, encoding="utf-8") as handle:
+        return {"source": safe_source, "text": handle.read()}
+
+
+@lru_cache(maxsize=1)
+def _get_index():
+    from rag.pipeline import build_index, chunk_documents, load_policy_documents
+    return build_index(chunk_documents(load_policy_documents(_POLICY_DIR)))
+
+
+from rag.pipeline import retrieve_policy_evidence
