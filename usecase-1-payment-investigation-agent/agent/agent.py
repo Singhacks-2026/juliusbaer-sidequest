@@ -361,6 +361,9 @@ def _build_facts(records: list[dict], payment_id: str) -> dict:
                 if record["name"] == "aggregate_beneficiary_24h"
                 and isinstance(record["output"], dict)
                 and record["output"].get("count", 0) > 1
+                and _matches_target(
+                    record["output"], target_client_id, target_beneficiary
+                )
             ),
             None,
         )

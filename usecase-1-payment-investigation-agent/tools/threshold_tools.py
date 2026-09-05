@@ -57,6 +57,7 @@ REGIONAL_THRESHOLDS = {
         "source": "regional_switzerland.md",
         "rm_review": {"amount": 80_000, "currency": "CHF"},
         "enhanced_review": {"amount": 120_000, "currency": "CHF"},
+        "escalate_structuring_to_compliance": True,
     },
 }
 
@@ -75,7 +76,10 @@ def get_high_risk_codes() -> list[str]:
         try:
             with open(path, "r", encoding="utf-8") as file:
                 text = file.read()
-            codes = sorted(set(re.findall(r"\b[A-Z]{2}\b", text)))
+            # Match the document's "CODE (Country name)" convention, e.g.
+            # "AE (UAE)", rather than any bare two-uppercase-letter word —
+            # the latter would also match ordinary acronyms in future prose.
+            codes = sorted(set(re.findall(r"\b([A-Z]{2})\s*\([A-Za-z]", text)))
         except OSError:
             codes = []
         _high_risk_codes = codes
@@ -245,7 +249,7 @@ def evaluate_structuring(client_id: str, beneficiary_name: str) -> dict:
         ),
         "escalation_to_compliance_required": bool(
             regional
-            and regional["source"] == "regional_switzerland.md"
+            and regional.get("escalate_structuring_to_compliance")
             and aggregate["count"] > 1
             and comparison["exceeds"]
         ),
