@@ -1,14 +1,21 @@
 """
-Policy retrieval tool interfaces.
+Policy retrieval tools.
 
-The agent should use these methods to obtain policy evidence rather than
-opening policy files directly.
-
-The implementation should preserve the source document name so that the final
-assistant can cite the evidence.
+The agent uses these methods to obtain policy evidence rather than opening
+policy files directly.  Every result preserves its source document name so the
+final answer can cite it.
 """
 
 import os
+
+from langchain_core.tools import tool
+
+from rag.pipeline import (
+    build_index,
+    chunk_documents,
+    load_policy_documents,
+    retrieve_policy_evidence,
+)
 
 _POLICY_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -16,68 +23,48 @@ _POLICY_DIR = os.path.join(
     "policies",
 )
 
+_index = None
 
+
+def _get_index():
+    """Build the RAG index once and reuse it across all queries."""
+    global _index
+    if _index is None:
+        documents = load_policy_documents(_POLICY_DIR)
+        chunks = chunk_documents(documents)
+        _index = build_index(chunks)
+    return _index
+
+
+@tool
 def search_policy(
     query: str,
     top_k: int = 5,
 ) -> list[dict]:
+    """Retrieve policy evidence relevant to a natural-language query.
+
+    Returns a list of ``{"source", "text", "score"}`` dicts, most relevant
+    first, drawn from distinct policy documents.
     """
-    Retrieve policy evidence relevant to a natural-language query.
+    evidence = retrieve_policy_evidence(_get_index(), query, top_k=top_k)
 
-    Parameters
-    ----------
-    query:
-        Example:
-        ``"high value payment enhanced review threshold"``.
-
-    top_k:
-        Maximum number of results.
-
-    Returns
-    -------
-    list[dict]
-        Suggested result:
-
+    return [
         {
-            "source": "global_payment_policy.md",
-            "text": "...relevant passage...",
-            "score": 0.91
+            "source": item["source"],
+            "text": item["text"],
+            "score": item["score"],
         }
-
-    Implementation
-    --------------
-    Connect this method to ``rag/pipeline.py``.
-
-    Build the RAG index **once** (e.g., at module level or on first call
-    using a cache) and reuse it across all calls.  Do not rebuild the
-    index on every query.
-
-    Suggested wiring:
-
-        from rag.pipeline import (
-            load_policy_documents, chunk_documents, build_index, retrieve,
-        )
-
-        _index = None
-
-        def _get_index():
-            global _index
-            if _index is None:
-                docs = load_policy_documents(_POLICY_DIR)
-                chunks = chunk_documents(docs)
-                _index = build_index(chunks)
-            return _index
-
-        def search_policy(query, top_k=5):
-            return retrieve(_get_index(), query, top_k)
-    """
-    pass
+        for item in evidence
+    ]
 
 
+@tool
 def get_policy_document(source: str) -> dict:
-    """
-    OPTIONAL: Retrieve a complete policy document by source name.
+    """Retrieve a complete policy document by source filename."""
+    path = os.path.join(_POLICY_DIR, os.path.basename(source))
 
-    Useful after the agent has already identified the relevant document.
-    """
-    pass
+    if not os.path.isfile(path):
+        return {"error": f"Policy document not found: {source}"}
+
+    with open(path, "r", encoding="utf-8") as file:
+        return {"source": os.path.basename(source), "text": file.read()}
