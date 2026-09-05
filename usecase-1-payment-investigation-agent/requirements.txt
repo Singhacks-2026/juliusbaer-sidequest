@@ -1,5 +1,6 @@
 pandas>=2.0
 numpy>=1.24
+openai>=1.0
 
 # Install ONE of the following based on your chosen LLM provider:
 # openai>=1.0

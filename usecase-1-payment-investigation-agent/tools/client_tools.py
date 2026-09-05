@@ -1,54 +1,45 @@
-"""
-Client data-access tool interfaces.
+"""Deterministic access to the supplied client data."""
 
-These methods intentionally contain NO implementations.
+from __future__ import annotations
 
-The candidate must implement the data lookup using the supplied
-``data/clients.csv`` file.
+import csv
+from functools import lru_cache
+from pathlib import Path
+from typing import Any
 
-The AI agent should interact with these methods rather than directly reading
-the CSV. This creates a clean separation between:
-    - AI orchestration;
-    - deterministic data access;
-    - final answer generation.
-"""
+_CLIENTS_PATH = Path(__file__).resolve().parents[1] / "data" / "clients.csv"
+
+
+def _coerce(value: str) -> Any:
+    if value == "":
+        return None
+    try:
+        number = float(value)
+    except ValueError:
+        return value
+    return int(number) if number.is_integer() else number
+
+
+@lru_cache(maxsize=1)
+def _clients() -> tuple[dict, ...]:
+    with _CLIENTS_PATH.open(newline="", encoding="utf-8") as handle:
+        return tuple(
+            {key: _coerce(value) for key, value in row.items()}
+            for row in csv.DictReader(handle)
+        )
 
 
 def get_client_profile(client_id: str) -> dict:
-    """
-    Retrieve one client's profile.
-
-    Parameters
-    ----------
-    client_id:
-        Example: ``"C2001"``.
-
-    Returns
-    -------
-    dict
-        Client information including country, risk rating, client type and
-        relationship duration.
-
-    Implementation requirement
-    --------------------------
-    Return a structured result for known clients and handle unknown IDs
-    gracefully.
-    """
-    pass
+    """Return a client profile, or an empty dict when the ID is unknown."""
+    wanted = str(client_id).strip().upper()
+    return next((dict(row) for row in _clients() if row["client_id"] == wanted), {})
 
 
 def get_clients_by_country(country: str) -> list[dict]:
-    """
-    OPTIONAL: Retrieve clients associated with a given country.
-
-    Parameters
-    ----------
-    country:
-        Country name.
-
-    Returns
-    -------
-    list[dict]
-        Matching client records.
-    """
-    pass
+    """Return clients whose relationship country matches case-insensitively."""
+    wanted = str(country).strip().casefold()
+    return [
+        dict(row)
+        for row in _clients()
+        if str(row.get("country", "")).casefold() == wanted
+    ]
