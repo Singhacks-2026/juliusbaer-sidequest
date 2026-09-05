@@ -86,17 +86,23 @@ def _compare(amount: float, currency: str, threshold: dict) -> dict:
     """Compare an amount against one threshold, recording the assumption used."""
     same_currency = currency == threshold["currency"]
 
+    if same_currency:
+        basis = "native currency"
+    elif currency == "mixed":
+        basis = (
+            "combined total spans more than one currency; summed at 1:1 "
+            f"equivalence and compared against the {threshold['currency']} threshold"
+        )
+    else:
+        basis = f"1:1 equivalence assumed between {currency} and {threshold['currency']}"
+
     return {
         "threshold_amount": threshold["amount"],
         "threshold_currency": threshold["currency"],
         "payment_amount": amount,
         "payment_currency": currency,
         "exceeds": amount > threshold["amount"],
-        "comparison_basis": (
-            "native currency"
-            if same_currency
-            else f"1:1 equivalence assumed between {currency} and {threshold['currency']}"
-        ),
+        "comparison_basis": basis,
     }
 
 

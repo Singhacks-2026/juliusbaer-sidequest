@@ -157,7 +157,10 @@ def aggregate_beneficiary_24h(
             }
         )
 
-    largest = max(windows, key=lambda window: (window["count"], window["total_amount"]))
+    # A structuring threshold is breached by combined value, not by payment
+    # count, so the reported window is the one with the highest total —
+    # count only breaks ties between equal-value windows.
+    largest = max(windows, key=lambda window: (window["total_amount"], window["count"]))
     currencies = {row["currency"] for row in largest["payments"]}
 
     result.update(

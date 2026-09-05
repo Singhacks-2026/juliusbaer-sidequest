@@ -30,7 +30,9 @@ after the model responds:
 * ``tools_used`` is read off the executed graph's own message trace.
 """
 
+import json
 import os
+import re
 import time
 from collections import defaultdict
 
@@ -152,22 +154,32 @@ MAX_ITERATIONS = 12
 MAX_RETRIES = 5
 
 
+# HTTP statuses worth retrying: rate limit, and transient server-side failure.
+_RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 529}
+
+
 def _with_retry(call, *args, **kwargs):
     """Retry an Anthropic call with exponential backoff on transient errors.
 
     Rate limits and transient overload/service-unavailable responses are
-    expected under back-to-back questions; anything else (bad request, auth)
-    is not retried and propagates immediately.
+    expected under back-to-back questions; anything else (bad request, auth,
+    a 4xx that isn't a rate limit) is not retried and propagates immediately.
     """
     delay = 1.0
     for attempt in range(MAX_RETRIES):
         try:
             return call(*args, **kwargs)
-        except (anthropic.RetryableError, anthropic.APIConnectionError):
+        except anthropic.APIConnectionError:
             if attempt == MAX_RETRIES - 1:
                 raise
-            time.sleep(delay)
-            delay *= 2
+        except anthropic.APIStatusError as error:
+            if (
+                attempt == MAX_RETRIES - 1
+                or error.status_code not in _RETRYABLE_STATUS_CODES
+            ):
+                raise
+        time.sleep(delay)
+        delay *= 2
 
 
 def _load_env() -> None:
@@ -215,23 +227,70 @@ def _establish_baseline(payment_id: str) -> tuple[str, list[dict]]:
         )
         evidence["threshold_evaluation"] = threshold_evaluation
 
-    import json
-
     return json.dumps(evidence, default=str)[:12000], records
 
 
 def _tool_call_records(messages) -> list[dict]:
-    """Extract every executed tool call (name, output) from the agent's trace."""
+    """Extract every executed tool call (name, output) from the agent's trace.
+
+    LangGraph's tool node JSON-serialises any non-string tool return before
+    storing it as ``ToolMessage.content`` (``_stringify`` in
+    ``langchain_core.tools.base``), so a dict/list result comes back as a JSON
+    string here and must be parsed back before the grounding checks below can
+    inspect its shape.
+    """
     records = []
     for message in messages:
-        if isinstance(message, ToolMessage):
-            records.append({"name": message.name, "output": message.content})
+        if not isinstance(message, ToolMessage):
+            continue
+
+        content = message.content
+        if isinstance(content, str):
+            try:
+                content = json.loads(content)
+            except (json.JSONDecodeError, ValueError):
+                pass
+
+        records.append({"name": message.name, "output": content})
     return records
+
+
+def _target_payment_context(
+    records: list[dict], payment_id: str
+) -> tuple[str | None, str | None]:
+    """Find the client and beneficiary of the payment under investigation.
+
+    Used to scope structuring evidence to this payment: the system prompt
+    allows the model to look up other clients/payments for comparison, and
+    without this filter a structuring result for an unrelated client could be
+    picked up as if it belonged to the investigated payment.
+    """
+    for record in records:
+        output = record["output"]
+        if (
+            record["name"] == "get_payment"
+            and isinstance(output, dict)
+            and output.get("payment_id") == payment_id
+            and "error" not in output
+        ):
+            return output.get("client_id"), output.get("beneficiary_name")
+    return None, None
+
+
+def _matches_target(output: dict, client_id: str | None, beneficiary_name: str | None) -> bool:
+    """True when a structuring/aggregate result belongs to the target payment."""
+    if client_id is None or beneficiary_name is None:
+        return True  # no target context available; don't over-filter
+
+    return output.get("client_id") == client_id and str(
+        output.get("beneficiary_name", "")
+    ).strip().lower() == beneficiary_name.strip().lower()
 
 
 def _build_facts(records: list[dict], payment_id: str) -> dict:
     """Assemble the ``facts`` block from deterministic tool output only."""
     facts: dict = {}
+    target_client_id, target_beneficiary = _target_payment_context(records, payment_id)
 
     threshold = next(
         (
@@ -273,6 +332,7 @@ def _build_facts(records: list[dict], payment_id: str) -> dict:
             if record["name"] == "evaluate_structuring"
             and isinstance(record["output"], dict)
             and "error" not in record["output"]
+            and _matches_target(record["output"], target_client_id, target_beneficiary)
         ),
         None,
     )
@@ -317,6 +377,32 @@ def _build_facts(records: list[dict], payment_id: str) -> dict:
             }
 
     return facts
+
+
+def _clean_answer(text: str) -> str:
+    """Normalise the model's answer text.
+
+    The model occasionally spills fragments of its own structured-output or
+    tool-call syntax into the end of the answer string (seen in production:
+    trailing ``</answer>``, ``<parameter name="citations">...`` fragments).
+    Anything from such a fragment onward is not part of the briefing and is
+    discarded.
+    """
+    if not text:
+        return ""
+
+    for marker in (
+        "</answer>",
+        "<parameter",
+        "</invoke>",
+        "<invoke",
+        "</function",
+        "<citations>",
+        "</citations>",
+    ):
+        text = text.split(marker, 1)[0]
+
+    return re.sub(r"\s+", " ", text).strip()
 
 
 def _allowed_sources(records: list[dict]) -> set[str]:
@@ -472,7 +558,7 @@ def run_agent(
                 )
             ],
         )
-        answer = structured.answer
+        answer = _clean_answer(structured.answer)
         citations = list(structured.citations or [])
 
     except Exception as error:
