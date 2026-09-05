@@ -1,83 +1,27 @@
-"""
-Policy retrieval tool interfaces.
+"""Cached policy retrieval and safe source lookup."""
+from functools import lru_cache
+from pathlib import Path
 
-The agent should use these methods to obtain policy evidence rather than
-opening policy files directly.
+from rag.pipeline import build_index, chunk_documents, load_policy_documents, retrieve_policy_evidence
 
-The implementation should preserve the source document name so that the final
-assistant can cite the evidence.
-"""
-
-import os
-
-_POLICY_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "data",
-    "policies",
-)
+_POLICY_DIR = Path(__file__).resolve().parents[1] / "data" / "policies"
 
 
-def search_policy(
-    query: str,
-    top_k: int = 5,
-) -> list[dict]:
-    """
-    Retrieve policy evidence relevant to a natural-language query.
+@lru_cache(maxsize=1)
+def _get_index():
+    return build_index(chunk_documents(load_policy_documents(str(_POLICY_DIR))))
 
-    Parameters
-    ----------
-    query:
-        Example:
-        ``"high value payment enhanced review threshold"``.
 
-    top_k:
-        Maximum number of results.
-
-    Returns
-    -------
-    list[dict]
-        Suggested result:
-
-        {
-            "source": "global_payment_policy.md",
-            "text": "...relevant passage...",
-            "score": 0.91
-        }
-
-    Implementation
-    --------------
-    Connect this method to ``rag/pipeline.py``.
-
-    Build the RAG index **once** (e.g., at module level or on first call
-    using a cache) and reuse it across all calls.  Do not rebuild the
-    index on every query.
-
-    Suggested wiring:
-
-        from rag.pipeline import (
-            load_policy_documents, chunk_documents, build_index, retrieve,
-        )
-
-        _index = None
-
-        def _get_index():
-            global _index
-            if _index is None:
-                docs = load_policy_documents(_POLICY_DIR)
-                chunks = chunk_documents(docs)
-                _index = build_index(chunks)
-            return _index
-
-        def search_policy(query, top_k=5):
-            return retrieve(_get_index(), query, top_k)
-    """
-    pass
+def search_policy(query: str, top_k: int = 5) -> list[dict]:
+    """Search policy passages; filenames and scores accompany every result."""
+    return retrieve_policy_evidence(_get_index(), query, top_k)
 
 
 def get_policy_document(source: str) -> dict:
-    """
-    OPTIONAL: Retrieve a complete policy document by source name.
-
-    Useful after the agent has already identified the relevant document.
-    """
-    pass
+    """Read a source identified by retrieval; reject paths outside the corpus."""
+    if Path(source).name != source or not source.endswith(".md"):
+        return {"error": "Invalid policy source"}
+    path = _POLICY_DIR / source
+    if not path.is_file() or path.resolve().parent != _POLICY_DIR.resolve():
+        return {"error": "Policy source not found", "source": source}
+    return {"source": source, "text": path.read_text(encoding="utf-8")}

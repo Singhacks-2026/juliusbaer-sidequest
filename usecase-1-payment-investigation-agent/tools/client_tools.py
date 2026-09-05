@@ -1,54 +1,14 @@
-"""
-Client data-access tool interfaces.
-
-These methods intentionally contain NO implementations.
-
-The candidate must implement the data lookup using the supplied
-``data/clients.csv`` file.
-
-The AI agent should interact with these methods rather than directly reading
-the CSV. This creates a clean separation between:
-    - AI orchestration;
-    - deterministic data access;
-    - final answer generation.
-"""
+"""Deterministic access to supplied client profiles."""
+from tools.data_store import read_records
 
 
 def get_client_profile(client_id: str) -> dict:
-    """
-    Retrieve one client's profile.
-
-    Parameters
-    ----------
-    client_id:
-        Example: ``"C2001"``.
-
-    Returns
-    -------
-    dict
-        Client information including country, risk rating, client type and
-        relationship duration.
-
-    Implementation requirement
-    --------------------------
-    Return a structured result for known clients and handle unknown IDs
-    gracefully.
-    """
-    pass
+    """Return a client record, or an explicit not-found error."""
+    return next((r for r in read_records("clients.csv") if r["client_id"] == client_id),
+                {"error": "Client not found", "client_id": client_id})
 
 
 def get_clients_by_country(country: str) -> list[dict]:
-    """
-    OPTIONAL: Retrieve clients associated with a given country.
-
-    Parameters
-    ----------
-    country:
-        Country name.
-
-    Returns
-    -------
-    list[dict]
-        Matching client records.
-    """
-    pass
+    """Return clients in a country (case-insensitive)."""
+    return [r for r in read_records("clients.csv")
+            if (r["country"] or "").casefold() == country.strip().casefold()]
