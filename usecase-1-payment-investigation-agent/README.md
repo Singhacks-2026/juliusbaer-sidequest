@@ -5,6 +5,9 @@ compliance team.  The assistant answers natural-language
 payment-investigation questions by combining structured data, policy
 documents (via RAG), deterministic tools, and an LLM agent.
 
+Completed output: [submission.json](submission.json). Implementation and run
+instructions: [SOLUTION.md](SOLUTION.md). Verified results: [VALIDATION.md](VALIDATION.md).
+
 ## Documentation
 
 Follow the reading order in `PARTICIPANT_INSTRUCTIONS.md` → "Before you
@@ -51,7 +54,7 @@ usecase-1-payment-investigation-agent/
 python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env  # Add your LLM API key
-python main.py --questions questions.json --output submission.json
+python main.py --questions questions/questions.json --output submission.json
 ```
 
 ## What you must implement
