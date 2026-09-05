@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Payment Investigation · Julius Baer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400;500&family=Inter:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  /* Julius Baer palette — primary #141E55. Same tokens as Foresight RM. */
+  :root {
+    --jb-950:#0b1136; --jb-900:#141e55; --jb-800:#1d2a6d; --jb-700:#273788; --jb-600:#3549a5;
+    --jb-500:#4a5fbd; --jb-400:#7186d3; --jb-300:#a3b1e5; --jb-200:#ccd5f2; --jb-100:#e6ebf9; --jb-50:#f3f6fd;
+    --iron-500:#ccd0d1; --iron-400:#dbdee0; --iron-300:#e8eaec; --iron-200:#f1f3f4; --iron-100:#f8f9fa;
+    --critical:#a8322b; --warn:#9a6a12; --good:#2c6a4f; --gold:#a68430;
+    --display:'Jost','Futura',ui-sans-serif,sans-serif;
+    --sans:'Inter',ui-sans-serif,system-ui,sans-serif;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+  }
+  * { box-sizing:border-box; }
+  html,body { height:100%; }
+  body { margin:0; background:#fff; color:var(--jb-800); font-family:var(--sans); font-size:15px; line-height:1.65; font-weight:400; -webkit-font-smoothing:antialiased; }
+  a { color:inherit; }
+
+  /* type */
+  .page-title { font-family:var(--display); font-weight:300; font-size:22px; letter-spacing:.13em; text-transform:uppercase; color:var(--jb-900); line-height:1.15; }
+  .section-title { font-family:var(--display); font-weight:300; font-size:20px; letter-spacing:.03em; color:var(--jb-900); line-height:1.3; }
+  .eyebrow { font-family:var(--display); font-weight:400; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--jb-600); }
+  .lede { font-size:15.5px; line-height:1.7; color:var(--jb-600); font-weight:300; }
+  .mono { font-family:var(--mono); font-variant-numeric:tabular-nums; }
+  .muted { color:var(--jb-500); }
+
+  /* surfaces: one hairline, no shadow */
+  .surface { background:#fff; border:1px solid var(--iron-400); border-radius:3px; }
+  .hairline { border-color:var(--iron-400); }
+
+  /* layout */
+  .top { display:flex; align-items:center; justify-content:space-between; padding:22px 36px; border-bottom:1px solid var(--iron-400); }
+  .top .brand { display:flex; align-items:baseline; gap:22px; }
+  .top .brand .sep { width:1px; height:22px; background:var(--iron-500); align-self:center; }
+  .top .meta { display:flex; gap:28px; font-size:12px; color:var(--jb-500); }
+  .top .meta b { font-weight:500; color:var(--jb-800); }
+
+  .shell { display:grid; grid-template-columns:300px 1fr 340px; min-height:calc(100% - 71px); }
+  .rail { border-right:1px solid var(--iron-400); padding:26px 0 40px; overflow-y:auto; }
+  .aside { border-left:1px solid var(--iron-400); padding:30px 28px 60px; overflow-y:auto; }
+  .main { padding:34px 48px 80px; max-width:900px; }
+
+  /* question list */
+  .rail .eyebrow { padding:0 28px 12px; }
+  .q { display:block; padding:14px 28px; border-left:2px solid transparent; text-decoration:none; cursor:pointer; }
+  .q:hover { background:var(--iron-100); }
+  .q.active { border-left-color:var(--jb-900); background:var(--jb-50); }
+  .q .id { font-family:var(--mono); font-size:12px; color:var(--jb-600); display:flex; justify-content:space-between; }
+  .q .txt { font-size:13.5px; line-height:1.45; color:var(--jb-800); margin-top:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .q .state { display:inline-flex; align-items:center; gap:7px; margin-top:7px; font-family:var(--display); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; }
+  .dot { width:6px; height:6px; border-radius:50%; background:currentColor; display:inline-block; }
+  .c-critical { color:var(--critical); } .c-warn { color:var(--warn); } .c-good { color:var(--good); } .c-gold { color:var(--gold); }
+
+  /* main content */
+  .head .eyebrow { margin-bottom:10px; }
+  .head .section-title { margin:0 0 6px; }
+  .head .ids { font-family:var(--mono); font-size:12.5px; color:var(--jb-500); }
+
+  .block { margin-top:34px; }
+  .block > .eyebrow { margin-bottom:12px; display:flex; justify-content:space-between; align-items:baseline; }
+  .block > .eyebrow small { font-family:var(--sans); font-size:12px; letter-spacing:0; text-transform:none; color:var(--jb-500); }
+
+  table.computed { width:100%; border-collapse:collapse; font-size:14px; }
+  table.computed td { padding:11px 0; border-top:1px solid var(--iron-300); vertical-align:top; }
+  table.computed tr:first-child td { border-top:none; }
+  table.computed td.k { width:170px; color:var(--jb-500); font-size:13px; padding-right:16px; }
+  table.computed td.v { font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:13.5px; color:var(--jb-900); }
+  table.computed td.r { width:150px; text-align:right; font-family:var(--display); font-size:11px; letter-spacing:.16em; text-transform:uppercase; }
+  .src { color:var(--jb-400); font-size:12px; font-family:var(--mono); }
+
+  .verdict { margin-top:14px; padding:16px 18px; border:1px solid var(--iron-400); border-radius:3px; display:flex; gap:18px; align-items:baseline; }
+  .verdict .lab { font-family:var(--display); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--jb-600); white-space:nowrap; }
+  .verdict .out { font-family:var(--display); font-weight:400; font-size:17px; letter-spacing:.02em; }
+
+  .answer { font-size:15.5px; line-height:1.8; color:var(--jb-800); white-space:pre-wrap; }
+  .answer .hl { color:var(--jb-900); font-weight:500; }
+  ul.assump { margin:8px 0 0; padding-left:18px; color:var(--jb-600); font-size:13.5px; }
+
+  /* evidence */
+  .aside .eyebrow { margin-bottom:12px; }
+  .aside .block:first-child { margin-top:0; }
+  .chip { display:block; width:100%; text-align:left; background:#fff; border:1px solid var(--iron-400); border-radius:3px; padding:10px 12px; margin-bottom:8px; cursor:pointer; font:inherit; color:inherit; }
+  .chip:hover { border-color:var(--iron-500); }
+  .chip .name { font-family:var(--mono); font-size:12.5px; color:var(--jb-900); display:flex; justify-content:space-between; }
+  .chip .name span { color:var(--jb-400); }
+  .chip .pass { margin-top:8px; font-size:13px; line-height:1.55; color:var(--jb-700); border-top:1px solid var(--iron-300); padding-top:8px; display:none; }
+  .chip.open .pass { display:block; }
+  .chip .pass p { margin:0 0 6px; }
+  .chip .pass p:last-child { margin:0; }
+  .excluded { font-size:12.5px; color:var(--jb-500); margin-top:10px; }
+  .excluded .mono { color:var(--jb-400); }
+
+  ol.trace { margin:0; padding-left:0; list-style:none; font-family:var(--mono); font-size:12px; color:var(--jb-700); }
+  ol.trace li { padding:7px 0; border-top:1px solid var(--iron-300); }
+  ol.trace li:first-child { border-top:none; }
+  ol.trace .fn { color:var(--jb-900); }
+  ol.trace .args { color:var(--jb-400); }
+
+  .narr { font-size:13px; color:var(--jb-600); }
+  .narr b { font-weight:500; color:var(--jb-800); }
+
+  .empty { padding:60px 48px; color:var(--jb-500); }
+  ::selection { background:var(--jb-200); }
+  .thin::-webkit-scrollbar { width:6px; } .thin::-webkit-scrollbar-thumb { background:var(--iron-500); border-radius:3px; }
+  @media (max-width:1180px) { .shell { grid-template-columns:260px 1fr; } .aside { grid-column:1 / -1; border-left:none; border-top:1px solid var(--iron-400); } }
+</style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <div class="page-title">Julius Baer</div>
+      <div class="sep"></div>
+      <div class="eyebrow" style="letter-spacing:.24em">Payment Investigation</div>
+    </div>
+    <div class="meta" id="meta"></div>
+  </header>
+
+  <div class="shell">
+    <nav class="rail thin" id="rail"><div class="eyebrow">Official questions</div></nav>
+    <main class="main" id="main"><div class="empty lede">Loading investigations…</div></main>
+    <aside class="aside thin" id="aside"></aside>
+  </div>
+
+<script>
+(async function () {
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fmt = (n, cur) => (cur ? cur + ' ' : '') + Number(n).toLocaleString('en-US', { minimumFractionDigits: Number.isInteger(+n) ? 0 : 2, maximumFractionDigits: 2 });
+
+  let data = null;
+  try { data = await (await fetch('investigations.json', { cache: 'no-store' })).json(); }
+  catch (e) {
+    // Fallback: render the graded submission alone.
+    try {
+      const sub = await (await fetch('../submission.json', { cache: 'no-store' })).json();
+      data = { rag_backend: 'submission.json', policy_sources: [], investigations: sub.map(r => ({ ...r, assessment: { found: false }, evidence: [], tool_calls: [], narrator: {} })) };
+    } catch (e2) {
+      document.getElementById('main').innerHTML = '<div class="empty lede">No <span class="mono">investigations.json</span> or <span class="mono">submission.json</span> found. Run <span class="mono">python main.py --questions questions/questions.json --output submission.json</span> first.</div>';
+      return;
+    }
+  }
+
+  const items = data.investigations.map((r, i) => ({ ...r, question_id: r.question_id || 'Q' + String(i + 1).padStart(2, '0') }));
+  const sources = data.policy_sources || [];
+
+  document.getElementById('meta').innerHTML =
+    `<div>Questions <b class="mono">${items.length}</b></div>` +
+    `<div>Retrieval <b class="mono">${esc(data.rag_backend || '—')}</b></div>` +
+    `<div>Corpus <b class="mono">${sources.length || '—'} documents</b></div>` +
+    (data.generated_at ? `<div>Generated <b class="mono">${esc(data.generated_at.replace('T', ' ').slice(0, 16))} UTC</b></div>` : '');
+
+  function stateOf(a) {
+    if (!a || !a.found) return { cls: 'c-warn', label: 'Unassessed' };
+    const reqs = (a.requirements || []).map(r => r.requirement);
+    if (reqs.some(r => /structuring/.test(r))) return { cls: 'c-gold', label: 'Structuring pattern' };
+    if (reqs.some(r => /enhanced/.test(r))) return { cls: 'c-critical', label: 'Enhanced review' };
+    if (reqs.length) return { cls: 'c-warn', label: reqs[0].replace(/\s*\(.*\)/, '') };
+    return { cls: 'c-good', label: 'No trigger' };
+  }
+
+  const rail = document.getElementById('rail');
+  items.forEach(it => {
+    const st = stateOf(it.assessment);
+    const a = document.createElement('a');
+    a.className = 'q'; a.href = '#' + it.question_id; a.id = 'nav-' + it.question_id;
+    a.innerHTML = `<div class="id"><span>${esc(it.question_id)}</span><span>${esc(it.payment_id)}</span></div>
+      <div class="txt">${esc(it.question)}</div>
+      <div class="state ${st.cls}"><i class="dot"></i>${esc(st.label)}</div>`;
+    rail.appendChild(a);
+  });
+
+  function renderMain(it) {
+    const a = it.assessment, f = a && a.facts;
+    const st = stateOf(a);
+    let computed = '';
+    if (a && a.found) {
+      const rows = [];
+      rows.push(`<tr><td class="k">Amount</td><td class="v">${fmt(f.amount, f.currency)}</td><td class="r muted">${esc(f.channel)} · ${esc(f.payment_date)}</td></tr>`);
+      rows.push(`<tr><td class="k">Client</td><td class="v">${esc(f.client_id)} · ${esc(f.client_country)} · ${esc(f.client_risk_rating)} risk</td><td class="r muted">${esc(f.client_type)}</td></tr>`);
+      rows.push(`<tr><td class="k">Applicable policy</td><td class="v">${(f.applicable_policies || []).map(esc).join('<br>')}</td><td class="r muted">region</td></tr>`);
+      (f.thresholds || []).forEach(t => rows.push(
+        `<tr><td class="k">${esc(t.requirement)}</td><td class="v">${fmt(f.amount, f.currency)} &nbsp;vs&nbsp; ${fmt(t.threshold, t.currency)}<br><span class="src">${esc(t.source)}</span></td><td class="r ${t.exceeds ? 'c-critical' : 'c-good'}">${t.exceeds ? 'exceeds' : 'below'}</td></tr>`));
+      const mism = a.country_code_mismatch ? `<br><span class="src">beneficiary_country '${esc(f.beneficiary_country)}' disagrees — code is authoritative</span>` : '';
+      rows.push(`<tr><td class="k">Destination</td><td class="v">${esc(f.beneficiary_country_code)}${mism}<br><span class="src">high_risk_jurisdictions.md</span></td><td class="r ${a.high_risk ? 'c-critical' : 'c-good'}">${a.high_risk ? 'high-risk' : 'not high-risk'}</td></tr>`);
+      const w = f.structuring_window || {};
+      if (w.count >= 2) {
+        rows.push(`<tr><td class="k">24-hour window</td><td class="v">${w.count} payments on ${esc(w.window_date)}<br>${(w.payment_ids || []).map((p, i) => esc(p) + ' ' + fmt(w.individual_amounts[i])).join(' + ')}<br>= ${fmt(w.combined_amount, w.currency)} &nbsp;vs&nbsp; ${fmt(w.threshold, w.threshold_currency)}<br><span class="src">channels: ${(w.channels || []).map(esc).join(', ')}</span></td><td class="r ${w.flagged ? 'c-gold' : 'c-good'}">${w.flagged ? 'flagged' : 'below'}</td></tr>`);
+      } else if (w.checked === false) {
+        rows.push(`<tr><td class="k">24-hour window</td><td class="v muted">not checked — the model judged it not relevant to this question</td><td class="r muted">skipped</td></tr>`);
+      } else {
+        rows.push(`<tr><td class="k">24-hour window</td><td class="v">${w.count || 0} payment to ${esc(f.beneficiary_name)} on ${esc(w.window_date || f.payment_date)}</td><td class="r c-good">no pattern</td></tr>`);
+      }
+      computed = `<div class="block"><div class="eyebrow">Computed <small>deterministic tools · no model arithmetic</small></div>
+        <table class="computed">${rows.join('')}</table>
+        <div class="verdict"><span class="lab">Assessed</span><span class="out ${st.cls}">${esc(a.outcome)}</span></div></div>`;
+    }
+    const assumptions = (a && a.assumptions && a.assumptions.length) ? `<ul class="assump">${a.assumptions.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '';
+    const answer = esc(it.answer).replace(/(P5\d{4}|C2\d{3}|\b(?:USD|CHF|SGD|HKD|GBP) [\d,]+(?:\.\d+)?)/g, '<span class="mono hl">$1</span>');
+    document.getElementById('main').innerHTML = `
+      <div class="head"><div class="eyebrow">Investigation · ${esc(it.question_id)}</div>
+        <h1 class="section-title">${esc(it.question)}</h1>
+        <div class="ids">${esc(it.payment_id)}${f && f.client_id ? ' · ' + esc(f.client_id) : ''}${f && f.beneficiary_name ? ' · ' + esc(f.beneficiary_name) : ''}</div></div>
+      ${computed}
+      <div class="block"><div class="eyebrow">Answer <small>${it.narrator && it.narrator.llm ? 'narrated by ' + esc(it.narrator.model) : 'deterministic narrator'}</small></div>
+        <div class="answer">${answer}</div>${assumptions ? '<div class="eyebrow" style="margin-top:18px">Assumptions</div>' + assumptions : ''}</div>`;
+  }
+
+  function renderAside(it) {
+    const ev = it.evidence || [];
+    const bySrc = {};
+    ev.forEach(e => { (bySrc[e.source] = bySrc[e.source] || []).push(e); });
+    const cited = it.citations || [];
+    const order = [...cited, ...Object.keys(bySrc).filter(s => !cited.includes(s))];
+    const chips = order.map(s => {
+      const passages = (bySrc[s] || []).map(e => `<p>${esc(e.text)}</p>`).join('') || '<p class="muted">Relied on directly by the assessor.</p>';
+      return `<button class="chip" type="button"><div class="name"><span style="color:var(--jb-900)">${esc(s)}</span><span>${cited.includes(s) ? 'cited' : 'retrieved'}</span></div><div class="pass">${passages}</div></button>`;
+    }).join('');
+    const retrieved = new Set(Object.keys(bySrc).concat(cited));
+    const excluded = sources.filter(s => !retrieved.has(s));
+    const trace = (it.tool_calls || []).map(c => `<li><span class="fn">${esc(c.tool)}</span> <span class="args">${esc(Object.values(c.args || {}).join(', '))}</span></li>`).join('') ||
+      (it.tools_used || []).map(t => `<li><span class="fn">${esc(t)}</span></li>`).join('');
+    document.getElementById('aside').innerHTML = `
+      <div class="block"><div class="eyebrow">Evidence <small>${cited.length} cited</small></div>${chips}
+        ${sources.length ? `<div class="excluded">${excluded.length} of ${sources.length} documents excluded by retrieval<br><span class="mono">${excluded.map(esc).join(' · ')}</span></div>` : ''}</div>
+      <div class="block"><div class="eyebrow">Tool trace <small>${(it.tool_calls || []).length || (it.tools_used || []).length} calls</small></div><ol class="trace">${trace}</ol></div>
+      <div class="block"><div class="eyebrow">Narrator</div><div class="narr">${it.narrator && it.narrator.llm ? `<b>${esc(it.narrator.model)}</b> wrote the prose from the computed assessment; facts and tools_used are taken from the tools, not the model.` : '<b>Deterministic narrator</b> composed the answer directly from the computed assessment. Set <span class="mono">ANTHROPIC_API_KEY</span> in <span class="mono">.env</span> to have Claude narrate.'}</div></div>`;
+    document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => c.classList.toggle('open')));
+    const first = document.querySelector('.chip'); if (first) first.classList.add('open');
+  }
+
+  function show(id) {
+    const it = items.find(x => x.question_id === id) || items[0];
+    if (!it) return;
+    document.querySelectorAll('.q').forEach(q => q.classList.toggle('active', q.id === 'nav-' + it.question_id));
+    renderMain(it); renderAside(it);
+    window.scrollTo({ top: 0 });
+  }
+  window.addEventListener('hashchange', () => show(location.hash.slice(1)));
+  show(location.hash.slice(1));
+})();
+</script>
+</body>
+</html>
