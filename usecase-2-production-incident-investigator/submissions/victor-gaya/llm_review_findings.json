@@ -1,0 +1,55 @@
+[
+  {
+    "incident": "incident_a_pool_exhaustion",
+    "report_confidence": 95.0,
+    "verified_unsupported_claims": [],
+    "discarded_unsupported_claims": [],
+    "verified_missed_evidence": [
+      {
+        "source": "runbooks.md",
+        "excerpt": "**Remediation**: revert the pool size to the prior baseline value, or\nscale the pool size upward to match current traffic; redeploy\n`payment-gateway-adapter`.",
+        "why_it_matters": "The report quotes the runbook under supporting evidence but truncates it at step 3 of the diagnostics, omitting the exact remediation text it references in its recommended actions."
+      },
+      {
+        "source": "logs.md",
+        "excerpt": "2026-09-02 14:47:12 ERROR payment-service          Charge failed order_id=ORD-88350 reason=GATEWAY_TIMEOUT",
+        "why_it_matters": "The report lists payment-service as an impacted system but fails to cite any error logs from payment-service showing GATEWAY_TIMEOUT failures."
+      },
+      {
+        "source": "logs.md",
+        "excerpt": "2026-09-02 14:30:00 INFO  deploy-agent             Deployment v2.4.1 completed on payment-gateway-adapter",
+        "why_it_matters": "This log entry directly establishes the precise runtime timestamp when deployment v2.4.1 finished on payment-gateway-adapter, anchoring the timeline right before the error logs start."
+      }
+    ],
+    "discarded_missed_evidence": [],
+    "confidence_assessment": {
+      "verdict": "about_right",
+      "reasoning": "A 95% confidence rating is justified given strong cross-document alignment across deployment records, log entries, known issues, runbooks, and past incident precedent. The timeline directly links the connection pool size reduction in deployment v2.4.1 to the onset of ConnectionPoolTimeoutException errors."
+    },
+    "worst_flaw": "The report truncates its runbook excerpt right before the remediation instructions and fails to cite payment-service error logs, leaving its recommended remediation and list of impacted components partially unevidenced in the supporting evidence array."
+  },
+  {
+    "incident": "incident_b_ambiguous_delay",
+    "report_confidence": 21.2,
+    "verified_unsupported_claims": [],
+    "discarded_unsupported_claims": [],
+    "verified_missed_evidence": [
+      {
+        "source": "known_issues.csv",
+        "excerpt": "KI-114,Notification email formatting glitch,Emails occasionally render with broken HTML in older webmail clients,notification-service,Cosmetic only; template fix scheduled",
+        "why_it_matters": "The report asserts in the root cause rationale that no corroborating known issue exists for notification-service, but fails to cite known_issues.csv to show that existing entries were examined and ruled out."
+      },
+      {
+        "source": "runbooks.md",
+        "excerpt": "**Typical MTTR: 15 minutes.** (Note: this MTTR figure is from a different, unconfirmed prior occurrence and may not apply here.)",
+        "why_it_matters": "The report relies directly on this text and its caveat to justify returning null for mttr_minutes, yet fails to include the excerpt in the supporting_evidence array."
+      }
+    ],
+    "discarded_missed_evidence": [],
+    "confidence_assessment": {
+      "verdict": "about_right",
+      "reasoning": "A low confidence score of ~21% is fully justified because the telemetry required to distinguish between consumer pool bottlenecking and third-party provider latency is absent from the corpus."
+    },
+    "worst_flaw": "The report sets mttr_minutes to null despite the user query explicitly asking for the mean time to recover, discarding the single MTTR figure present in the runbook corpus instead of supplying it with appropriate caveats."
+  }
+]
