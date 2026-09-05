@@ -89,4 +89,8 @@ answers against policy text as well as running the validator.
 policy changes, additive Swiss/global rules, authoritative risk codes, the two
 structuring distractors, decimal precision, date separation, mixed currencies,
 missing evidence, retrieval ranking, whole-rule chunks, evidence guards, a
-simulated multi-round tool loop, and honest API failure behavior.
+simulated multi-round tool loop, and honest API failure behavior. The suite now
+contains 30 tests, including replay of all 78 submitted tool calls, missing-policy
+uncertainty, target-specific assessment freshness, and artifact-tampering checks.
+The validator recomputes derived facts from the original records instead of
+trusting submitted aggregates or a matching trace.

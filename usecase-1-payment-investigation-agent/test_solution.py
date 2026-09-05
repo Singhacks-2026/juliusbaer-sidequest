@@ -249,5 +249,74 @@ class AgentTests(unittest.TestCase):
             self.assertEqual([], _final_errors(trace['result'], facts, retrieved, events))
 
 
+
+class SubmissionValidationTests(unittest.TestCase):
+    def setUp(self):
+        from validate_submission import validate
+        self.validate = validate
+        root = Path(__file__).resolve().parent
+        self.results = json.loads((root/'submission.json').read_text())
+        self.questions = json.loads((root/'questions/questions.json').read_text())
+        self.traces = [json.loads(line) for line in (root/'artifacts/trace.jsonl').read_text().splitlines()]
+
+    def test_submitted_artifacts_pass(self):
+        self.assertEqual([], self.validate(self.results, self.questions, self.traces))
+
+    def test_question_identity_and_count(self):
+        self.assertTrue(self.validate(self.results[:-1], self.questions))
+        for field in ['question_id', 'payment_id', 'question']:
+            with self.subTest(field=field):
+                rows = deepcopy(self.results)
+                rows[0][field] = 'changed'
+                self.assertTrue(self.validate(rows, self.questions))
+
+    def test_client_facts_are_verified_without_trace(self):
+        for field, value in [('client_risk_rating', 'High'), ('client_type', 'Corporate'), ('relationship_years', 0)]:
+            with self.subTest(field=field):
+                rows = deepcopy(self.results)
+                rows[0]['facts'][field] = value
+                self.assertTrue(self.validate(rows, self.questions))
+
+    def test_policy_conclusion_tampering_even_with_matching_trace(self):
+        self.results[0]['facts']['policy_assessment']['enhanced_review_required'] = True
+        self.traces[0]['result']['facts'] = deepcopy(self.results[0]['facts'])
+        self.assertTrue(self.validate(self.results, self.questions, self.traces))
+
+    def test_aggregation_tampering_without_trace(self):
+        self.results[3]['facts']['beneficiary_analyses'][0]['windows'][0]['total_amount'] = 1
+        self.assertTrue(self.validate(self.results, self.questions))
+
+    def test_malformed_fields_return_errors(self):
+        for field, value in [('facts', []), ('citations', [{}]), ('tools_used', {}), ('answer', None)]:
+            with self.subTest(field=field):
+                rows = deepcopy(self.results)
+                rows[0][field] = value
+                self.assertTrue(self.validate(rows, self.questions, self.traces))
+        for value in [[], ['bad'], 'bad', None]:
+            with self.subTest(assessment=value):
+                rows = deepcopy(self.results)
+                rows[0]['facts']['policy_assessment'] = value
+                self.assertTrue(self.validate(rows, self.questions))
+
+    def test_malformed_and_missing_traces(self):
+        for traces in [[{}], [None], {}, []]:
+            with self.subTest(traces=traces):
+                self.assertTrue(self.validate(self.results, self.questions, traces))
+        self.traces[0]['tool_calls'][0]['tool'] = []
+        self.assertTrue(self.validate(self.results, self.questions, self.traces))
+
+    def test_cli_invalid_json_has_no_traceback(self):
+        import subprocess
+        import sys
+        import tempfile
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp)/'broken.json'
+            path.write_text('{not json')
+            process = subprocess.run([sys.executable, str(Path(__file__).with_name('validate_submission.py')), str(path)],
+                                     capture_output=True, text=True)
+        self.assertNotEqual(0, process.returncode)
+        self.assertNotIn('Traceback', process.stderr)
+
+
 if __name__ == '__main__':
     unittest.main()

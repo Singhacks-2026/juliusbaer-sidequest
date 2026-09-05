@@ -7,8 +7,8 @@ with no incomplete results.
 
 ## Checks completed
 
-- `python -m unittest -v test_solution`: **14 tests passed**.
-- The same 14 tests passed from a separate temporary directory without the
+- `python -m unittest -v test_solution`: **30 tests passed**.
+- The same 30 tests passed from a separate temporary directory without the
   repository-root `.env`.
 - `python validate_submission.py submission.json --trace artifacts/trace.jsonl`:
   **10 results passed**. Required fields, official IDs, source facts, retrieved
@@ -19,6 +19,20 @@ with no incomplete results.
 - `main.py`, the source datasets, policies, and official questions are unchanged.
 - Submission files were checked for the configured API key; no credential was
   found. `.env` is ignored and excluded.
+
+## Regression coverage
+
+The expanded suite also checks missing structuring policies, missing regional
+escalation evidence, tool-completion order, target-specific assessment freshness,
+single-payment false positives, exact Swiss thresholds, bounded invalid model
+responses, malformed input handling, and submission tampering.
+
+All 78 tool calls in the included live trace are replayed against the current
+implementation, with exact tool-result and final-fact comparisons. The original
+10 live answers are retained; this replay and the stronger validator confirm that
+the code changes do not alter their evidence. The validator recomputes client
+facts, beneficiary aggregates and policy conclusions directly from the source
+records, including when a modified submission and trace agree with each other.
 
 ## Answer review
 
