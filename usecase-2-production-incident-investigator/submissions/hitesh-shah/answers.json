@@ -1,0 +1,71 @@
+{
+  "incident_a_pool_exhaustion": {
+    "root_cause": "Connection pool exhaustion in payment-gateway-adapter caused by deployment v2.4.1 (which reduced the connection pool size from 50 to 10), leading to ConnectionPoolTimeoutException and intermittent 504 GATEWAY_TIMEOUT charge failures under normal traffic.",
+    "supporting_evidence": [
+      {
+        "source": "logs.md",
+        "excerpt": "Multiple ConnectionPoolTimeoutException errors in payment-gateway-adapter following deployment: '2026-09-02 14:47:12 ERROR payment-gateway-adapter  ConnectionPoolTimeoutException: no available connection after 5000ms' and resulting GATEWAY_TIMEOUT in payment-service."
+      },
+      {
+        "source": "deployment_history.md",
+        "excerpt": "v2.4.1 (2026-09-02 14:30) on payment-gateway-adapter: Reduced connection pool size from 50 to 10 (memory optimization for the upcoming cost-reduction initiative)"
+      },
+      {
+        "source": "known_issues.csv",
+        "excerpt": "KI-101: A ConnectionPoolTimeoutException in payment-gateway-adapter logs is a known signature of an undersized connection pool relative to current traffic; cross-reference against deployment history for any recent pool size change \u2014 Recurred more than once - see previous incidents; both prior occurrences traced back to a pool size reduction"
+      },
+      {
+        "source": "previous_incidents.md",
+        "excerpt": "INC-2031 (2026-03-14): Intermittent payment failures due to connection pool size set too low for peak traffic during deploy configuration change. Resolved by reverting pool size to 50 (MTTR: 22 minutes)."
+      },
+      {
+        "source": "runbooks.md",
+        "excerpt": "RB-014 (Payment Gateway Timeout Spike): Symptoms match ConnectionPoolTimeoutException; Remediation: revert pool size to prior baseline (50 connections) and redeploy payment-gateway-adapter. Typical MTTR: 20 minutes."
+      },
+      {
+        "source": "architecture.md",
+        "excerpt": "payment-gateway-adapter owns a bounded connection pool to the external Payment Provider's API; synchronous dependency for payment-service."
+      }
+    ],
+    "impacted_systems": [
+      "payment-gateway-adapter",
+      "payment-service"
+    ],
+    "mttr_minutes": 20,
+    "remediation": "Revert the connection pool size configuration in payment-gateway-adapter from 10 back to the historical baseline of 50 connections (or scale up to match peak load) and redeploy payment-gateway-adapter.",
+    "confidence_score": 92.0,
+    "needs_human_review": false
+  },
+  "incident_b_ambiguous_delay": {
+    "root_cause": "Suspected message queue processing backlog or third-party email provider delivery latency affecting notification-service; root cause is unconfirmed due to lack of per-stage instrumentation, absence of error logs, zero correlated deployments, and no matching known issues or prior incidents.",
+    "supporting_evidence": [
+      {
+        "source": "logs.md",
+        "excerpt": "2026-08-15 11:10:02 WARN notification-service Queue depth elevated: 340 messages (with observed 40-75 minute lag between Email queued and Email sent, but no error logs or failed deliveries)."
+      },
+      {
+        "source": "deployment_history.md",
+        "excerpt": "No deployment touched notification-service in the month before this incident (2026-08-15); no correlated deployment found."
+      },
+      {
+        "source": "previous_incidents.md",
+        "excerpt": "No previous incident in historical record involves notification-service email delivery latency; first recorded report of this symptom."
+      },
+      {
+        "source": "runbooks.md",
+        "excerpt": "RB-002 (Elevated Notification Queue Depth): Note indicates runbook is incomplete pending better instrumentation; consumer/downstream bottleneck is unverified."
+      },
+      {
+        "source": "architecture.md",
+        "excerpt": "notification-service consumes internal message queue; consumer pool size and third-party email provider latency are uninstrumented with per-stage timing."
+      }
+    ],
+    "impacted_systems": [
+      "notification-service"
+    ],
+    "mttr_minutes": 15,
+    "remediation": "Verify consumer worker count and downstream third-party email provider latency; scale notification-service consumers if worker pool starvation is confirmed, and add per-stage latency metrics and monitoring to notification-service.",
+    "confidence_score": 23.0,
+    "needs_human_review": true
+  }
+}
