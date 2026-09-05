@@ -1,6 +1,7 @@
 # Production incident investigator
 
 Participant: Lim Hur (GitHub: `lhurr`).
+Email: limhur.ng@gmail.com
 
 This submission implements use case 2 with Python 3.10+ and the standard library.
 It runs offline without an API key or model download.
