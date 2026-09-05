@@ -1,0 +1,87 @@
+{
+  "incident_a_pool_exhaustion": {
+    "root_cause": "Probable cause: A ConnectionPoolTimeoutException in payment-gateway-adapter logs is a known signature of an undersized connection pool relative to current traffic; cross-reference against deployment history for any recent pool size change Corroborating change: v2.4.1 on 2026-09-02 14:30 UTC: Reduced connection pool size from 50 to 10 (memory optimization for the upcoming cost-reduction initiative). First matching error in the supplied log: 2026-09-02 14:47:12 UTC.",
+    "supporting_evidence": [
+      {
+        "source": "logs.md",
+        "excerpt": "2026-09-02 14:47:12 ERROR payment-gateway-adapter  ConnectionPoolTimeoutException: no available connection after 5000ms"
+      },
+      {
+        "source": "known_issues.csv",
+        "excerpt": "KI-101,ConnectionPoolTimeoutException in payment-gateway-adapter,A ConnectionPoolTimeoutException in payment-gateway-adapter logs is a known signature of an undersized connection pool relative to current traffic; cross-reference against deployment history for any recent pool size change,payment-gateway-adapter,Recurred more than once - see previous incidents; both prior occurrences traced back to a pool size reduction"
+      },
+      {
+        "source": "deployment_history.md",
+        "excerpt": "| **v2.4.1** | **2026-09-02 14:30** | **payment-gateway-adapter** | **Reduced connection pool size from 50 to 10 (memory optimization for the upcoming cost-reduction initiative)** |"
+      },
+      {
+        "source": "runbooks.md",
+        "excerpt": "## RB-014: Payment Gateway Timeout Spike\n\n**Symptoms**: `ConnectionPoolTimeoutException` appearing in\n`payment-gateway-adapter` logs; intermittent (not total) payment\nfailures; `payment-service` logging `GATEWAY_TIMEOUT`.\n\n**Diagnostic steps**:\n1. Check `payment-gateway-adapter` connection pool utilization metrics\n   for saturation.\n2. Check recent deployments touching `payment-gateway-adapter`\n   (see deployment history) for pool size or timeout configuration changes.\n3. Compare the current pool size configuration against the historical\n   baseline (50 connections).\n\n**Remediation**: revert the pool size to the prior baseline value, or\nscale the pool size upward to match current traffic; redeploy\n`payment-gateway-adapter`.\n\n**Typical MTTR: 20 minutes.**"
+      },
+      {
+        "source": "previous_incidents.md",
+        "excerpt": "## INC-2031 (2026-03-14)\n\n**Summary**: Intermittent payment failures, `payment-gateway-adapter`\nlogging `ConnectionPoolTimeoutException` under normal (not elevated)\ntraffic.\n\n**Root cause**: connection pool size was set too low for peak traffic\nduring a configuration change made in that day's deploy.\n\n**Resolution**: reverted the pool size to its prior value (50) and\nredeployed.\n\n**MTTR**: 22 minutes (from first error log to resolution deploy landing)."
+      },
+      {
+        "source": "logs.md",
+        "excerpt": "2026-09-02 14:47:12 ERROR payment-service          Charge failed order_id=ORD-88350 reason=GATEWAY_TIMEOUT"
+      },
+      {
+        "source": "architecture.md",
+        "excerpt": "## Components\n\n- **payment-service**: stateless, horizontally scaled, calls\n  `payment-gateway-adapter` synchronously for every charge.\n- **payment-gateway-adapter**: owns a bounded connection pool to the\n  external Payment Provider's API. Pool size is a static configuration\n  value, set at deploy time. When the pool is exhausted, new requests\n  wait up to a fixed timeout and then fail with\n  `ConnectionPoolTimeoutException`.\n- **order-service**: independent of payment-service; creates orders\n  before payment is attempted.\n- **notification-service**: sends emails via a message queue; independent\n  of the payment path.\n\n`payment-service` and `payment-gateway-adapter` are the only components in\nthe direct path of a charge request."
+      }
+    ],
+    "impacted_systems": [
+      "payment-gateway-adapter",
+      "payment-service"
+    ],
+    "mttr_minutes": 20,
+    "remediation": "Human-reviewed recommendation: revert the pool size to the prior baseline value, or\nscale the pool size upward to match current traffic; redeploy\n`payment-gateway-adapter`. Validate current utilization, traffic and deployment configuration first; verify error rate and latency after the authorised change. No action has been executed. Recovery estimate is the runbook typical value (20 minutes), not measured recovery for this incident.",
+    "confidence_score": 90.0,
+    "needs_human_review": false
+  },
+  "incident_b_ambiguous_delay": {
+    "root_cause": "Root cause undetermined. The supplied logs show symptoms in notification-service, but do not establish a correlated deployment, matching error signature or confirmed precedent. Queue/consumer capacity and downstream email-provider latency remain competing hypotheses; an isolated queue warning does not distinguish them.",
+    "supporting_evidence": [
+      {
+        "source": "logs.md",
+        "excerpt": "2026-08-15 08:55:03 INFO  notification-service     Email queued order_id=ORD-55021"
+      },
+      {
+        "source": "logs.md",
+        "excerpt": "2026-08-15 09:41:38 INFO  notification-service     Email sent order_id=ORD-55021"
+      },
+      {
+        "source": "logs.md",
+        "excerpt": "2026-08-15 11:10:02 WARN  notification-service     Queue depth elevated: 340 messages"
+      },
+      {
+        "source": "architecture.md",
+        "excerpt": "# Architecture overview\n\n```\nClient\n  -> API Gateway\n       -> payment-service       (validates and orchestrates charge requests)\n            -> payment-gateway-adapter   (connection pool to Payment Provider)\n       -> order-service          (creates and tracks orders)\n       -> notification-service   (consumes an internal message queue and\n                                   sends order/payment confirmation emails\n                                   via a third-party email provider)\n```"
+      },
+      {
+        "source": "deployment_history.md",
+        "excerpt": "# Deployment history\n\n| Version | Timestamp (UTC) | Component | Change |\n|---|---|---|---|\n| v2.4.0 | 2026-08-20 10:00 | payment-service | Added client-side retry logic for transient gateway errors |\n| v2.4.1 | 2026-09-02 14:30 | payment-gateway-adapter | Reduced connection pool size from 50 to 10 |\n\nNo deployment touched `notification-service` in the month before this\nincident (2026-08-15). The two entries above both post-date this\nincident and involve unrelated components \u2014 there is no deployment\ncorrelated with the email delay pattern."
+      },
+      {
+        "source": "previous_incidents.md",
+        "excerpt": "# Previous incidents\n\nNo previous incident in the historical record involves\n`notification-service` email delivery latency. The two incidents on file\n(payment gateway connection pool exhaustion, and a database failover\naffecting `order-service`) are both unrelated to email delivery timing.\n\nThis is the first recorded report of this symptom."
+      },
+      {
+        "source": "runbooks.md",
+        "excerpt": "## RB-002: Elevated Notification Queue Depth\n\n**Symptoms**: `notification-service` logging elevated queue depth\nwarnings.\n\n**Diagnostic steps**: check consumer count and downstream email provider\nlatency. Neither is currently exposed as a metric \u2014 this runbook is\nincomplete pending better instrumentation.\n\n**Remediation**: scale notification-service consumers (unverified whether\nthis is actually the bottleneck).\n\n**Typical MTTR: 15 minutes.** (Note: this MTTR figure is from a\ndifferent, unconfirmed prior occurrence and may not apply here.)\n\nNo other runbook in the current set addresses email delivery latency\nspecifically."
+      },
+      {
+        "source": "api_specs.md",
+        "excerpt": "# API specification (excerpt)\n\n`notification-service` has no public HTTP API \u2014 it is a queue consumer\nonly, triggered internally by events published from `order-service` and\n`payment-service`. There is no documented SLA for email delivery latency\nin the current API specification; this is itself a gap worth noting."
+      }
+    ],
+    "impacted_systems": [
+      "notification-service"
+    ],
+    "mttr_minutes": null,
+    "remediation": "Obtain per-stage traces, queue age/depth history, consumer concurrency and third-party provider latency; validate competing hypotheses with the service owner before scaling or changing configuration. Do not reuse an unconfirmed runbook recovery estimate. No action has been executed.",
+    "confidence_score": 20.0,
+    "needs_human_review": true
+  }
+}

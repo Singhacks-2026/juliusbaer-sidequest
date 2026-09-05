@@ -1,0 +1,3004 @@
+[
+  {
+    "payment_id": "P50000",
+    "question": "Should P50000 require enhanced review? Explain using policy.",
+    "title": "No review trigger established by these checks",
+    "payment": {
+      "payment_id": "P50000",
+      "client_id": "C2000",
+      "beneficiary_name": "Redwood Services",
+      "beneficiary_country": "UK",
+      "beneficiary_country_code": "SG",
+      "amount": "12000.0",
+      "currency": "USD",
+      "channel": "Branch",
+      "payment_date": "2026-01-23"
+    },
+    "client": {
+      "client_id": "C2000",
+      "country": "UAE",
+      "risk_rating": "Medium",
+      "client_type": "Individual",
+      "relationship_years": "13.0"
+    },
+    "checks": [
+      {
+        "id": "global_amount",
+        "title": "Global enhanced-review amount check",
+        "triggered": false,
+        "state": "complete",
+        "detail": "USD 12,000.00 does not exceed USD 100,000 equivalent.",
+        "source": "global_payment_policy.md",
+        "clause": "Payments above USD 100,000 equivalent require enhanced review before release.",
+        "requirement": null,
+        "calculation": {
+          "value": "12000.0",
+          "value_currency": "USD",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "destination",
+        "title": "Destination review",
+        "triggered": false,
+        "state": "complete",
+        "detail": "Authoritative destination code: SG. The supplied exercise list identifies AE.",
+        "source": "high_risk_jurisdictions.md",
+        "clause": "Payments to AE require additional review.",
+        "requirement": null,
+        "calculation": null
+      },
+      {
+        "id": "pattern",
+        "title": "Related-payment pattern",
+        "triggered": false,
+        "state": "complete",
+        "detail": "1 matching payment(s) on 2026-01-23 total USD 12,000.00. Filter: same client, beneficiary, date, and currency.",
+        "source": "global_payment_policy.md",
+        "clause": "Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
+        "requirement": null,
+        "calculation": {
+          "value": "12000.0",
+          "value_currency": "USD",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "procedure",
+        "title": "Investigation procedure evidence",
+        "triggered": false,
+        "state": "complete",
+        "detail": "Facts, policies, destination, pattern, assumptions, and supporting evidence have been assembled for review.",
+        "source": "investigation_procedure.md",
+        "clause": "Record the evidence supporting the recommendation.",
+        "requirement": null,
+        "calculation": null
+      }
+    ],
+    "requirements": [],
+    "evidence": [
+      {
+        "chunk_id": "global_payment_policy.md:1",
+        "source": "global_payment_policy.md",
+        "text": "# Global Payment Monitoring Policy 2026\n\n- Payments above USD 100,000 equivalent require enhanced review before release.\n- Payments to high-risk jurisdictions require additional review.\n- Multiple payments to the same beneficiary by the same client within 24 hours\n should be reviewed for potential structuring if their combined value exceeds\n USD 100,000 equivalent.\n- A policy trigger does not by itself establish suspicious activity.",
+        "score": 0.47057
+      },
+      {
+        "chunk_id": "high_risk_jurisdictions.md:1",
+        "source": "high_risk_jurisdictions.md",
+        "text": "# High-Risk Jurisdiction List 2026\n\nFor this exercise AE (UAE) is a high-risk destination.\nPayments to AE require additional review.",
+        "score": 2.45844
+      },
+      {
+        "chunk_id": "investigation_procedure.md:1",
+        "source": "investigation_procedure.md",
+        "text": "# Payment Investigation Procedure\n\n1. Establish client and payment facts.\n2. Identify the applicable policy.\n3. Check high-risk destination indicators.\n4. Check for possible transaction splitting.\n5. Separate observed facts from assumptions.\n6. Record the evidence supporting the recommendation.",
+        "score": 2.10234
+      }
+    ],
+    "citations": [
+      "global_payment_policy.md",
+      "high_risk_jurisdictions.md",
+      "investigation_procedure.md"
+    ],
+    "facts": {
+      "payment_id": "P50000",
+      "client_id": "C2000",
+      "beneficiary_name": "Redwood Services",
+      "beneficiary_country": "UK",
+      "beneficiary_country_code": "SG",
+      "amount": "12000.0",
+      "currency": "USD",
+      "channel": "Branch",
+      "payment_date": "2026-01-23",
+      "client_country": "UAE",
+      "related_payment_ids": [
+        "P50000"
+      ],
+      "related_count": 1,
+      "related_total": "12000.0",
+      "related_currency": "USD"
+    },
+    "related_group": {
+      "date": "2026-01-23",
+      "currency": "USD",
+      "count": 1,
+      "total_amount": "12000.0",
+      "payment_ids": [
+        "P50000"
+      ],
+      "payments": [
+        {
+          "payment_id": "P50000",
+          "client_id": "C2000",
+          "beneficiary_name": "Redwood Services",
+          "beneficiary_country": "UK",
+          "beneficiary_country_code": "SG",
+          "amount": "12000.0",
+          "currency": "USD",
+          "channel": "Branch",
+          "payment_date": "2026-01-23"
+        }
+      ]
+    },
+    "other_currency_groups": [],
+    "history_count": 6,
+    "discrepancy": {
+      "label": "UK",
+      "code": "SG",
+      "message": "Country label says UK; code says SG. The code is authoritative for this exercise."
+    },
+    "assumptions": [
+      "Same calendar date is used as the 24-hour window because exact timestamps are not supplied."
+    ],
+    "missing_information": [
+      "Resolve the destination label/code discrepancy under the appropriate procedure."
+    ],
+    "request_items": [],
+    "draft": "Internal analyst note: inspect the completed checks, resolve any data discrepancies, and follow the remaining bank review procedure. These checks do not authorise payment release.",
+    "external_request_needed": false,
+    "status": "ready_for_review",
+    "answer": "No review trigger established by these checks.\n\nGlobal enhanced-review amount check: USD 12,000.00 does not exceed USD 100,000 equivalent.\n\nDestination review: Authoritative destination code: SG. The supplied exercise list identifies AE.\n\nRelated-payment pattern: 1 matching payment(s) on 2026-01-23 total USD 12,000.00. Filter: same client, beneficiary, date, and currency.\n\nInvestigation procedure evidence: Facts, policies, destination, pattern, assumptions, and supporting evidence have been assembled for review.\n\nCountry label says UK; code says SG. The code is authoritative for this exercise.\n\nAssumptions: Same calendar date is used as the 24-hour window because exact timestamps are not supplied.\n\nA policy trigger does not establish suspicious activity. No payment release is authorised.\n\nWorkflow: establish facts, identify applicable policy, check destination and related transfers, separate facts from assumptions, and record evidence for human review.",
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "get_client_payments",
+      "aggregate_beneficiary_24h",
+      "search_policy"
+    ],
+    "trace": [
+      {
+        "tool": "get_payment",
+        "arguments": {
+          "payment_id": "P50000"
+        }
+      },
+      {
+        "tool": "get_client_profile",
+        "arguments": {
+          "client_id": "C2000"
+        }
+      },
+      {
+        "tool": "get_client_payments",
+        "arguments": {
+          "client_id": "C2000"
+        }
+      },
+      {
+        "tool": "aggregate_beneficiary_24h",
+        "arguments": {
+          "client_id": "C2000",
+          "beneficiary_name": "Redwood Services"
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Global payment monitoring USD 100000 equivalent same client beneficiary structuring",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "High risk jurisdiction AE additional review",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Investigation procedure establish facts assumptions record evidence",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "get_payment",
+        "arguments": {
+          "payment_id": "P50000"
+        },
+        "initiated_by": "llm"
+      }
+    ],
+    "input_version": "40d1b9d04b9098c4",
+    "mode": "fallback",
+    "mode_label": "Evidence mode \u00b7 AI unavailable",
+    "generated_at": "2026-09-05T06:45:22.055598+00:00",
+    "guardrails": [
+      "Exercise policies only",
+      "Human review required",
+      "No payment actions"
+    ],
+    "limitation": "The live AI response failed or did not pass validation (response_validation). Verified deterministic checks remain available.",
+    "ai_error_code": "response_validation",
+    "ai_error_reason": "Review type not in verified requirements",
+    "ai_duration_ms": 5237,
+    "question_id": "Q01"
+  },
+  {
+    "payment_id": "P50001",
+    "question": "What review requirement applies to P50001 and why?",
+    "title": "Enhanced review + destination review",
+    "payment": {
+      "payment_id": "P50001",
+      "client_id": "C2001",
+      "beneficiary_name": "Desert Star LLC",
+      "beneficiary_country": "UAE",
+      "beneficiary_country_code": "AE",
+      "amount": "125000.0",
+      "currency": "USD",
+      "channel": "Branch",
+      "payment_date": "2026-05-11"
+    },
+    "client": {
+      "client_id": "C2001",
+      "country": "Singapore",
+      "risk_rating": "Low",
+      "client_type": "Individual",
+      "relationship_years": "3.1"
+    },
+    "checks": [
+      {
+        "id": "global_amount",
+        "title": "Global enhanced-review amount check",
+        "triggered": true,
+        "state": "complete",
+        "detail": "USD 125,000.00 exceeds USD 100,000 equivalent.",
+        "source": "global_payment_policy.md",
+        "clause": "Payments above USD 100,000 equivalent require enhanced review before release.",
+        "requirement": "Enhanced review",
+        "calculation": {
+          "value": "125000.0",
+          "value_currency": "USD",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "regional_rm",
+        "title": "Singapore RM review",
+        "triggered": true,
+        "state": "complete",
+        "detail": "USD 125,000.00 exceeds USD 75,000 equivalent.",
+        "source": "regional_singapore.md",
+        "clause": "Payments above USD 75,000 equivalent require RM review.",
+        "requirement": "RM review",
+        "calculation": {
+          "value": "125000.0",
+          "value_currency": "USD",
+          "operator": ">",
+          "threshold": "75000",
+          "threshold_currency": "USD",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "regional_enhanced",
+        "title": "Singapore Enhanced review",
+        "triggered": true,
+        "state": "complete",
+        "detail": "USD 125,000.00 exceeds USD 100,000 equivalent.",
+        "source": "regional_singapore.md",
+        "clause": "Payments above USD 100,000 equivalent require enhanced review.",
+        "requirement": "Enhanced review",
+        "calculation": {
+          "value": "125000.0",
+          "value_currency": "USD",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "destination",
+        "title": "Destination review",
+        "triggered": true,
+        "state": "complete",
+        "detail": "Authoritative destination code: AE. The supplied exercise list identifies AE.",
+        "source": "high_risk_jurisdictions.md",
+        "clause": "Payments to AE require additional review.",
+        "requirement": "Additional destination review",
+        "calculation": null
+      },
+      {
+        "id": "pattern",
+        "title": "Related-payment pattern",
+        "triggered": false,
+        "state": "complete",
+        "detail": "1 matching payment(s) on 2026-05-11 total USD 125,000.00. Filter: same client, beneficiary, date, and currency.",
+        "source": "global_payment_policy.md",
+        "clause": "Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
+        "requirement": null,
+        "calculation": {
+          "value": "125000.0",
+          "value_currency": "USD",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "procedure",
+        "title": "Investigation procedure evidence",
+        "triggered": false,
+        "state": "complete",
+        "detail": "Facts, policies, destination, pattern, assumptions, and supporting evidence have been assembled for review.",
+        "source": "investigation_procedure.md",
+        "clause": "Record the evidence supporting the recommendation.",
+        "requirement": null,
+        "calculation": null
+      }
+    ],
+    "requirements": [
+      "Enhanced review",
+      "RM review",
+      "Additional destination review"
+    ],
+    "evidence": [
+      {
+        "chunk_id": "global_payment_policy.md:1",
+        "source": "global_payment_policy.md",
+        "text": "# Global Payment Monitoring Policy 2026\n\n- Payments above USD 100,000 equivalent require enhanced review before release.\n- Payments to high-risk jurisdictions require additional review.\n- Multiple payments to the same beneficiary by the same client within 24 hours\n should be reviewed for potential structuring if their combined value exceeds\n USD 100,000 equivalent.\n- A policy trigger does not by itself establish suspicious activity.",
+        "score": 0.3335
+      },
+      {
+        "chunk_id": "high_risk_jurisdictions.md:1",
+        "source": "high_risk_jurisdictions.md",
+        "text": "# High-Risk Jurisdiction List 2026\n\nFor this exercise AE (UAE) is a high-risk destination.\nPayments to AE require additional review.",
+        "score": 2.45844
+      },
+      {
+        "chunk_id": "investigation_procedure.md:1",
+        "source": "investigation_procedure.md",
+        "text": "# Payment Investigation Procedure\n\n1. Establish client and payment facts.\n2. Identify the applicable policy.\n3. Check high-risk destination indicators.\n4. Check for possible transaction splitting.\n5. Separate observed facts from assumptions.\n6. Record the evidence supporting the recommendation.",
+        "score": 2.10234
+      },
+      {
+        "chunk_id": "regional_singapore.md:1",
+        "source": "regional_singapore.md",
+        "text": "# Singapore Payment Procedure 2026\n\n- Payments above USD 75,000 equivalent require RM review.\n- Payments above USD 100,000 equivalent require enhanced review.\n- High-risk destinations require additional review.",
+        "score": 1.36564
+      }
+    ],
+    "citations": [
+      "global_payment_policy.md",
+      "high_risk_jurisdictions.md",
+      "investigation_procedure.md",
+      "regional_singapore.md"
+    ],
+    "facts": {
+      "payment_id": "P50001",
+      "client_id": "C2001",
+      "beneficiary_name": "Desert Star LLC",
+      "beneficiary_country": "UAE",
+      "beneficiary_country_code": "AE",
+      "amount": "125000.0",
+      "currency": "USD",
+      "channel": "Branch",
+      "payment_date": "2026-05-11",
+      "client_country": "Singapore",
+      "related_payment_ids": [
+        "P50001"
+      ],
+      "related_count": 1,
+      "related_total": "125000.0",
+      "related_currency": "USD"
+    },
+    "related_group": {
+      "date": "2026-05-11",
+      "currency": "USD",
+      "count": 1,
+      "total_amount": "125000.0",
+      "payment_ids": [
+        "P50001"
+      ],
+      "payments": [
+        {
+          "payment_id": "P50001",
+          "client_id": "C2001",
+          "beneficiary_name": "Desert Star LLC",
+          "beneficiary_country": "UAE",
+          "beneficiary_country_code": "AE",
+          "amount": "125000.0",
+          "currency": "USD",
+          "channel": "Branch",
+          "payment_date": "2026-05-11"
+        }
+      ]
+    },
+    "other_currency_groups": [],
+    "history_count": 6,
+    "discrepancy": null,
+    "assumptions": [
+      "Same calendar date is used as the 24-hour window because exact timestamps are not supplied."
+    ],
+    "missing_information": [],
+    "request_items": [
+      "Payment purpose",
+      "Supporting invoice or agreement",
+      "Relationship with the beneficiary"
+    ],
+    "draft": "For payment P50001 to Desert Star LLC, please confirm the payment purpose and your relationship with the beneficiary. Please provide a supporting invoice or agreement, if available.",
+    "external_request_needed": true,
+    "status": "ready_for_review",
+    "answer": "Enhanced review + destination review.\n\nGlobal enhanced-review amount check: USD 125,000.00 exceeds USD 100,000 equivalent.\n\nSingapore RM review: USD 125,000.00 exceeds USD 75,000 equivalent.\n\nSingapore Enhanced review: USD 125,000.00 exceeds USD 100,000 equivalent.\n\nDestination review: Authoritative destination code: AE. The supplied exercise list identifies AE.\n\nRelated-payment pattern: 1 matching payment(s) on 2026-05-11 total USD 125,000.00. Filter: same client, beneficiary, date, and currency.\n\nInvestigation procedure evidence: Facts, policies, destination, pattern, assumptions, and supporting evidence have been assembled for review.\n\nAssumptions: Same calendar date is used as the 24-hour window because exact timestamps are not supplied.\n\nA policy trigger does not establish suspicious activity. No payment release is authorised.\n\nProposed information request: Payment purpose, Supporting invoice or agreement, Relationship with the beneficiary.\n\nWorkflow: establish facts, identify applicable policy, check destination and related transfers, separate facts from assumptions, and record evidence for human review.",
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "get_client_payments",
+      "aggregate_beneficiary_24h",
+      "search_policy"
+    ],
+    "trace": [
+      {
+        "tool": "get_payment",
+        "arguments": {
+          "payment_id": "P50001"
+        }
+      },
+      {
+        "tool": "get_client_profile",
+        "arguments": {
+          "client_id": "C2001"
+        }
+      },
+      {
+        "tool": "get_client_payments",
+        "arguments": {
+          "client_id": "C2001"
+        }
+      },
+      {
+        "tool": "aggregate_beneficiary_24h",
+        "arguments": {
+          "client_id": "C2001",
+          "beneficiary_name": "Desert Star LLC"
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Global payment monitoring USD 100000 equivalent same client beneficiary structuring",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "High risk jurisdiction AE additional review",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Investigation procedure establish facts assumptions record evidence",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Singapore payment procedure thresholds RM enhanced review",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "get_payment",
+        "arguments": {
+          "payment_id": "P50001"
+        },
+        "initiated_by": "llm"
+      },
+      {
+        "tool": "get_client_profile",
+        "arguments": {
+          "client_id": "C2001"
+        },
+        "initiated_by": "llm"
+      }
+    ],
+    "input_version": "40d1b9d04b9098c4",
+    "mode": "fallback",
+    "mode_label": "Evidence mode \u00b7 AI unavailable",
+    "generated_at": "2026-09-05T06:45:27.293572+00:00",
+    "guardrails": [
+      "Exercise policies only",
+      "Human review required",
+      "No payment actions"
+    ],
+    "limitation": "The live AI response failed or did not pass validation (response_validation). Verified deterministic checks remain available.",
+    "ai_error_code": "response_validation",
+    "ai_error_reason": "Threshold detail must come from tools",
+    "ai_duration_ms": 7076,
+    "question_id": "Q02"
+  },
+  {
+    "payment_id": "P50002",
+    "question": "Identify the risk indicators for P50002 and state the additional review required.",
+    "title": "RM review + destination review",
+    "payment": {
+      "payment_id": "P50002",
+      "client_id": "C2002",
+      "beneficiary_name": "Pacific Holdings",
+      "beneficiary_country": "Hong Kong",
+      "beneficiary_country_code": "AE",
+      "amount": "85000.0",
+      "currency": "USD",
+      "channel": "Branch",
+      "payment_date": "2026-04-27"
+    },
+    "client": {
+      "client_id": "C2002",
+      "country": "Singapore",
+      "risk_rating": "Medium",
+      "client_type": "Individual",
+      "relationship_years": "11.5"
+    },
+    "checks": [
+      {
+        "id": "global_amount",
+        "title": "Global enhanced-review amount check",
+        "triggered": false,
+        "state": "complete",
+        "detail": "USD 85,000.00 does not exceed USD 100,000 equivalent.",
+        "source": "global_payment_policy.md",
+        "clause": "Payments above USD 100,000 equivalent require enhanced review before release.",
+        "requirement": null,
+        "calculation": {
+          "value": "85000.0",
+          "value_currency": "USD",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "regional_rm",
+        "title": "Singapore RM review",
+        "triggered": true,
+        "state": "complete",
+        "detail": "USD 85,000.00 exceeds USD 75,000 equivalent.",
+        "source": "regional_singapore.md",
+        "clause": "Payments above USD 75,000 equivalent require RM review.",
+        "requirement": "RM review",
+        "calculation": {
+          "value": "85000.0",
+          "value_currency": "USD",
+          "operator": ">",
+          "threshold": "75000",
+          "threshold_currency": "USD",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "regional_enhanced",
+        "title": "Singapore Enhanced review",
+        "triggered": false,
+        "state": "complete",
+        "detail": "USD 85,000.00 does not exceed USD 100,000 equivalent.",
+        "source": "regional_singapore.md",
+        "clause": "Payments above USD 100,000 equivalent require enhanced review.",
+        "requirement": null,
+        "calculation": {
+          "value": "85000.0",
+          "value_currency": "USD",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "destination",
+        "title": "Destination review",
+        "triggered": true,
+        "state": "complete",
+        "detail": "Authoritative destination code: AE. The supplied exercise list identifies AE.",
+        "source": "high_risk_jurisdictions.md",
+        "clause": "Payments to AE require additional review.",
+        "requirement": "Additional destination review",
+        "calculation": null
+      },
+      {
+        "id": "pattern",
+        "title": "Related-payment pattern",
+        "triggered": false,
+        "state": "complete",
+        "detail": "1 matching payment(s) on 2026-04-27 total USD 85,000.00. Filter: same client, beneficiary, date, and currency.",
+        "source": "global_payment_policy.md",
+        "clause": "Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
+        "requirement": null,
+        "calculation": {
+          "value": "85000.0",
+          "value_currency": "USD",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "procedure",
+        "title": "Investigation procedure evidence",
+        "triggered": false,
+        "state": "complete",
+        "detail": "Facts, policies, destination, pattern, assumptions, and supporting evidence have been assembled for review.",
+        "source": "investigation_procedure.md",
+        "clause": "Record the evidence supporting the recommendation.",
+        "requirement": null,
+        "calculation": null
+      }
+    ],
+    "requirements": [
+      "RM review",
+      "Additional destination review"
+    ],
+    "evidence": [
+      {
+        "chunk_id": "global_payment_policy.md:1",
+        "source": "global_payment_policy.md",
+        "text": "# Global Payment Monitoring Policy 2026\n\n- Payments above USD 100,000 equivalent require enhanced review before release.\n- Payments to high-risk jurisdictions require additional review.\n- Multiple payments to the same beneficiary by the same client within 24 hours\n should be reviewed for potential structuring if their combined value exceeds\n USD 100,000 equivalent.\n- A policy trigger does not by itself establish suspicious activity.",
+        "score": 0.3335
+      },
+      {
+        "chunk_id": "high_risk_jurisdictions.md:1",
+        "source": "high_risk_jurisdictions.md",
+        "text": "# High-Risk Jurisdiction List 2026\n\nFor this exercise AE (UAE) is a high-risk destination.\nPayments to AE require additional review.",
+        "score": 2.45844
+      },
+      {
+        "chunk_id": "investigation_procedure.md:1",
+        "source": "investigation_procedure.md",
+        "text": "# Payment Investigation Procedure\n\n1. Establish client and payment facts.\n2. Identify the applicable policy.\n3. Check high-risk destination indicators.\n4. Check for possible transaction splitting.\n5. Separate observed facts from assumptions.\n6. Record the evidence supporting the recommendation.",
+        "score": 2.10234
+      },
+      {
+        "chunk_id": "regional_singapore.md:1",
+        "source": "regional_singapore.md",
+        "text": "# Singapore Payment Procedure 2026\n\n- Payments above USD 75,000 equivalent require RM review.\n- Payments above USD 100,000 equivalent require enhanced review.\n- High-risk destinations require additional review.",
+        "score": 1.36564
+      }
+    ],
+    "citations": [
+      "global_payment_policy.md",
+      "high_risk_jurisdictions.md",
+      "investigation_procedure.md",
+      "regional_singapore.md"
+    ],
+    "facts": {
+      "payment_id": "P50002",
+      "client_id": "C2002",
+      "beneficiary_name": "Pacific Holdings",
+      "beneficiary_country": "Hong Kong",
+      "beneficiary_country_code": "AE",
+      "amount": "85000.0",
+      "currency": "USD",
+      "channel": "Branch",
+      "payment_date": "2026-04-27",
+      "client_country": "Singapore",
+      "related_payment_ids": [
+        "P50002"
+      ],
+      "related_count": 1,
+      "related_total": "85000.0",
+      "related_currency": "USD"
+    },
+    "related_group": {
+      "date": "2026-04-27",
+      "currency": "USD",
+      "count": 1,
+      "total_amount": "85000.0",
+      "payment_ids": [
+        "P50002"
+      ],
+      "payments": [
+        {
+          "payment_id": "P50002",
+          "client_id": "C2002",
+          "beneficiary_name": "Pacific Holdings",
+          "beneficiary_country": "Hong Kong",
+          "beneficiary_country_code": "AE",
+          "amount": "85000.0",
+          "currency": "USD",
+          "channel": "Branch",
+          "payment_date": "2026-04-27"
+        }
+      ]
+    },
+    "other_currency_groups": [],
+    "history_count": 8,
+    "discrepancy": {
+      "label": "Hong Kong",
+      "code": "AE",
+      "message": "Country label says Hong Kong; code says AE. The code is authoritative for this exercise."
+    },
+    "assumptions": [
+      "Same calendar date is used as the 24-hour window because exact timestamps are not supplied."
+    ],
+    "missing_information": [
+      "Resolve the destination label/code discrepancy under the appropriate procedure."
+    ],
+    "request_items": [
+      "Payment purpose",
+      "Supporting invoice or agreement",
+      "Relationship with the beneficiary",
+      "Confirmation of intended destination"
+    ],
+    "draft": "For payment P50002 to Pacific Holdings, please confirm the payment purpose and your relationship with the beneficiary. Please provide a supporting invoice or agreement, if available. Please also confirm the intended destination.",
+    "external_request_needed": true,
+    "status": "ready_for_review",
+    "answer": "The payment requires a relationship manager review due to its amount relative to the client's country policy. The destination is identified as high-risk, necessitating an additional destination review. There is a discrepancy between the beneficiary country label and the authoritative destination code, with the code being authoritative for this exercise. Payment release is not authorised pending these reviews.\n\nRM review + destination review.\n\nGlobal enhanced-review amount check: USD 85,000.00 does not exceed USD 100,000 equivalent.\n\nSingapore RM review: USD 85,000.00 exceeds USD 75,000 equivalent.\n\nSingapore Enhanced review: USD 85,000.00 does not exceed USD 100,000 equivalent.\n\nDestination review: Authoritative destination code: AE. The supplied exercise list identifies AE.\n\nRelated-payment pattern: 1 matching payment(s) on 2026-04-27 total USD 85,000.00. Filter: same client, beneficiary, date, and currency.\n\nInvestigation procedure evidence: Facts, policies, destination, pattern, assumptions, and supporting evidence have been assembled for review.\n\nCountry label says Hong Kong; code says AE. The code is authoritative for this exercise.\n\nAssumptions: Same calendar date is used as the 24-hour window because exact timestamps are not supplied.\n\nA policy trigger does not establish suspicious activity. No payment release is authorised.\n\nProposed information request: Payment purpose, Supporting invoice or agreement, Relationship with the beneficiary, Confirmation of intended destination.\n\nWorkflow: establish facts, identify applicable policy, check destination and related transfers, separate facts from assumptions, and record evidence for human review.",
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "get_client_payments",
+      "aggregate_beneficiary_24h",
+      "search_policy"
+    ],
+    "trace": [
+      {
+        "tool": "get_payment",
+        "arguments": {
+          "payment_id": "P50002"
+        }
+      },
+      {
+        "tool": "get_client_profile",
+        "arguments": {
+          "client_id": "C2002"
+        }
+      },
+      {
+        "tool": "get_client_payments",
+        "arguments": {
+          "client_id": "C2002"
+        }
+      },
+      {
+        "tool": "aggregate_beneficiary_24h",
+        "arguments": {
+          "client_id": "C2002",
+          "beneficiary_name": "Pacific Holdings"
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Global payment monitoring USD 100000 equivalent same client beneficiary structuring",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "High risk jurisdiction AE additional review",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Investigation procedure establish facts assumptions record evidence",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Singapore payment procedure thresholds RM enhanced review",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "get_payment",
+        "arguments": {
+          "payment_id": "P50002"
+        },
+        "initiated_by": "llm"
+      },
+      {
+        "tool": "get_client_profile",
+        "arguments": {
+          "client_id": "C2002"
+        },
+        "initiated_by": "llm"
+      },
+      {
+        "tool": "aggregate_beneficiary_24h",
+        "arguments": {
+          "client_id": "C2002",
+          "beneficiary_name": "Pacific Holdings"
+        },
+        "initiated_by": "llm"
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "RM review"
+        },
+        "initiated_by": "llm"
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "destination review"
+        },
+        "initiated_by": "llm"
+      }
+    ],
+    "input_version": "40d1b9d04b9098c4",
+    "mode": "live_ai",
+    "mode_label": "Live AI + verified checks",
+    "generated_at": "2026-09-05T06:45:34.371806+00:00",
+    "guardrails": [
+      "Exercise policies only",
+      "Human review required",
+      "No payment actions"
+    ],
+    "limitation": "AI prose is validated structurally; a human must still verify its meaning.",
+    "ai_explanation": "The payment requires a relationship manager review due to its amount relative to the client's country policy. The destination is identified as high-risk, necessitating an additional destination review. There is a discrepancy between the beneficiary country label and the authoritative destination code, with the code being authoritative for this exercise. Payment release is not authorised pending these reviews.",
+    "ai_model": "gpt-4.1-mini",
+    "ai_duration_ms": 7469,
+    "question_id": "Q03"
+  },
+  {
+    "payment_id": "P50003",
+    "question": "Does the data show a possible transaction-splitting pattern for C2003? Explain.",
+    "title": "Related payments require pattern review",
+    "payment": {
+      "payment_id": "P50003",
+      "client_id": "C2003",
+      "beneficiary_name": "Northstar Trading",
+      "beneficiary_country": "Singapore",
+      "beneficiary_country_code": "CH",
+      "amount": "45000.0",
+      "currency": "CHF",
+      "channel": "Branch",
+      "payment_date": "2026-04-11"
+    },
+    "client": {
+      "client_id": "C2003",
+      "country": "Switzerland",
+      "risk_rating": "Low",
+      "client_type": "Corporate",
+      "relationship_years": "12.1"
+    },
+    "checks": [
+      {
+        "id": "global_amount",
+        "title": "Global enhanced-review amount check",
+        "triggered": false,
+        "state": "complete",
+        "detail": "CHF 45,000.00 does not exceed USD 100,000 equivalent.",
+        "source": "global_payment_policy.md",
+        "clause": "Payments above USD 100,000 equivalent require enhanced review before release.",
+        "requirement": null,
+        "calculation": {
+          "value": "45000.0",
+          "value_currency": "CHF",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "exercise 1:1 equivalence"
+        }
+      },
+      {
+        "id": "regional_rm",
+        "title": "Switzerland RM review",
+        "triggered": false,
+        "state": "complete",
+        "detail": "CHF 45,000.00 does not exceed CHF 80,000 equivalent.",
+        "source": "regional_switzerland.md",
+        "clause": "Payments above CHF 80,000 equivalent require RM review.",
+        "requirement": null,
+        "calculation": {
+          "value": "45000.0",
+          "value_currency": "CHF",
+          "operator": ">",
+          "threshold": "80000",
+          "threshold_currency": "CHF",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "regional_enhanced",
+        "title": "Switzerland Enhanced review",
+        "triggered": false,
+        "state": "complete",
+        "detail": "CHF 45,000.00 does not exceed CHF 120,000 equivalent.",
+        "source": "regional_switzerland.md",
+        "clause": "Payments above CHF 120,000 equivalent require enhanced review.",
+        "requirement": null,
+        "calculation": {
+          "value": "45000.0",
+          "value_currency": "CHF",
+          "operator": ">",
+          "threshold": "120000",
+          "threshold_currency": "CHF",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "destination",
+        "title": "Destination review",
+        "triggered": false,
+        "state": "complete",
+        "detail": "Authoritative destination code: CH. The supplied exercise list identifies AE.",
+        "source": "high_risk_jurisdictions.md",
+        "clause": "Payments to AE require additional review.",
+        "requirement": null,
+        "calculation": null
+      },
+      {
+        "id": "pattern",
+        "title": "Related-payment pattern",
+        "triggered": true,
+        "state": "complete",
+        "detail": "3 matching payment(s) on 2026-04-11 total CHF 110,000.00. Filter: same client, beneficiary, date, and currency.",
+        "source": "global_payment_policy.md",
+        "clause": "Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
+        "requirement": "Potential structuring review",
+        "calculation": {
+          "value": "110000.0",
+          "value_currency": "CHF",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "exercise 1:1 equivalence"
+        }
+      },
+      {
+        "id": "escalation",
+        "title": "Swiss escalation requirement",
+        "triggered": true,
+        "state": "complete",
+        "detail": "The observed pattern requires Compliance escalation under the supplied Swiss procedure. Intent is not established.",
+        "source": "regional_switzerland.md",
+        "clause": "Potential structuring should be escalated to Compliance.",
+        "requirement": "Compliance escalation",
+        "calculation": null
+      },
+      {
+        "id": "procedure",
+        "title": "Investigation procedure evidence",
+        "triggered": false,
+        "state": "complete",
+        "detail": "Facts, policies, destination, pattern, assumptions, and supporting evidence have been assembled for review.",
+        "source": "investigation_procedure.md",
+        "clause": "Record the evidence supporting the recommendation.",
+        "requirement": null,
+        "calculation": null
+      }
+    ],
+    "requirements": [
+      "Potential structuring review",
+      "Compliance escalation"
+    ],
+    "evidence": [
+      {
+        "chunk_id": "global_payment_policy.md:1",
+        "source": "global_payment_policy.md",
+        "text": "# Global Payment Monitoring Policy 2026\n\n- Payments above USD 100,000 equivalent require enhanced review before release.\n- Payments to high-risk jurisdictions require additional review.\n- Multiple payments to the same beneficiary by the same client within 24 hours\n should be reviewed for potential structuring if their combined value exceeds\n USD 100,000 equivalent.\n- A policy trigger does not by itself establish suspicious activity.",
+        "score": 0.3335
+      },
+      {
+        "chunk_id": "high_risk_jurisdictions.md:1",
+        "source": "high_risk_jurisdictions.md",
+        "text": "# High-Risk Jurisdiction List 2026\n\nFor this exercise AE (UAE) is a high-risk destination.\nPayments to AE require additional review.",
+        "score": 2.45844
+      },
+      {
+        "chunk_id": "investigation_procedure.md:1",
+        "source": "investigation_procedure.md",
+        "text": "# Payment Investigation Procedure\n\n1. Establish client and payment facts.\n2. Identify the applicable policy.\n3. Check high-risk destination indicators.\n4. Check for possible transaction splitting.\n5. Separate observed facts from assumptions.\n6. Record the evidence supporting the recommendation.",
+        "score": 2.10234
+      },
+      {
+        "chunk_id": "regional_switzerland.md:1",
+        "source": "regional_switzerland.md",
+        "text": "# Switzerland Payment Procedure 2026\n\n- Payments above CHF 80,000 equivalent require RM review.\n- Payments above CHF 120,000 equivalent require enhanced review.\n- Potential structuring should be escalated to Compliance.",
+        "score": 1.24188
+      }
+    ],
+    "citations": [
+      "global_payment_policy.md",
+      "high_risk_jurisdictions.md",
+      "investigation_procedure.md",
+      "regional_switzerland.md"
+    ],
+    "facts": {
+      "payment_id": "P50003",
+      "client_id": "C2003",
+      "beneficiary_name": "Northstar Trading",
+      "beneficiary_country": "Singapore",
+      "beneficiary_country_code": "CH",
+      "amount": "45000.0",
+      "currency": "CHF",
+      "channel": "Branch",
+      "payment_date": "2026-04-11",
+      "client_country": "Switzerland",
+      "related_payment_ids": [
+        "P50003",
+        "P50180",
+        "P50181"
+      ],
+      "related_count": 3,
+      "related_total": "110000.0",
+      "related_currency": "CHF"
+    },
+    "related_group": {
+      "date": "2026-04-11",
+      "currency": "CHF",
+      "count": 3,
+      "total_amount": "110000.0",
+      "payment_ids": [
+        "P50003",
+        "P50180",
+        "P50181"
+      ],
+      "payments": [
+        {
+          "payment_id": "P50003",
+          "client_id": "C2003",
+          "beneficiary_name": "Northstar Trading",
+          "beneficiary_country": "Singapore",
+          "beneficiary_country_code": "CH",
+          "amount": "45000.0",
+          "currency": "CHF",
+          "channel": "Branch",
+          "payment_date": "2026-04-11"
+        },
+        {
+          "payment_id": "P50180",
+          "client_id": "C2003",
+          "beneficiary_name": "Northstar Trading",
+          "beneficiary_country": "Singapore",
+          "beneficiary_country_code": "CH",
+          "amount": "35000.0",
+          "currency": "CHF",
+          "channel": "Online",
+          "payment_date": "2026-04-11"
+        },
+        {
+          "payment_id": "P50181",
+          "client_id": "C2003",
+          "beneficiary_name": "Northstar Trading",
+          "beneficiary_country": "Singapore",
+          "beneficiary_country_code": "CH",
+          "amount": "30000.0",
+          "currency": "CHF",
+          "channel": "RM-assisted",
+          "payment_date": "2026-04-11"
+        }
+      ]
+    },
+    "other_currency_groups": [],
+    "history_count": 10,
+    "discrepancy": {
+      "label": "Singapore",
+      "code": "CH",
+      "message": "Country label says Singapore; code says CH. The code is authoritative for this exercise."
+    },
+    "assumptions": [
+      "Exercise-only 1:1 equivalence: CHF to USD; approved FX is not supplied.",
+      "Same calendar date is used as the 24-hour window because exact timestamps are not supplied."
+    ],
+    "missing_information": [
+      "Resolve the destination label/code discrepancy under the appropriate procedure.",
+      "Confirm the commercial purpose and relationship of the related transfers; intent is unknown."
+    ],
+    "request_items": [
+      "Payment purpose",
+      "Supporting invoice or agreement",
+      "Relationship with the beneficiary",
+      "Confirmation of intended destination",
+      "Reason for separate transfers",
+      "Actual payment timestamps"
+    ],
+    "draft": "For your payments to Northstar Trading on 2026-04-11, please provide the purpose and supporting documents for each transfer, and confirm why they were made separately. Please also confirm the intended destination.",
+    "external_request_needed": true,
+    "status": "ready_for_review",
+    "answer": "The payment is part of multiple transfers on the same day to the same beneficiary and currency, requiring a potential structuring review and compliance escalation under Swiss policy. The destination code differs from the beneficiary country label, with the code being authoritative. The intent behind the transfers is unclear, and payment release is not authorised. Additional information is needed to clarify the purpose and relationships involved.\n\nRelated payments require pattern review.\n\nGlobal enhanced-review amount check: CHF 45,000.00 does not exceed USD 100,000 equivalent.\n\nSwitzerland RM review: CHF 45,000.00 does not exceed CHF 80,000 equivalent.\n\nSwitzerland Enhanced review: CHF 45,000.00 does not exceed CHF 120,000 equivalent.\n\nDestination review: Authoritative destination code: CH. The supplied exercise list identifies AE.\n\nRelated-payment pattern: 3 matching payment(s) on 2026-04-11 total CHF 110,000.00. Filter: same client, beneficiary, date, and currency.\n\nSwiss escalation requirement: The observed pattern requires Compliance escalation under the supplied Swiss procedure. Intent is not established.\n\nInvestigation procedure evidence: Facts, policies, destination, pattern, assumptions, and supporting evidence have been assembled for review.\n\nCountry label says Singapore; code says CH. The code is authoritative for this exercise.\n\nAssumptions: Exercise-only 1:1 equivalence: CHF to USD; approved FX is not supplied. Same calendar date is used as the 24-hour window because exact timestamps are not supplied.\n\nA policy trigger does not establish suspicious activity. No payment release is authorised.\n\nProposed information request: Payment purpose, Supporting invoice or agreement, Relationship with the beneficiary, Confirmation of intended destination, Reason for separate transfers, Actual payment timestamps.\n\nWorkflow: establish facts, identify applicable policy, check destination and related transfers, separate facts from assumptions, and record evidence for human review.",
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "get_client_payments",
+      "aggregate_beneficiary_24h",
+      "search_policy"
+    ],
+    "trace": [
+      {
+        "tool": "get_payment",
+        "arguments": {
+          "payment_id": "P50003"
+        }
+      },
+      {
+        "tool": "get_client_profile",
+        "arguments": {
+          "client_id": "C2003"
+        }
+      },
+      {
+        "tool": "get_client_payments",
+        "arguments": {
+          "client_id": "C2003"
+        }
+      },
+      {
+        "tool": "aggregate_beneficiary_24h",
+        "arguments": {
+          "client_id": "C2003",
+          "beneficiary_name": "Northstar Trading"
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Global payment monitoring USD 100000 equivalent same client beneficiary structuring",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "High risk jurisdiction AE additional review",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Investigation procedure establish facts assumptions record evidence",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Switzerland payment procedure thresholds RM enhanced review",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "get_client_payments",
+        "arguments": {
+          "client_id": "C2003"
+        },
+        "initiated_by": "llm"
+      }
+    ],
+    "input_version": "40d1b9d04b9098c4",
+    "mode": "live_ai",
+    "mode_label": "Live AI + verified checks",
+    "generated_at": "2026-09-05T06:45:41.842445+00:00",
+    "guardrails": [
+      "Exercise policies only",
+      "Human review required",
+      "No payment actions"
+    ],
+    "limitation": "AI prose is validated structurally; a human must still verify its meaning.",
+    "ai_explanation": "The payment is part of multiple transfers on the same day to the same beneficiary and currency, requiring a potential structuring review and compliance escalation under Swiss policy. The destination code differs from the beneficiary country label, with the code being authoritative. The intent behind the transfers is unclear, and payment release is not authorised. Additional information is needed to clarify the purpose and relationships involved.",
+    "ai_model": "gpt-4.1-mini",
+    "ai_duration_ms": 6763,
+    "question_id": "Q04"
+  },
+  {
+    "payment_id": "P50001",
+    "question": "Which policy documents should the assistant retrieve before recommending release of P50001?",
+    "title": "Enhanced review + destination review",
+    "payment": {
+      "payment_id": "P50001",
+      "client_id": "C2001",
+      "beneficiary_name": "Desert Star LLC",
+      "beneficiary_country": "UAE",
+      "beneficiary_country_code": "AE",
+      "amount": "125000.0",
+      "currency": "USD",
+      "channel": "Branch",
+      "payment_date": "2026-05-11"
+    },
+    "client": {
+      "client_id": "C2001",
+      "country": "Singapore",
+      "risk_rating": "Low",
+      "client_type": "Individual",
+      "relationship_years": "3.1"
+    },
+    "checks": [
+      {
+        "id": "global_amount",
+        "title": "Global enhanced-review amount check",
+        "triggered": true,
+        "state": "complete",
+        "detail": "USD 125,000.00 exceeds USD 100,000 equivalent.",
+        "source": "global_payment_policy.md",
+        "clause": "Payments above USD 100,000 equivalent require enhanced review before release.",
+        "requirement": "Enhanced review",
+        "calculation": {
+          "value": "125000.0",
+          "value_currency": "USD",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "regional_rm",
+        "title": "Singapore RM review",
+        "triggered": true,
+        "state": "complete",
+        "detail": "USD 125,000.00 exceeds USD 75,000 equivalent.",
+        "source": "regional_singapore.md",
+        "clause": "Payments above USD 75,000 equivalent require RM review.",
+        "requirement": "RM review",
+        "calculation": {
+          "value": "125000.0",
+          "value_currency": "USD",
+          "operator": ">",
+          "threshold": "75000",
+          "threshold_currency": "USD",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "regional_enhanced",
+        "title": "Singapore Enhanced review",
+        "triggered": true,
+        "state": "complete",
+        "detail": "USD 125,000.00 exceeds USD 100,000 equivalent.",
+        "source": "regional_singapore.md",
+        "clause": "Payments above USD 100,000 equivalent require enhanced review.",
+        "requirement": "Enhanced review",
+        "calculation": {
+          "value": "125000.0",
+          "value_currency": "USD",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "destination",
+        "title": "Destination review",
+        "triggered": true,
+        "state": "complete",
+        "detail": "Authoritative destination code: AE. The supplied exercise list identifies AE.",
+        "source": "high_risk_jurisdictions.md",
+        "clause": "Payments to AE require additional review.",
+        "requirement": "Additional destination review",
+        "calculation": null
+      },
+      {
+        "id": "pattern",
+        "title": "Related-payment pattern",
+        "triggered": false,
+        "state": "complete",
+        "detail": "1 matching payment(s) on 2026-05-11 total USD 125,000.00. Filter: same client, beneficiary, date, and currency.",
+        "source": "global_payment_policy.md",
+        "clause": "Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
+        "requirement": null,
+        "calculation": {
+          "value": "125000.0",
+          "value_currency": "USD",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "procedure",
+        "title": "Investigation procedure evidence",
+        "triggered": false,
+        "state": "complete",
+        "detail": "Facts, policies, destination, pattern, assumptions, and supporting evidence have been assembled for review.",
+        "source": "investigation_procedure.md",
+        "clause": "Record the evidence supporting the recommendation.",
+        "requirement": null,
+        "calculation": null
+      }
+    ],
+    "requirements": [
+      "Enhanced review",
+      "RM review",
+      "Additional destination review"
+    ],
+    "evidence": [
+      {
+        "chunk_id": "global_payment_policy.md:1",
+        "source": "global_payment_policy.md",
+        "text": "# Global Payment Monitoring Policy 2026\n\n- Payments above USD 100,000 equivalent require enhanced review before release.\n- Payments to high-risk jurisdictions require additional review.\n- Multiple payments to the same beneficiary by the same client within 24 hours\n should be reviewed for potential structuring if their combined value exceeds\n USD 100,000 equivalent.\n- A policy trigger does not by itself establish suspicious activity.",
+        "score": 0.3335
+      },
+      {
+        "chunk_id": "high_risk_jurisdictions.md:1",
+        "source": "high_risk_jurisdictions.md",
+        "text": "# High-Risk Jurisdiction List 2026\n\nFor this exercise AE (UAE) is a high-risk destination.\nPayments to AE require additional review.",
+        "score": 2.45844
+      },
+      {
+        "chunk_id": "investigation_procedure.md:1",
+        "source": "investigation_procedure.md",
+        "text": "# Payment Investigation Procedure\n\n1. Establish client and payment facts.\n2. Identify the applicable policy.\n3. Check high-risk destination indicators.\n4. Check for possible transaction splitting.\n5. Separate observed facts from assumptions.\n6. Record the evidence supporting the recommendation.",
+        "score": 2.10234
+      },
+      {
+        "chunk_id": "regional_singapore.md:1",
+        "source": "regional_singapore.md",
+        "text": "# Singapore Payment Procedure 2026\n\n- Payments above USD 75,000 equivalent require RM review.\n- Payments above USD 100,000 equivalent require enhanced review.\n- High-risk destinations require additional review.",
+        "score": 1.36564
+      }
+    ],
+    "citations": [
+      "global_payment_policy.md",
+      "high_risk_jurisdictions.md",
+      "investigation_procedure.md",
+      "regional_singapore.md"
+    ],
+    "facts": {
+      "payment_id": "P50001",
+      "client_id": "C2001",
+      "beneficiary_name": "Desert Star LLC",
+      "beneficiary_country": "UAE",
+      "beneficiary_country_code": "AE",
+      "amount": "125000.0",
+      "currency": "USD",
+      "channel": "Branch",
+      "payment_date": "2026-05-11",
+      "client_country": "Singapore",
+      "related_payment_ids": [
+        "P50001"
+      ],
+      "related_count": 1,
+      "related_total": "125000.0",
+      "related_currency": "USD"
+    },
+    "related_group": {
+      "date": "2026-05-11",
+      "currency": "USD",
+      "count": 1,
+      "total_amount": "125000.0",
+      "payment_ids": [
+        "P50001"
+      ],
+      "payments": [
+        {
+          "payment_id": "P50001",
+          "client_id": "C2001",
+          "beneficiary_name": "Desert Star LLC",
+          "beneficiary_country": "UAE",
+          "beneficiary_country_code": "AE",
+          "amount": "125000.0",
+          "currency": "USD",
+          "channel": "Branch",
+          "payment_date": "2026-05-11"
+        }
+      ]
+    },
+    "other_currency_groups": [],
+    "history_count": 6,
+    "discrepancy": null,
+    "assumptions": [
+      "Same calendar date is used as the 24-hour window because exact timestamps are not supplied."
+    ],
+    "missing_information": [],
+    "request_items": [
+      "Payment purpose",
+      "Supporting invoice or agreement",
+      "Relationship with the beneficiary"
+    ],
+    "draft": "For payment P50001 to Desert Star LLC, please confirm the payment purpose and your relationship with the beneficiary. Please provide a supporting invoice or agreement, if available.",
+    "external_request_needed": true,
+    "status": "ready_for_review",
+    "answer": "The payment requires enhanced review, relationship manager review, and additional destination review due to the payment amount and beneficiary location. Relevant policies include the global payment policy, the regional Singapore policy, the high-risk jurisdictions policy, and the investigation procedure document. Payment release is not authorised at this stage.\n\nEnhanced review + destination review.\n\nGlobal enhanced-review amount check: USD 125,000.00 exceeds USD 100,000 equivalent.\n\nSingapore RM review: USD 125,000.00 exceeds USD 75,000 equivalent.\n\nSingapore Enhanced review: USD 125,000.00 exceeds USD 100,000 equivalent.\n\nDestination review: Authoritative destination code: AE. The supplied exercise list identifies AE.\n\nRelated-payment pattern: 1 matching payment(s) on 2026-05-11 total USD 125,000.00. Filter: same client, beneficiary, date, and currency.\n\nInvestigation procedure evidence: Facts, policies, destination, pattern, assumptions, and supporting evidence have been assembled for review.\n\nAssumptions: Same calendar date is used as the 24-hour window because exact timestamps are not supplied.\n\nA policy trigger does not establish suspicious activity. No payment release is authorised.\n\nProposed information request: Payment purpose, Supporting invoice or agreement, Relationship with the beneficiary.\n\nWorkflow: establish facts, identify applicable policy, check destination and related transfers, separate facts from assumptions, and record evidence for human review.",
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "get_client_payments",
+      "aggregate_beneficiary_24h",
+      "search_policy"
+    ],
+    "trace": [
+      {
+        "tool": "get_payment",
+        "arguments": {
+          "payment_id": "P50001"
+        }
+      },
+      {
+        "tool": "get_client_profile",
+        "arguments": {
+          "client_id": "C2001"
+        }
+      },
+      {
+        "tool": "get_client_payments",
+        "arguments": {
+          "client_id": "C2001"
+        }
+      },
+      {
+        "tool": "aggregate_beneficiary_24h",
+        "arguments": {
+          "client_id": "C2001",
+          "beneficiary_name": "Desert Star LLC"
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Global payment monitoring USD 100000 equivalent same client beneficiary structuring",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "High risk jurisdiction AE additional review",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Investigation procedure establish facts assumptions record evidence",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Singapore payment procedure thresholds RM enhanced review",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "get_payment",
+        "arguments": {
+          "payment_id": "P50001"
+        },
+        "initiated_by": "llm"
+      }
+    ],
+    "input_version": "40d1b9d04b9098c4",
+    "mode": "live_ai",
+    "mode_label": "Live AI + verified checks",
+    "generated_at": "2026-09-05T06:45:48.607574+00:00",
+    "guardrails": [
+      "Exercise policies only",
+      "Human review required",
+      "No payment actions"
+    ],
+    "limitation": "AI prose is validated structurally; a human must still verify its meaning.",
+    "ai_explanation": "The payment requires enhanced review, relationship manager review, and additional destination review due to the payment amount and beneficiary location. Relevant policies include the global payment policy, the regional Singapore policy, the high-risk jurisdictions policy, and the investigation procedure document. Payment release is not authorised at this stage.",
+    "ai_model": "gpt-4.1-mini",
+    "ai_duration_ms": 4552,
+    "question_id": "Q05"
+  },
+  {
+    "payment_id": "P50002",
+    "question": "Separate factual evidence from assumptions for P50002 and give a grounded recommendation.",
+    "title": "RM review + destination review",
+    "payment": {
+      "payment_id": "P50002",
+      "client_id": "C2002",
+      "beneficiary_name": "Pacific Holdings",
+      "beneficiary_country": "Hong Kong",
+      "beneficiary_country_code": "AE",
+      "amount": "85000.0",
+      "currency": "USD",
+      "channel": "Branch",
+      "payment_date": "2026-04-27"
+    },
+    "client": {
+      "client_id": "C2002",
+      "country": "Singapore",
+      "risk_rating": "Medium",
+      "client_type": "Individual",
+      "relationship_years": "11.5"
+    },
+    "checks": [
+      {
+        "id": "global_amount",
+        "title": "Global enhanced-review amount check",
+        "triggered": false,
+        "state": "complete",
+        "detail": "USD 85,000.00 does not exceed USD 100,000 equivalent.",
+        "source": "global_payment_policy.md",
+        "clause": "Payments above USD 100,000 equivalent require enhanced review before release.",
+        "requirement": null,
+        "calculation": {
+          "value": "85000.0",
+          "value_currency": "USD",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "regional_rm",
+        "title": "Singapore RM review",
+        "triggered": true,
+        "state": "complete",
+        "detail": "USD 85,000.00 exceeds USD 75,000 equivalent.",
+        "source": "regional_singapore.md",
+        "clause": "Payments above USD 75,000 equivalent require RM review.",
+        "requirement": "RM review",
+        "calculation": {
+          "value": "85000.0",
+          "value_currency": "USD",
+          "operator": ">",
+          "threshold": "75000",
+          "threshold_currency": "USD",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "regional_enhanced",
+        "title": "Singapore Enhanced review",
+        "triggered": false,
+        "state": "complete",
+        "detail": "USD 85,000.00 does not exceed USD 100,000 equivalent.",
+        "source": "regional_singapore.md",
+        "clause": "Payments above USD 100,000 equivalent require enhanced review.",
+        "requirement": null,
+        "calculation": {
+          "value": "85000.0",
+          "value_currency": "USD",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "destination",
+        "title": "Destination review",
+        "triggered": true,
+        "state": "complete",
+        "detail": "Authoritative destination code: AE. The supplied exercise list identifies AE.",
+        "source": "high_risk_jurisdictions.md",
+        "clause": "Payments to AE require additional review.",
+        "requirement": "Additional destination review",
+        "calculation": null
+      },
+      {
+        "id": "pattern",
+        "title": "Related-payment pattern",
+        "triggered": false,
+        "state": "complete",
+        "detail": "1 matching payment(s) on 2026-04-27 total USD 85,000.00. Filter: same client, beneficiary, date, and currency.",
+        "source": "global_payment_policy.md",
+        "clause": "Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
+        "requirement": null,
+        "calculation": {
+          "value": "85000.0",
+          "value_currency": "USD",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "procedure",
+        "title": "Investigation procedure evidence",
+        "triggered": false,
+        "state": "complete",
+        "detail": "Facts, policies, destination, pattern, assumptions, and supporting evidence have been assembled for review.",
+        "source": "investigation_procedure.md",
+        "clause": "Record the evidence supporting the recommendation.",
+        "requirement": null,
+        "calculation": null
+      }
+    ],
+    "requirements": [
+      "RM review",
+      "Additional destination review"
+    ],
+    "evidence": [
+      {
+        "chunk_id": "global_payment_policy.md:1",
+        "source": "global_payment_policy.md",
+        "text": "# Global Payment Monitoring Policy 2026\n\n- Payments above USD 100,000 equivalent require enhanced review before release.\n- Payments to high-risk jurisdictions require additional review.\n- Multiple payments to the same beneficiary by the same client within 24 hours\n should be reviewed for potential structuring if their combined value exceeds\n USD 100,000 equivalent.\n- A policy trigger does not by itself establish suspicious activity.",
+        "score": 0.3335
+      },
+      {
+        "chunk_id": "high_risk_jurisdictions.md:1",
+        "source": "high_risk_jurisdictions.md",
+        "text": "# High-Risk Jurisdiction List 2026\n\nFor this exercise AE (UAE) is a high-risk destination.\nPayments to AE require additional review.",
+        "score": 2.45844
+      },
+      {
+        "chunk_id": "investigation_procedure.md:1",
+        "source": "investigation_procedure.md",
+        "text": "# Payment Investigation Procedure\n\n1. Establish client and payment facts.\n2. Identify the applicable policy.\n3. Check high-risk destination indicators.\n4. Check for possible transaction splitting.\n5. Separate observed facts from assumptions.\n6. Record the evidence supporting the recommendation.",
+        "score": 2.10234
+      },
+      {
+        "chunk_id": "regional_singapore.md:1",
+        "source": "regional_singapore.md",
+        "text": "# Singapore Payment Procedure 2026\n\n- Payments above USD 75,000 equivalent require RM review.\n- Payments above USD 100,000 equivalent require enhanced review.\n- High-risk destinations require additional review.",
+        "score": 1.36564
+      }
+    ],
+    "citations": [
+      "global_payment_policy.md",
+      "high_risk_jurisdictions.md",
+      "investigation_procedure.md",
+      "regional_singapore.md"
+    ],
+    "facts": {
+      "payment_id": "P50002",
+      "client_id": "C2002",
+      "beneficiary_name": "Pacific Holdings",
+      "beneficiary_country": "Hong Kong",
+      "beneficiary_country_code": "AE",
+      "amount": "85000.0",
+      "currency": "USD",
+      "channel": "Branch",
+      "payment_date": "2026-04-27",
+      "client_country": "Singapore",
+      "related_payment_ids": [
+        "P50002"
+      ],
+      "related_count": 1,
+      "related_total": "85000.0",
+      "related_currency": "USD"
+    },
+    "related_group": {
+      "date": "2026-04-27",
+      "currency": "USD",
+      "count": 1,
+      "total_amount": "85000.0",
+      "payment_ids": [
+        "P50002"
+      ],
+      "payments": [
+        {
+          "payment_id": "P50002",
+          "client_id": "C2002",
+          "beneficiary_name": "Pacific Holdings",
+          "beneficiary_country": "Hong Kong",
+          "beneficiary_country_code": "AE",
+          "amount": "85000.0",
+          "currency": "USD",
+          "channel": "Branch",
+          "payment_date": "2026-04-27"
+        }
+      ]
+    },
+    "other_currency_groups": [],
+    "history_count": 8,
+    "discrepancy": {
+      "label": "Hong Kong",
+      "code": "AE",
+      "message": "Country label says Hong Kong; code says AE. The code is authoritative for this exercise."
+    },
+    "assumptions": [
+      "Same calendar date is used as the 24-hour window because exact timestamps are not supplied."
+    ],
+    "missing_information": [
+      "Resolve the destination label/code discrepancy under the appropriate procedure."
+    ],
+    "request_items": [
+      "Payment purpose",
+      "Supporting invoice or agreement",
+      "Relationship with the beneficiary",
+      "Confirmation of intended destination"
+    ],
+    "draft": "For payment P50002 to Pacific Holdings, please confirm the payment purpose and your relationship with the beneficiary. Please provide a supporting invoice or agreement, if available. Please also confirm the intended destination.",
+    "external_request_needed": true,
+    "status": "ready_for_review",
+    "answer": "The payment facts include client and beneficiary details, payment amount, and date. The destination is a high-risk jurisdiction requiring additional destination review. The payment amount triggers a relationship manager review based on client country policy. An assumption is made about the time window due to missing exact timestamps. These facts and assumptions support the need for the specified reviews. No release is authorised pending further information to clarify payment purpose, supporting documents, beneficiary relationship, and destination confirmation.\n\nRM review + destination review.\n\nGlobal enhanced-review amount check: USD 85,000.00 does not exceed USD 100,000 equivalent.\n\nSingapore RM review: USD 85,000.00 exceeds USD 75,000 equivalent.\n\nSingapore Enhanced review: USD 85,000.00 does not exceed USD 100,000 equivalent.\n\nDestination review: Authoritative destination code: AE. The supplied exercise list identifies AE.\n\nRelated-payment pattern: 1 matching payment(s) on 2026-04-27 total USD 85,000.00. Filter: same client, beneficiary, date, and currency.\n\nInvestigation procedure evidence: Facts, policies, destination, pattern, assumptions, and supporting evidence have been assembled for review.\n\nCountry label says Hong Kong; code says AE. The code is authoritative for this exercise.\n\nAssumptions: Same calendar date is used as the 24-hour window because exact timestamps are not supplied.\n\nA policy trigger does not establish suspicious activity. No payment release is authorised.\n\nProposed information request: Payment purpose, Supporting invoice or agreement, Relationship with the beneficiary, Confirmation of intended destination.\n\nWorkflow: establish facts, identify applicable policy, check destination and related transfers, separate facts from assumptions, and record evidence for human review.",
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "get_client_payments",
+      "aggregate_beneficiary_24h",
+      "search_policy"
+    ],
+    "trace": [
+      {
+        "tool": "get_payment",
+        "arguments": {
+          "payment_id": "P50002"
+        }
+      },
+      {
+        "tool": "get_client_profile",
+        "arguments": {
+          "client_id": "C2002"
+        }
+      },
+      {
+        "tool": "get_client_payments",
+        "arguments": {
+          "client_id": "C2002"
+        }
+      },
+      {
+        "tool": "aggregate_beneficiary_24h",
+        "arguments": {
+          "client_id": "C2002",
+          "beneficiary_name": "Pacific Holdings"
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Global payment monitoring USD 100000 equivalent same client beneficiary structuring",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "High risk jurisdiction AE additional review",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Investigation procedure establish facts assumptions record evidence",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Singapore payment procedure thresholds RM enhanced review",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "get_payment",
+        "arguments": {
+          "payment_id": "P50002"
+        },
+        "initiated_by": "llm"
+      },
+      {
+        "tool": "get_client_profile",
+        "arguments": {
+          "client_id": "C2002"
+        },
+        "initiated_by": "llm"
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "RM review"
+        },
+        "initiated_by": "llm"
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "destination review"
+        },
+        "initiated_by": "llm"
+      }
+    ],
+    "input_version": "40d1b9d04b9098c4",
+    "mode": "live_ai",
+    "mode_label": "Live AI + verified checks",
+    "generated_at": "2026-09-05T06:45:53.161638+00:00",
+    "guardrails": [
+      "Exercise policies only",
+      "Human review required",
+      "No payment actions"
+    ],
+    "limitation": "AI prose is validated structurally; a human must still verify its meaning.",
+    "ai_explanation": "The payment facts include client and beneficiary details, payment amount, and date. The destination is a high-risk jurisdiction requiring additional destination review. The payment amount triggers a relationship manager review based on client country policy. An assumption is made about the time window due to missing exact timestamps. These facts and assumptions support the need for the specified reviews. No release is authorised pending further information to clarify payment purpose, supporting documents, beneficiary relationship, and destination confirmation.",
+    "ai_model": "gpt-4.1-mini",
+    "ai_duration_ms": 6504,
+    "question_id": "Q06"
+  },
+  {
+    "payment_id": "P50003",
+    "question": "What additional information should be requested before escalating the potential structuring pattern?",
+    "title": "Related payments require pattern review",
+    "payment": {
+      "payment_id": "P50003",
+      "client_id": "C2003",
+      "beneficiary_name": "Northstar Trading",
+      "beneficiary_country": "Singapore",
+      "beneficiary_country_code": "CH",
+      "amount": "45000.0",
+      "currency": "CHF",
+      "channel": "Branch",
+      "payment_date": "2026-04-11"
+    },
+    "client": {
+      "client_id": "C2003",
+      "country": "Switzerland",
+      "risk_rating": "Low",
+      "client_type": "Corporate",
+      "relationship_years": "12.1"
+    },
+    "checks": [
+      {
+        "id": "global_amount",
+        "title": "Global enhanced-review amount check",
+        "triggered": false,
+        "state": "complete",
+        "detail": "CHF 45,000.00 does not exceed USD 100,000 equivalent.",
+        "source": "global_payment_policy.md",
+        "clause": "Payments above USD 100,000 equivalent require enhanced review before release.",
+        "requirement": null,
+        "calculation": {
+          "value": "45000.0",
+          "value_currency": "CHF",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "exercise 1:1 equivalence"
+        }
+      },
+      {
+        "id": "regional_rm",
+        "title": "Switzerland RM review",
+        "triggered": false,
+        "state": "complete",
+        "detail": "CHF 45,000.00 does not exceed CHF 80,000 equivalent.",
+        "source": "regional_switzerland.md",
+        "clause": "Payments above CHF 80,000 equivalent require RM review.",
+        "requirement": null,
+        "calculation": {
+          "value": "45000.0",
+          "value_currency": "CHF",
+          "operator": ">",
+          "threshold": "80000",
+          "threshold_currency": "CHF",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "regional_enhanced",
+        "title": "Switzerland Enhanced review",
+        "triggered": false,
+        "state": "complete",
+        "detail": "CHF 45,000.00 does not exceed CHF 120,000 equivalent.",
+        "source": "regional_switzerland.md",
+        "clause": "Payments above CHF 120,000 equivalent require enhanced review.",
+        "requirement": null,
+        "calculation": {
+          "value": "45000.0",
+          "value_currency": "CHF",
+          "operator": ">",
+          "threshold": "120000",
+          "threshold_currency": "CHF",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "destination",
+        "title": "Destination review",
+        "triggered": false,
+        "state": "complete",
+        "detail": "Authoritative destination code: CH. The supplied exercise list identifies AE.",
+        "source": "high_risk_jurisdictions.md",
+        "clause": "Payments to AE require additional review.",
+        "requirement": null,
+        "calculation": null
+      },
+      {
+        "id": "pattern",
+        "title": "Related-payment pattern",
+        "triggered": true,
+        "state": "complete",
+        "detail": "3 matching payment(s) on 2026-04-11 total CHF 110,000.00. Filter: same client, beneficiary, date, and currency.",
+        "source": "global_payment_policy.md",
+        "clause": "Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
+        "requirement": "Potential structuring review",
+        "calculation": {
+          "value": "110000.0",
+          "value_currency": "CHF",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "exercise 1:1 equivalence"
+        }
+      },
+      {
+        "id": "escalation",
+        "title": "Swiss escalation requirement",
+        "triggered": true,
+        "state": "complete",
+        "detail": "The observed pattern requires Compliance escalation under the supplied Swiss procedure. Intent is not established.",
+        "source": "regional_switzerland.md",
+        "clause": "Potential structuring should be escalated to Compliance.",
+        "requirement": "Compliance escalation",
+        "calculation": null
+      },
+      {
+        "id": "procedure",
+        "title": "Investigation procedure evidence",
+        "triggered": false,
+        "state": "complete",
+        "detail": "Facts, policies, destination, pattern, assumptions, and supporting evidence have been assembled for review.",
+        "source": "investigation_procedure.md",
+        "clause": "Record the evidence supporting the recommendation.",
+        "requirement": null,
+        "calculation": null
+      }
+    ],
+    "requirements": [
+      "Potential structuring review",
+      "Compliance escalation"
+    ],
+    "evidence": [
+      {
+        "chunk_id": "global_payment_policy.md:1",
+        "source": "global_payment_policy.md",
+        "text": "# Global Payment Monitoring Policy 2026\n\n- Payments above USD 100,000 equivalent require enhanced review before release.\n- Payments to high-risk jurisdictions require additional review.\n- Multiple payments to the same beneficiary by the same client within 24 hours\n should be reviewed for potential structuring if their combined value exceeds\n USD 100,000 equivalent.\n- A policy trigger does not by itself establish suspicious activity.",
+        "score": 0.3335
+      },
+      {
+        "chunk_id": "high_risk_jurisdictions.md:1",
+        "source": "high_risk_jurisdictions.md",
+        "text": "# High-Risk Jurisdiction List 2026\n\nFor this exercise AE (UAE) is a high-risk destination.\nPayments to AE require additional review.",
+        "score": 2.45844
+      },
+      {
+        "chunk_id": "investigation_procedure.md:1",
+        "source": "investigation_procedure.md",
+        "text": "# Payment Investigation Procedure\n\n1. Establish client and payment facts.\n2. Identify the applicable policy.\n3. Check high-risk destination indicators.\n4. Check for possible transaction splitting.\n5. Separate observed facts from assumptions.\n6. Record the evidence supporting the recommendation.",
+        "score": 2.10234
+      },
+      {
+        "chunk_id": "regional_switzerland.md:1",
+        "source": "regional_switzerland.md",
+        "text": "# Switzerland Payment Procedure 2026\n\n- Payments above CHF 80,000 equivalent require RM review.\n- Payments above CHF 120,000 equivalent require enhanced review.\n- Potential structuring should be escalated to Compliance.",
+        "score": 1.24188
+      }
+    ],
+    "citations": [
+      "global_payment_policy.md",
+      "high_risk_jurisdictions.md",
+      "investigation_procedure.md",
+      "regional_switzerland.md"
+    ],
+    "facts": {
+      "payment_id": "P50003",
+      "client_id": "C2003",
+      "beneficiary_name": "Northstar Trading",
+      "beneficiary_country": "Singapore",
+      "beneficiary_country_code": "CH",
+      "amount": "45000.0",
+      "currency": "CHF",
+      "channel": "Branch",
+      "payment_date": "2026-04-11",
+      "client_country": "Switzerland",
+      "related_payment_ids": [
+        "P50003",
+        "P50180",
+        "P50181"
+      ],
+      "related_count": 3,
+      "related_total": "110000.0",
+      "related_currency": "CHF"
+    },
+    "related_group": {
+      "date": "2026-04-11",
+      "currency": "CHF",
+      "count": 3,
+      "total_amount": "110000.0",
+      "payment_ids": [
+        "P50003",
+        "P50180",
+        "P50181"
+      ],
+      "payments": [
+        {
+          "payment_id": "P50003",
+          "client_id": "C2003",
+          "beneficiary_name": "Northstar Trading",
+          "beneficiary_country": "Singapore",
+          "beneficiary_country_code": "CH",
+          "amount": "45000.0",
+          "currency": "CHF",
+          "channel": "Branch",
+          "payment_date": "2026-04-11"
+        },
+        {
+          "payment_id": "P50180",
+          "client_id": "C2003",
+          "beneficiary_name": "Northstar Trading",
+          "beneficiary_country": "Singapore",
+          "beneficiary_country_code": "CH",
+          "amount": "35000.0",
+          "currency": "CHF",
+          "channel": "Online",
+          "payment_date": "2026-04-11"
+        },
+        {
+          "payment_id": "P50181",
+          "client_id": "C2003",
+          "beneficiary_name": "Northstar Trading",
+          "beneficiary_country": "Singapore",
+          "beneficiary_country_code": "CH",
+          "amount": "30000.0",
+          "currency": "CHF",
+          "channel": "RM-assisted",
+          "payment_date": "2026-04-11"
+        }
+      ]
+    },
+    "other_currency_groups": [],
+    "history_count": 10,
+    "discrepancy": {
+      "label": "Singapore",
+      "code": "CH",
+      "message": "Country label says Singapore; code says CH. The code is authoritative for this exercise."
+    },
+    "assumptions": [
+      "Exercise-only 1:1 equivalence: CHF to USD; approved FX is not supplied.",
+      "Same calendar date is used as the 24-hour window because exact timestamps are not supplied."
+    ],
+    "missing_information": [
+      "Resolve the destination label/code discrepancy under the appropriate procedure.",
+      "Confirm the commercial purpose and relationship of the related transfers; intent is unknown."
+    ],
+    "request_items": [
+      "Payment purpose",
+      "Supporting invoice or agreement",
+      "Relationship with the beneficiary",
+      "Confirmation of intended destination",
+      "Reason for separate transfers",
+      "Actual payment timestamps"
+    ],
+    "draft": "For your payments to Northstar Trading on 2026-04-11, please provide the purpose and supporting documents for each transfer, and confirm why they were made separately. Please also confirm the intended destination.",
+    "external_request_needed": true,
+    "status": "ready_for_review",
+    "answer": "The payment is part of a pattern of multiple payments on the same date, beneficiary, and currency, triggering a potential structuring review and Compliance escalation under Swiss procedure. The destination country code is authoritative and differs from the beneficiary country label, which is a noted discrepancy. Additional information requested includes the payment purpose, supporting invoice or agreement, relationship with the beneficiary, confirmation of intended destination, reason for separate transfers, and actual payment timestamps. These details are necessary to clarify intent and support the escalation review. Payment release is not authorised at this stage.\n\nRelated payments require pattern review.\n\nGlobal enhanced-review amount check: CHF 45,000.00 does not exceed USD 100,000 equivalent.\n\nSwitzerland RM review: CHF 45,000.00 does not exceed CHF 80,000 equivalent.\n\nSwitzerland Enhanced review: CHF 45,000.00 does not exceed CHF 120,000 equivalent.\n\nDestination review: Authoritative destination code: CH. The supplied exercise list identifies AE.\n\nRelated-payment pattern: 3 matching payment(s) on 2026-04-11 total CHF 110,000.00. Filter: same client, beneficiary, date, and currency.\n\nSwiss escalation requirement: The observed pattern requires Compliance escalation under the supplied Swiss procedure. Intent is not established.\n\nInvestigation procedure evidence: Facts, policies, destination, pattern, assumptions, and supporting evidence have been assembled for review.\n\nCountry label says Singapore; code says CH. The code is authoritative for this exercise.\n\nAssumptions: Exercise-only 1:1 equivalence: CHF to USD; approved FX is not supplied. Same calendar date is used as the 24-hour window because exact timestamps are not supplied.\n\nA policy trigger does not establish suspicious activity. No payment release is authorised.\n\nProposed information request: Payment purpose, Supporting invoice or agreement, Relationship with the beneficiary, Confirmation of intended destination, Reason for separate transfers, Actual payment timestamps.\n\nWorkflow: establish facts, identify applicable policy, check destination and related transfers, separate facts from assumptions, and record evidence for human review.",
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "get_client_payments",
+      "aggregate_beneficiary_24h",
+      "search_policy"
+    ],
+    "trace": [
+      {
+        "tool": "get_payment",
+        "arguments": {
+          "payment_id": "P50003"
+        }
+      },
+      {
+        "tool": "get_client_profile",
+        "arguments": {
+          "client_id": "C2003"
+        }
+      },
+      {
+        "tool": "get_client_payments",
+        "arguments": {
+          "client_id": "C2003"
+        }
+      },
+      {
+        "tool": "aggregate_beneficiary_24h",
+        "arguments": {
+          "client_id": "C2003",
+          "beneficiary_name": "Northstar Trading"
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Global payment monitoring USD 100000 equivalent same client beneficiary structuring",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "High risk jurisdiction AE additional review",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Investigation procedure establish facts assumptions record evidence",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Switzerland payment procedure thresholds RM enhanced review",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "get_payment",
+        "arguments": {
+          "payment_id": "P50003"
+        },
+        "initiated_by": "llm"
+      }
+    ],
+    "input_version": "40d1b9d04b9098c4",
+    "mode": "live_ai",
+    "mode_label": "Live AI + verified checks",
+    "generated_at": "2026-09-05T06:45:59.667158+00:00",
+    "guardrails": [
+      "Exercise policies only",
+      "Human review required",
+      "No payment actions"
+    ],
+    "limitation": "AI prose is validated structurally; a human must still verify its meaning.",
+    "ai_explanation": "The payment is part of a pattern of multiple payments on the same date, beneficiary, and currency, triggering a potential structuring review and Compliance escalation under Swiss procedure. The destination country code is authoritative and differs from the beneficiary country label, which is a noted discrepancy. Additional information requested includes the payment purpose, supporting invoice or agreement, relationship with the beneficiary, confirmation of intended destination, reason for separate transfers, and actual payment timestamps. These details are necessary to clarify intent and support the escalation review. Payment release is not authorised at this stage.",
+    "ai_model": "gpt-4.1-mini",
+    "ai_duration_ms": 3066,
+    "question_id": "Q07"
+  },
+  {
+    "payment_id": "P50004",
+    "question": "What payment-review threshold applies based on the client's region?",
+    "title": "No review trigger established by these checks",
+    "payment": {
+      "payment_id": "P50004",
+      "client_id": "C2003",
+      "beneficiary_name": "Redwood Services",
+      "beneficiary_country": "UK",
+      "beneficiary_country_code": "CH",
+      "amount": "48000.0",
+      "currency": "CHF",
+      "channel": "RM-assisted",
+      "payment_date": "2026-01-26"
+    },
+    "client": {
+      "client_id": "C2003",
+      "country": "Switzerland",
+      "risk_rating": "Low",
+      "client_type": "Corporate",
+      "relationship_years": "12.1"
+    },
+    "checks": [
+      {
+        "id": "global_amount",
+        "title": "Global enhanced-review amount check",
+        "triggered": false,
+        "state": "complete",
+        "detail": "CHF 48,000.00 does not exceed USD 100,000 equivalent.",
+        "source": "global_payment_policy.md",
+        "clause": "Payments above USD 100,000 equivalent require enhanced review before release.",
+        "requirement": null,
+        "calculation": {
+          "value": "48000.0",
+          "value_currency": "CHF",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "exercise 1:1 equivalence"
+        }
+      },
+      {
+        "id": "regional_rm",
+        "title": "Switzerland RM review",
+        "triggered": false,
+        "state": "complete",
+        "detail": "CHF 48,000.00 does not exceed CHF 80,000 equivalent.",
+        "source": "regional_switzerland.md",
+        "clause": "Payments above CHF 80,000 equivalent require RM review.",
+        "requirement": null,
+        "calculation": {
+          "value": "48000.0",
+          "value_currency": "CHF",
+          "operator": ">",
+          "threshold": "80000",
+          "threshold_currency": "CHF",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "regional_enhanced",
+        "title": "Switzerland Enhanced review",
+        "triggered": false,
+        "state": "complete",
+        "detail": "CHF 48,000.00 does not exceed CHF 120,000 equivalent.",
+        "source": "regional_switzerland.md",
+        "clause": "Payments above CHF 120,000 equivalent require enhanced review.",
+        "requirement": null,
+        "calculation": {
+          "value": "48000.0",
+          "value_currency": "CHF",
+          "operator": ">",
+          "threshold": "120000",
+          "threshold_currency": "CHF",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "destination",
+        "title": "Destination review",
+        "triggered": false,
+        "state": "complete",
+        "detail": "Authoritative destination code: CH. The supplied exercise list identifies AE.",
+        "source": "high_risk_jurisdictions.md",
+        "clause": "Payments to AE require additional review.",
+        "requirement": null,
+        "calculation": null
+      },
+      {
+        "id": "pattern",
+        "title": "Related-payment pattern",
+        "triggered": false,
+        "state": "complete",
+        "detail": "1 matching payment(s) on 2026-01-26 total CHF 48,000.00. Filter: same client, beneficiary, date, and currency.",
+        "source": "global_payment_policy.md",
+        "clause": "Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
+        "requirement": null,
+        "calculation": {
+          "value": "48000.0",
+          "value_currency": "CHF",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "exercise 1:1 equivalence"
+        }
+      },
+      {
+        "id": "procedure",
+        "title": "Investigation procedure evidence",
+        "triggered": false,
+        "state": "complete",
+        "detail": "Facts, policies, destination, pattern, assumptions, and supporting evidence have been assembled for review.",
+        "source": "investigation_procedure.md",
+        "clause": "Record the evidence supporting the recommendation.",
+        "requirement": null,
+        "calculation": null
+      }
+    ],
+    "requirements": [],
+    "evidence": [
+      {
+        "chunk_id": "global_payment_policy.md:1",
+        "source": "global_payment_policy.md",
+        "text": "# Global Payment Monitoring Policy 2026\n\n- Payments above USD 100,000 equivalent require enhanced review before release.\n- Payments to high-risk jurisdictions require additional review.\n- Multiple payments to the same beneficiary by the same client within 24 hours\n should be reviewed for potential structuring if their combined value exceeds\n USD 100,000 equivalent.\n- A policy trigger does not by itself establish suspicious activity.",
+        "score": 0.3335
+      },
+      {
+        "chunk_id": "high_risk_jurisdictions.md:1",
+        "source": "high_risk_jurisdictions.md",
+        "text": "# High-Risk Jurisdiction List 2026\n\nFor this exercise AE (UAE) is a high-risk destination.\nPayments to AE require additional review.",
+        "score": 2.45844
+      },
+      {
+        "chunk_id": "investigation_procedure.md:1",
+        "source": "investigation_procedure.md",
+        "text": "# Payment Investigation Procedure\n\n1. Establish client and payment facts.\n2. Identify the applicable policy.\n3. Check high-risk destination indicators.\n4. Check for possible transaction splitting.\n5. Separate observed facts from assumptions.\n6. Record the evidence supporting the recommendation.",
+        "score": 2.10234
+      },
+      {
+        "chunk_id": "regional_switzerland.md:1",
+        "source": "regional_switzerland.md",
+        "text": "# Switzerland Payment Procedure 2026\n\n- Payments above CHF 80,000 equivalent require RM review.\n- Payments above CHF 120,000 equivalent require enhanced review.\n- Potential structuring should be escalated to Compliance.",
+        "score": 1.24188
+      }
+    ],
+    "citations": [
+      "global_payment_policy.md",
+      "high_risk_jurisdictions.md",
+      "investigation_procedure.md",
+      "regional_switzerland.md"
+    ],
+    "facts": {
+      "payment_id": "P50004",
+      "client_id": "C2003",
+      "beneficiary_name": "Redwood Services",
+      "beneficiary_country": "UK",
+      "beneficiary_country_code": "CH",
+      "amount": "48000.0",
+      "currency": "CHF",
+      "channel": "RM-assisted",
+      "payment_date": "2026-01-26",
+      "client_country": "Switzerland",
+      "related_payment_ids": [
+        "P50004"
+      ],
+      "related_count": 1,
+      "related_total": "48000.0",
+      "related_currency": "CHF"
+    },
+    "related_group": {
+      "date": "2026-01-26",
+      "currency": "CHF",
+      "count": 1,
+      "total_amount": "48000.0",
+      "payment_ids": [
+        "P50004"
+      ],
+      "payments": [
+        {
+          "payment_id": "P50004",
+          "client_id": "C2003",
+          "beneficiary_name": "Redwood Services",
+          "beneficiary_country": "UK",
+          "beneficiary_country_code": "CH",
+          "amount": "48000.0",
+          "currency": "CHF",
+          "channel": "RM-assisted",
+          "payment_date": "2026-01-26"
+        }
+      ]
+    },
+    "other_currency_groups": [],
+    "history_count": 10,
+    "discrepancy": {
+      "label": "UK",
+      "code": "CH",
+      "message": "Country label says UK; code says CH. The code is authoritative for this exercise."
+    },
+    "assumptions": [
+      "Exercise-only 1:1 equivalence: CHF to USD; approved FX is not supplied.",
+      "Same calendar date is used as the 24-hour window because exact timestamps are not supplied."
+    ],
+    "missing_information": [
+      "Resolve the destination label/code discrepancy under the appropriate procedure."
+    ],
+    "request_items": [],
+    "draft": "Internal analyst note: inspect the completed checks, resolve any data discrepancies, and follow the remaining bank review procedure. These checks do not authorise payment release.",
+    "external_request_needed": false,
+    "status": "ready_for_review",
+    "answer": "The client is located in Switzerland with a low risk rating and corporate status. The payment does not trigger any review based on the client's region or risk profile. The destination code confirms Switzerland as the authoritative location despite a label discrepancy. All relevant facts and policies have been gathered for human review. Payment release is not authorised.\n\nNo review trigger established by these checks.\n\nGlobal enhanced-review amount check: CHF 48,000.00 does not exceed USD 100,000 equivalent.\n\nSwitzerland RM review: CHF 48,000.00 does not exceed CHF 80,000 equivalent.\n\nSwitzerland Enhanced review: CHF 48,000.00 does not exceed CHF 120,000 equivalent.\n\nDestination review: Authoritative destination code: CH. The supplied exercise list identifies AE.\n\nRelated-payment pattern: 1 matching payment(s) on 2026-01-26 total CHF 48,000.00. Filter: same client, beneficiary, date, and currency.\n\nInvestigation procedure evidence: Facts, policies, destination, pattern, assumptions, and supporting evidence have been assembled for review.\n\nCountry label says UK; code says CH. The code is authoritative for this exercise.\n\nAssumptions: Exercise-only 1:1 equivalence: CHF to USD; approved FX is not supplied. Same calendar date is used as the 24-hour window because exact timestamps are not supplied.\n\nA policy trigger does not establish suspicious activity. No payment release is authorised.\n\nWorkflow: establish facts, identify applicable policy, check destination and related transfers, separate facts from assumptions, and record evidence for human review.",
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "get_client_payments",
+      "aggregate_beneficiary_24h",
+      "search_policy"
+    ],
+    "trace": [
+      {
+        "tool": "get_payment",
+        "arguments": {
+          "payment_id": "P50004"
+        }
+      },
+      {
+        "tool": "get_client_profile",
+        "arguments": {
+          "client_id": "C2003"
+        }
+      },
+      {
+        "tool": "get_client_payments",
+        "arguments": {
+          "client_id": "C2003"
+        }
+      },
+      {
+        "tool": "aggregate_beneficiary_24h",
+        "arguments": {
+          "client_id": "C2003",
+          "beneficiary_name": "Redwood Services"
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Global payment monitoring USD 100000 equivalent same client beneficiary structuring",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "High risk jurisdiction AE additional review",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Investigation procedure establish facts assumptions record evidence",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Switzerland payment procedure thresholds RM enhanced review",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "get_client_profile",
+        "arguments": {
+          "client_id": "C2003"
+        },
+        "initiated_by": "llm"
+      }
+    ],
+    "input_version": "40d1b9d04b9098c4",
+    "mode": "live_ai",
+    "mode_label": "Live AI + verified checks",
+    "generated_at": "2026-09-05T06:46:02.735197+00:00",
+    "guardrails": [
+      "Exercise policies only",
+      "Human review required",
+      "No payment actions"
+    ],
+    "limitation": "AI prose is validated structurally; a human must still verify its meaning.",
+    "ai_explanation": "The client is located in Switzerland with a low risk rating and corporate status. The payment does not trigger any review based on the client's region or risk profile. The destination code confirms Switzerland as the authoritative location despite a label discrepancy. All relevant facts and policies have been gathered for human review. Payment release is not authorised.",
+    "ai_model": "gpt-4.1-mini",
+    "ai_duration_ms": 4463,
+    "question_id": "Q08"
+  },
+  {
+    "payment_id": "P50005",
+    "question": "If a payment is below the global threshold but the destination is high-risk, what should be recommended?",
+    "title": "Additional destination review required",
+    "payment": {
+      "payment_id": "P50005",
+      "client_id": "C2003",
+      "beneficiary_name": "Pacific Holdings",
+      "beneficiary_country": "UAE",
+      "beneficiary_country_code": "AE",
+      "amount": "47000.0",
+      "currency": "CHF",
+      "channel": "Online",
+      "payment_date": "2026-02-18"
+    },
+    "client": {
+      "client_id": "C2003",
+      "country": "Switzerland",
+      "risk_rating": "Low",
+      "client_type": "Corporate",
+      "relationship_years": "12.1"
+    },
+    "checks": [
+      {
+        "id": "global_amount",
+        "title": "Global enhanced-review amount check",
+        "triggered": false,
+        "state": "complete",
+        "detail": "CHF 47,000.00 does not exceed USD 100,000 equivalent.",
+        "source": "global_payment_policy.md",
+        "clause": "Payments above USD 100,000 equivalent require enhanced review before release.",
+        "requirement": null,
+        "calculation": {
+          "value": "47000.0",
+          "value_currency": "CHF",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "exercise 1:1 equivalence"
+        }
+      },
+      {
+        "id": "regional_rm",
+        "title": "Switzerland RM review",
+        "triggered": false,
+        "state": "complete",
+        "detail": "CHF 47,000.00 does not exceed CHF 80,000 equivalent.",
+        "source": "regional_switzerland.md",
+        "clause": "Payments above CHF 80,000 equivalent require RM review.",
+        "requirement": null,
+        "calculation": {
+          "value": "47000.0",
+          "value_currency": "CHF",
+          "operator": ">",
+          "threshold": "80000",
+          "threshold_currency": "CHF",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "regional_enhanced",
+        "title": "Switzerland Enhanced review",
+        "triggered": false,
+        "state": "complete",
+        "detail": "CHF 47,000.00 does not exceed CHF 120,000 equivalent.",
+        "source": "regional_switzerland.md",
+        "clause": "Payments above CHF 120,000 equivalent require enhanced review.",
+        "requirement": null,
+        "calculation": {
+          "value": "47000.0",
+          "value_currency": "CHF",
+          "operator": ">",
+          "threshold": "120000",
+          "threshold_currency": "CHF",
+          "basis": "native currency"
+        }
+      },
+      {
+        "id": "destination",
+        "title": "Destination review",
+        "triggered": true,
+        "state": "complete",
+        "detail": "Authoritative destination code: AE. The supplied exercise list identifies AE.",
+        "source": "high_risk_jurisdictions.md",
+        "clause": "Payments to AE require additional review.",
+        "requirement": "Additional destination review",
+        "calculation": null
+      },
+      {
+        "id": "pattern",
+        "title": "Related-payment pattern",
+        "triggered": false,
+        "state": "complete",
+        "detail": "1 matching payment(s) on 2026-02-18 total CHF 47,000.00. Filter: same client, beneficiary, date, and currency.",
+        "source": "global_payment_policy.md",
+        "clause": "Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
+        "requirement": null,
+        "calculation": {
+          "value": "47000.0",
+          "value_currency": "CHF",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "exercise 1:1 equivalence"
+        }
+      },
+      {
+        "id": "procedure",
+        "title": "Investigation procedure evidence",
+        "triggered": false,
+        "state": "complete",
+        "detail": "Facts, policies, destination, pattern, assumptions, and supporting evidence have been assembled for review.",
+        "source": "investigation_procedure.md",
+        "clause": "Record the evidence supporting the recommendation.",
+        "requirement": null,
+        "calculation": null
+      }
+    ],
+    "requirements": [
+      "Additional destination review"
+    ],
+    "evidence": [
+      {
+        "chunk_id": "global_payment_policy.md:1",
+        "source": "global_payment_policy.md",
+        "text": "# Global Payment Monitoring Policy 2026\n\n- Payments above USD 100,000 equivalent require enhanced review before release.\n- Payments to high-risk jurisdictions require additional review.\n- Multiple payments to the same beneficiary by the same client within 24 hours\n should be reviewed for potential structuring if their combined value exceeds\n USD 100,000 equivalent.\n- A policy trigger does not by itself establish suspicious activity.",
+        "score": 0.3335
+      },
+      {
+        "chunk_id": "high_risk_jurisdictions.md:1",
+        "source": "high_risk_jurisdictions.md",
+        "text": "# High-Risk Jurisdiction List 2026\n\nFor this exercise AE (UAE) is a high-risk destination.\nPayments to AE require additional review.",
+        "score": 2.45844
+      },
+      {
+        "chunk_id": "investigation_procedure.md:1",
+        "source": "investigation_procedure.md",
+        "text": "# Payment Investigation Procedure\n\n1. Establish client and payment facts.\n2. Identify the applicable policy.\n3. Check high-risk destination indicators.\n4. Check for possible transaction splitting.\n5. Separate observed facts from assumptions.\n6. Record the evidence supporting the recommendation.",
+        "score": 2.10234
+      },
+      {
+        "chunk_id": "regional_switzerland.md:1",
+        "source": "regional_switzerland.md",
+        "text": "# Switzerland Payment Procedure 2026\n\n- Payments above CHF 80,000 equivalent require RM review.\n- Payments above CHF 120,000 equivalent require enhanced review.\n- Potential structuring should be escalated to Compliance.",
+        "score": 1.24188
+      }
+    ],
+    "citations": [
+      "global_payment_policy.md",
+      "high_risk_jurisdictions.md",
+      "investigation_procedure.md",
+      "regional_switzerland.md"
+    ],
+    "facts": {
+      "payment_id": "P50005",
+      "client_id": "C2003",
+      "beneficiary_name": "Pacific Holdings",
+      "beneficiary_country": "UAE",
+      "beneficiary_country_code": "AE",
+      "amount": "47000.0",
+      "currency": "CHF",
+      "channel": "Online",
+      "payment_date": "2026-02-18",
+      "client_country": "Switzerland",
+      "related_payment_ids": [
+        "P50005"
+      ],
+      "related_count": 1,
+      "related_total": "47000.0",
+      "related_currency": "CHF"
+    },
+    "related_group": {
+      "date": "2026-02-18",
+      "currency": "CHF",
+      "count": 1,
+      "total_amount": "47000.0",
+      "payment_ids": [
+        "P50005"
+      ],
+      "payments": [
+        {
+          "payment_id": "P50005",
+          "client_id": "C2003",
+          "beneficiary_name": "Pacific Holdings",
+          "beneficiary_country": "UAE",
+          "beneficiary_country_code": "AE",
+          "amount": "47000.0",
+          "currency": "CHF",
+          "channel": "Online",
+          "payment_date": "2026-02-18"
+        }
+      ]
+    },
+    "other_currency_groups": [],
+    "history_count": 10,
+    "discrepancy": null,
+    "assumptions": [
+      "Exercise-only 1:1 equivalence: CHF to USD; approved FX is not supplied.",
+      "Same calendar date is used as the 24-hour window because exact timestamps are not supplied."
+    ],
+    "missing_information": [],
+    "request_items": [
+      "Payment purpose",
+      "Supporting invoice or agreement",
+      "Relationship with the beneficiary"
+    ],
+    "draft": "For payment P50005 to Pacific Holdings, please confirm the payment purpose and your relationship with the beneficiary. Please provide a supporting invoice or agreement, if available.",
+    "external_request_needed": true,
+    "status": "ready_for_review",
+    "answer": "Additional destination review required.\n\nGlobal enhanced-review amount check: CHF 47,000.00 does not exceed USD 100,000 equivalent.\n\nSwitzerland RM review: CHF 47,000.00 does not exceed CHF 80,000 equivalent.\n\nSwitzerland Enhanced review: CHF 47,000.00 does not exceed CHF 120,000 equivalent.\n\nDestination review: Authoritative destination code: AE. The supplied exercise list identifies AE.\n\nRelated-payment pattern: 1 matching payment(s) on 2026-02-18 total CHF 47,000.00. Filter: same client, beneficiary, date, and currency.\n\nInvestigation procedure evidence: Facts, policies, destination, pattern, assumptions, and supporting evidence have been assembled for review.\n\nAssumptions: Exercise-only 1:1 equivalence: CHF to USD; approved FX is not supplied. Same calendar date is used as the 24-hour window because exact timestamps are not supplied.\n\nA policy trigger does not establish suspicious activity. No payment release is authorised.\n\nProposed information request: Payment purpose, Supporting invoice or agreement, Relationship with the beneficiary.\n\nWorkflow: establish facts, identify applicable policy, check destination and related transfers, separate facts from assumptions, and record evidence for human review.",
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "get_client_payments",
+      "aggregate_beneficiary_24h",
+      "search_policy"
+    ],
+    "trace": [
+      {
+        "tool": "get_payment",
+        "arguments": {
+          "payment_id": "P50005"
+        }
+      },
+      {
+        "tool": "get_client_profile",
+        "arguments": {
+          "client_id": "C2003"
+        }
+      },
+      {
+        "tool": "get_client_payments",
+        "arguments": {
+          "client_id": "C2003"
+        }
+      },
+      {
+        "tool": "aggregate_beneficiary_24h",
+        "arguments": {
+          "client_id": "C2003",
+          "beneficiary_name": "Pacific Holdings"
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Global payment monitoring USD 100000 equivalent same client beneficiary structuring",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "High risk jurisdiction AE additional review",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Investigation procedure establish facts assumptions record evidence",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Switzerland payment procedure thresholds RM enhanced review",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "payment below global threshold but destination high-risk"
+        },
+        "initiated_by": "llm"
+      }
+    ],
+    "input_version": "40d1b9d04b9098c4",
+    "mode": "fallback",
+    "mode_label": "Evidence mode \u00b7 AI unavailable",
+    "generated_at": "2026-09-05T06:46:07.200720+00:00",
+    "guardrails": [
+      "Exercise policies only",
+      "Human review required",
+      "No payment actions"
+    ],
+    "limitation": "The live AI response failed or did not pass validation (response_validation). Verified deterministic checks remain available.",
+    "ai_error_code": "response_validation",
+    "ai_error_reason": "Threshold detail must come from tools",
+    "ai_duration_ms": 4484,
+    "question_id": "Q09"
+  },
+  {
+    "payment_id": "P50006",
+    "question": "Summarize the investigation workflow that should be followed.",
+    "title": "No review trigger established by these checks",
+    "payment": {
+      "payment_id": "P50006",
+      "client_id": "C2023",
+      "beneficiary_name": "Pacific Holdings",
+      "beneficiary_country": "Hong Kong",
+      "beneficiary_country_code": "HK",
+      "amount": "24110.41",
+      "currency": "SGD",
+      "channel": "RM-assisted",
+      "payment_date": "2026-01-19"
+    },
+    "client": {
+      "client_id": "C2023",
+      "country": "UK",
+      "risk_rating": "Medium",
+      "client_type": "Individual",
+      "relationship_years": "7.7"
+    },
+    "checks": [
+      {
+        "id": "global_amount",
+        "title": "Global enhanced-review amount check",
+        "triggered": false,
+        "state": "complete",
+        "detail": "SGD 24,110.41 does not exceed USD 100,000 equivalent.",
+        "source": "global_payment_policy.md",
+        "clause": "Payments above USD 100,000 equivalent require enhanced review before release.",
+        "requirement": null,
+        "calculation": {
+          "value": "24110.41",
+          "value_currency": "SGD",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "exercise 1:1 equivalence"
+        }
+      },
+      {
+        "id": "destination",
+        "title": "Destination review",
+        "triggered": false,
+        "state": "complete",
+        "detail": "Authoritative destination code: HK. The supplied exercise list identifies AE.",
+        "source": "high_risk_jurisdictions.md",
+        "clause": "Payments to AE require additional review.",
+        "requirement": null,
+        "calculation": null
+      },
+      {
+        "id": "pattern",
+        "title": "Related-payment pattern",
+        "triggered": false,
+        "state": "complete",
+        "detail": "1 matching payment(s) on 2026-01-19 total SGD 24,110.41. Filter: same client, beneficiary, date, and currency.",
+        "source": "global_payment_policy.md",
+        "clause": "Multiple payments to the same beneficiary by the same client within 24 hours should be reviewed for potential structuring if their combined value exceeds USD 100,000 equivalent.",
+        "requirement": null,
+        "calculation": {
+          "value": "24110.41",
+          "value_currency": "SGD",
+          "operator": ">",
+          "threshold": "100000",
+          "threshold_currency": "USD",
+          "basis": "exercise 1:1 equivalence"
+        }
+      },
+      {
+        "id": "procedure",
+        "title": "Investigation procedure evidence",
+        "triggered": false,
+        "state": "complete",
+        "detail": "Facts, policies, destination, pattern, assumptions, and supporting evidence have been assembled for review.",
+        "source": "investigation_procedure.md",
+        "clause": "Record the evidence supporting the recommendation.",
+        "requirement": null,
+        "calculation": null
+      }
+    ],
+    "requirements": [],
+    "evidence": [
+      {
+        "chunk_id": "global_payment_policy.md:1",
+        "source": "global_payment_policy.md",
+        "text": "# Global Payment Monitoring Policy 2026\n\n- Payments above USD 100,000 equivalent require enhanced review before release.\n- Payments to high-risk jurisdictions require additional review.\n- Multiple payments to the same beneficiary by the same client within 24 hours\n should be reviewed for potential structuring if their combined value exceeds\n USD 100,000 equivalent.\n- A policy trigger does not by itself establish suspicious activity.",
+        "score": 0.47057
+      },
+      {
+        "chunk_id": "high_risk_jurisdictions.md:1",
+        "source": "high_risk_jurisdictions.md",
+        "text": "# High-Risk Jurisdiction List 2026\n\nFor this exercise AE (UAE) is a high-risk destination.\nPayments to AE require additional review.",
+        "score": 2.45844
+      },
+      {
+        "chunk_id": "investigation_procedure.md:1",
+        "source": "investigation_procedure.md",
+        "text": "# Payment Investigation Procedure\n\n1. Establish client and payment facts.\n2. Identify the applicable policy.\n3. Check high-risk destination indicators.\n4. Check for possible transaction splitting.\n5. Separate observed facts from assumptions.\n6. Record the evidence supporting the recommendation.",
+        "score": 2.10234
+      }
+    ],
+    "citations": [
+      "global_payment_policy.md",
+      "high_risk_jurisdictions.md",
+      "investigation_procedure.md"
+    ],
+    "facts": {
+      "payment_id": "P50006",
+      "client_id": "C2023",
+      "beneficiary_name": "Pacific Holdings",
+      "beneficiary_country": "Hong Kong",
+      "beneficiary_country_code": "HK",
+      "amount": "24110.41",
+      "currency": "SGD",
+      "channel": "RM-assisted",
+      "payment_date": "2026-01-19",
+      "client_country": "UK",
+      "related_payment_ids": [
+        "P50006"
+      ],
+      "related_count": 1,
+      "related_total": "24110.41",
+      "related_currency": "SGD"
+    },
+    "related_group": {
+      "date": "2026-01-19",
+      "currency": "SGD",
+      "count": 1,
+      "total_amount": "24110.41",
+      "payment_ids": [
+        "P50006"
+      ],
+      "payments": [
+        {
+          "payment_id": "P50006",
+          "client_id": "C2023",
+          "beneficiary_name": "Pacific Holdings",
+          "beneficiary_country": "Hong Kong",
+          "beneficiary_country_code": "HK",
+          "amount": "24110.41",
+          "currency": "SGD",
+          "channel": "RM-assisted",
+          "payment_date": "2026-01-19"
+        }
+      ]
+    },
+    "other_currency_groups": [],
+    "history_count": 4,
+    "discrepancy": null,
+    "assumptions": [
+      "Exercise-only 1:1 equivalence: SGD to USD; approved FX is not supplied.",
+      "Same calendar date is used as the 24-hour window because exact timestamps are not supplied."
+    ],
+    "missing_information": [],
+    "request_items": [],
+    "draft": "Internal analyst note: inspect the completed checks, resolve any data discrepancies, and follow the remaining bank review procedure. These checks do not authorise payment release.",
+    "external_request_needed": false,
+    "status": "ready_for_review",
+    "answer": "The investigation workflow involves first establishing the facts of the payment, including client and beneficiary details. Next, the applicable policies are identified and applied, including checks on destination and related payments. Facts are clearly separated from assumptions, such as currency equivalences and time windows. All relevant evidence, including facts, policies, destination, patterns, and assumptions, is recorded for human review. This structured approach ensures thoroughness without authorizing payment release when no review triggers are met.\n\nNo review trigger established by these checks.\n\nGlobal enhanced-review amount check: SGD 24,110.41 does not exceed USD 100,000 equivalent.\n\nDestination review: Authoritative destination code: HK. The supplied exercise list identifies AE.\n\nRelated-payment pattern: 1 matching payment(s) on 2026-01-19 total SGD 24,110.41. Filter: same client, beneficiary, date, and currency.\n\nInvestigation procedure evidence: Facts, policies, destination, pattern, assumptions, and supporting evidence have been assembled for review.\n\nAssumptions: Exercise-only 1:1 equivalence: SGD to USD; approved FX is not supplied. Same calendar date is used as the 24-hour window because exact timestamps are not supplied.\n\nA policy trigger does not establish suspicious activity. No payment release is authorised.\n\nWorkflow: establish facts, identify applicable policy, check destination and related transfers, separate facts from assumptions, and record evidence for human review.",
+    "tools_used": [
+      "get_payment",
+      "get_client_profile",
+      "get_client_payments",
+      "aggregate_beneficiary_24h",
+      "search_policy"
+    ],
+    "trace": [
+      {
+        "tool": "get_payment",
+        "arguments": {
+          "payment_id": "P50006"
+        }
+      },
+      {
+        "tool": "get_client_profile",
+        "arguments": {
+          "client_id": "C2023"
+        }
+      },
+      {
+        "tool": "get_client_payments",
+        "arguments": {
+          "client_id": "C2023"
+        }
+      },
+      {
+        "tool": "aggregate_beneficiary_24h",
+        "arguments": {
+          "client_id": "C2023",
+          "beneficiary_name": "Pacific Holdings"
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Global payment monitoring USD 100000 equivalent same client beneficiary structuring",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "High risk jurisdiction AE additional review",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "search_policy",
+        "arguments": {
+          "query": "Investigation procedure establish facts assumptions record evidence",
+          "top_k": 3
+        }
+      },
+      {
+        "tool": "get_payment",
+        "arguments": {
+          "payment_id": "P50006"
+        },
+        "initiated_by": "llm"
+      }
+    ],
+    "input_version": "40d1b9d04b9098c4",
+    "mode": "live_ai",
+    "mode_label": "Live AI + verified checks",
+    "generated_at": "2026-09-05T06:46:11.686045+00:00",
+    "guardrails": [
+      "Exercise policies only",
+      "Human review required",
+      "No payment actions"
+    ],
+    "limitation": "AI prose is validated structurally; a human must still verify its meaning.",
+    "ai_explanation": "The investigation workflow involves first establishing the facts of the payment, including client and beneficiary details. Next, the applicable policies are identified and applied, including checks on destination and related payments. Facts are clearly separated from assumptions, such as currency equivalences and time windows. All relevant evidence, including facts, policies, destination, patterns, and assumptions, is recorded for human review. This structured approach ensures thoroughness without authorizing payment release when no review triggers are met.",
+    "ai_model": "gpt-4.1-mini",
+    "ai_duration_ms": 3036,
+    "question_id": "Q10"
+  }
+]
